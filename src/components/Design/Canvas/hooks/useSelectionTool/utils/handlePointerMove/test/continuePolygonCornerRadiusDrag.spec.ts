@@ -31,7 +31,7 @@ const createPolygonCornerRadiusDragRef = (
 const addPolygonNode = (x: number, y: number, width: number, height: number, sides: number): string => {
   store.dispatch(
     addNode({
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       flipX: false,
       flipY: false,
       height,

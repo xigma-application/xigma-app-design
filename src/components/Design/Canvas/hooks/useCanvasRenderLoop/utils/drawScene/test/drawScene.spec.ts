@@ -655,7 +655,7 @@ describe('drawScene', () => {
 
     store.dispatch(
       addNode({
-        fill: '#aabbcc',
+        fills: [{ color: '#aabbcc', opacity: 100, type: 'solid' }],
         flipX: false,
         flipY: false,
         height: 100,

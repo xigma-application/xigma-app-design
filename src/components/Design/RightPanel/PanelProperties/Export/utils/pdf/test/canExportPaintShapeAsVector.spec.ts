@@ -4,7 +4,7 @@ import { TPaint } from 'types/design/paint/types';
 import { TEffect, TEllipseNode, TFrameNode } from 'types/design/types';
 
 // utils
-import { canExportEllipseAsVector } from '../canExportEllipseAsVector';
+import { canExportPaintShapeAsVector } from '../canExportPaintShapeAsVector';
 
 const ellipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
   fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
@@ -20,9 +20,9 @@ const ellipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
   ...overrides,
 });
 
-const check = (node: TEllipseNode): boolean => canExportEllipseAsVector(node, {});
+const check = (node: TEllipseNode): boolean => canExportPaintShapeAsVector(node, {});
 
-describe('canExportEllipseAsVector', () => {
+describe('canExportPaintShapeAsVector', () => {
   it('should allow a plain ellipse', () => {
     expect(check(ellipse())).toBe(true);
   });
@@ -49,7 +49,7 @@ describe('canExportEllipseAsVector', () => {
       y: 0,
     };
 
-    expect(canExportEllipseAsVector(ellipse({ parentId: 'p' }), { p: parent })).toBe(false);
+    expect(canExportPaintShapeAsVector(ellipse({ parentId: 'p' }), { p: parent })).toBe(false);
   });
 
   it('should reject visible effects and paints the export cannot draw', () => {

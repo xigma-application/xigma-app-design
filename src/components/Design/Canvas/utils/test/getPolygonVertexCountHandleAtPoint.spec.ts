@@ -9,7 +9,7 @@ import { rotatePoint } from 'utils/math/rotatePoint';
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const polygon = (id: string, x: number, y: number, width: number, height: number, sides: number, rotation = 0): TPolygonNode => ({
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   flipX: false,
   flipY: false,
   height,

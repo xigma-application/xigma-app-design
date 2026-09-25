@@ -1,11 +1,11 @@
 // types
 import { BlendMode, NodeType } from 'types/design/enums';
-import { TFrameNode, TPolygonNode } from 'types/design/types';
+import { TFrameNode, TStarNode } from 'types/design/types';
 
 // utils
 import { canExportSimpleShapeAsSvgVector } from '../canExportSimpleShapeAsSvgVector';
 
-const polygon = (overrides: Partial<TPolygonNode> = {}): TPolygonNode => ({
+const star = (overrides: Partial<TStarNode> = {}): TStarNode => ({
   fill: '#ff0000',
   flipX: false,
   flipY: false,
@@ -13,26 +13,27 @@ const polygon = (overrides: Partial<TPolygonNode> = {}): TPolygonNode => ({
   id: 'e',
   name: 'e',
   parentId: null,
+  points: 5,
+  ratio: 0.5,
   rotation: 0,
-  sides: 5,
-  type: NodeType.polygon,
+  type: NodeType.star,
   width: 10,
   x: 0,
   y: 0,
   ...overrides,
 });
 
-const check = (node: TPolygonNode): boolean => canExportSimpleShapeAsSvgVector(node, {});
+const check = (node: TStarNode): boolean => canExportSimpleShapeAsSvgVector(node, {});
 
 describe('canExportSimpleShapeAsSvgVector', () => {
-  it('should allow a plain polygon', () => {
-    expect(check(polygon())).toBe(true);
+  it('should allow a plain star', () => {
+    expect(check(star())).toBe(true);
   });
 
   it('should reject a hidden or blended node', () => {
-    expect(check(polygon({ hidden: true }))).toBe(false);
-    expect(check(polygon({ blendMode: BlendMode.screen }))).toBe(false);
-    expect(check(polygon({ blendMode: BlendMode.normal }))).toBe(true);
+    expect(check(star({ hidden: true }))).toBe(false);
+    expect(check(star({ blendMode: BlendMode.screen }))).toBe(false);
+    expect(check(star({ blendMode: BlendMode.normal }))).toBe(true);
   });
 
   it('should reject a node whose ancestor is unsafe', () => {
@@ -51,6 +52,6 @@ describe('canExportSimpleShapeAsSvgVector', () => {
       y: 0,
     };
 
-    expect(canExportSimpleShapeAsSvgVector(polygon({ parentId: 'p' }), { p: parent })).toBe(false);
+    expect(canExportSimpleShapeAsSvgVector(star({ parentId: 'p' }), { p: parent })).toBe(false);
   });
 });

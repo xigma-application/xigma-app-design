@@ -1,33 +1,28 @@
 import { PDFName, PDFPage } from 'pdf-lib';
 
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
-import { TPolygonNode } from 'types/design/types';
+import { TDraftRect } from 'types/canvas';
+import { TPolygonNode, TSceneNode } from 'types/design/types';
+import { TPaint } from 'types/design/paint/types';
 
 // utils
-import { drawPdfPolygons } from './drawPdfPolygons';
-import { flipPoint } from 'utils/math/flipPoint';
-import { getPolygonShapePoints } from 'utils/canvas/shapes/getPolygonShapePoints';
-import { rotatePoint } from 'utils/math/rotatePoint';
+import { drawPdfPaintPolygons } from './drawPdfPaintPolygons';
+import { getEffectiveOpacity } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getEffectiveOpacity';
+import { getPolygonStrokeShapes } from 'utils/canvas/shapes/getPolygonStrokeShapes';
+import { getPolygonWorldPoints } from 'utils/canvas/shapes/getPolygonWorldPoints';
 
 export const drawPdfPolygonShape = (
   page: PDFPage,
   node: TPolygonNode,
-  opacity: number,
+  nodesById: Record<string, TSceneNode>,
   bounds: TDraftRect,
   graphicsStates: Map<number, PDFName>,
 ): void => {
-  if (node.fill) {
-    const center: TPoint = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
-    const toDesign = (point: TPoint): TPoint => rotatePoint(flipPoint(point, center, node.flipX, node.flipY), center, node.rotation);
+  const opacity = getEffectiveOpacity(node, nodesById);
 
-    drawPdfPolygons(
-      page,
-      [getPolygonShapePoints(node, node.sides, node.cornerRadius ?? 0).map(toDesign)],
-      node.fill,
-      opacity,
-      bounds,
-      graphicsStates,
-    );
-  }
+  drawPdfPaintPolygons(page, node.fills, [getPolygonWorldPoints(node)], opacity, bounds, graphicsStates);
+
+  ((node.strokes?.length ? getPolygonStrokeShapes(node) : null) ?? []).forEach(({ polygons }) => {
+    drawPdfPaintPolygons(page, node.strokes as TPaint[], polygons, opacity, bounds, graphicsStates);
+  });
 };

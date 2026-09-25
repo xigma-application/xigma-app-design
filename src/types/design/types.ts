@@ -289,10 +289,32 @@ export type TPathNode = TBaseNode & {
 
 export type TPolygonNode = TBaseNode & {
   cornerRadius?: number;
-  fill: string;
+  effects?: TEffect[];
+  fills: TPaint[];
   flipX: boolean;
   flipY: boolean;
   sides: number;
+  strokeAlign?: StrokeAlign;
+  strokeBrush?: string;
+  strokeBrushAngularJitter?: number;
+  strokeBrushDirection?: StrokeBrushDirection;
+  strokeBrushGap?: number;
+  strokeBrushRotation?: number;
+  strokeBrushSizeJitter?: number;
+  strokeBrushWiggle?: number;
+  strokeDash?: number;
+  strokeDashCap?: StrokeDashCap;
+  strokeDashes?: number[];
+  strokeDynamicFrequency?: number;
+  strokeDynamicSmoothen?: number;
+  strokeDynamicWiggle?: number;
+  strokeGap?: number;
+  strokeMode?: StrokeMode;
+  strokeProfile?: StrokeProfile;
+  strokeProfileFlipped?: boolean;
+  strokeStyle?: StrokeStyle;
+  strokeWidth?: number;
+  strokes?: TPaint[];
   type: NodeType.polygon;
 };
 

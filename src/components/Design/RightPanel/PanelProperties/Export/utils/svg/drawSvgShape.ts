@@ -9,6 +9,7 @@ import { drawSvgBoxShape } from './drawSvgBoxShape';
 import { drawSvgEllipseShape } from './drawSvgEllipseShape';
 import { drawSvgLineShape } from './drawSvgLineShape';
 import { drawSvgMediaNodeShape } from './drawSvgMediaNodeShape';
+import { drawSvgPolygonShape } from './drawSvgPolygonShape';
 import { drawSvgSimpleShape } from './drawSvgSimpleShape';
 import { drawSvgVectorNodeShape } from './drawSvgVectorNodeShape';
 
@@ -26,6 +27,9 @@ export const drawSvgShape = async (
       break;
     case NodeType.ellipse:
       await drawSvgEllipseShape(elements, defs, node, nodesById, bounds);
+      break;
+    case NodeType.polygon:
+      await drawSvgPolygonShape(elements, defs, node, nodesById, bounds);
       break;
     case NodeType.line:
       drawSvgLineShape(elements, node, nodesById, bounds);

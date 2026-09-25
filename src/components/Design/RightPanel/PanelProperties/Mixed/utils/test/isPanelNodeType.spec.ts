@@ -12,6 +12,6 @@ describe('isPanelNodeType', () => {
 
   it('should reject a type without a panel', () => {
     // action / result
-    expect(isPanelNodeType(NodeType.polygon)).toBe(false);
+    expect(isPanelNodeType(NodeType.star)).toBe(false);
   });
 });

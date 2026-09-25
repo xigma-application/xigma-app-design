@@ -38,12 +38,12 @@ describe('getNodePaintStyle', () => {
     });
   });
 
-  it('should read the same paint style from a rectangle, a boolean and an ellipse as from a section', () => {
+  it('should read the same paint style from a rectangle, a boolean, an ellipse and a polygon as from a section', () => {
     // mock
     const style = { fills: [], strokeWidth: 1, strokes: [] };
 
     // result
-    [NodeType.rectangle, NodeType.boolean, NodeType.ellipse].forEach((type) => {
+    [NodeType.rectangle, NodeType.boolean, NodeType.ellipse, NodeType.polygon].forEach((type) => {
       expect(getNodePaintStyle({ ...style, type } as unknown as TSceneNode)).toEqual({
         ...style,
         effects: undefined,
@@ -52,9 +52,9 @@ describe('getNodePaintStyle', () => {
     });
   });
 
-  it('should only read the fill of polygons, stars and text', () => {
+  it('should only read the fill of stars and text', () => {
     // result
-    [NodeType.polygon, NodeType.star, NodeType.text].forEach((type) => {
+    [NodeType.star, NodeType.text].forEach((type) => {
       expect(getNodePaintStyle({ fill: '#333333', type } as TSceneNode)).toEqual({
         fills: [{ color: '#333333', opacity: 100, type: 'solid' }],
       });

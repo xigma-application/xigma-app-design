@@ -1,6 +1,6 @@
 // types
 import { NodeType, StrokeStyle } from 'types/design/enums';
-import { TEllipseNode, TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getModeStrokeOutlineLoops } from '../getModeStrokeOutlineLoops';
@@ -89,5 +89,29 @@ describe('getModeStrokeOutlineLoops', () => {
 
     // result
     expect(getModeStrokeOutlineLoops(ellipse)).toHaveLength(2);
+  });
+
+  it('should outline a polygon by its drawn stroke band', () => {
+    // mock
+    const polygon = {
+      fills: [],
+      flipX: false,
+      flipY: false,
+      height: 100,
+      id: 'p',
+      name: 'Polygon',
+      parentId: null,
+      rotation: 0,
+      sides: 5,
+      strokeWidth: 10,
+      type: NodeType.polygon,
+      width: 100,
+      x: 0,
+      y: 0,
+    } as TPolygonNode;
+
+    // result
+    expect(getModeStrokeOutlineLoops(polygon)).toHaveLength(2);
+    expect(getModeStrokeOutlineLoops({ ...polygon, strokeWidth: 0 })).toBeNull();
   });
 });

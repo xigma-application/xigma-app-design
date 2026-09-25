@@ -464,6 +464,13 @@ Two independent render passes, both need updating for a visual change to show up
   so short arc segments at a cut corner leave no holes), and dashed, profile, dynamic and brush strokes run
   around the offset midline through the closed-loop vector functions. The same shapes feed SVG/PDF export and
   Outline stroke / booleans (built already turned, so their outline rotation is 0).
+  A polygon is drawn the same way: it stores `fills`, `strokes`, `effects` and the stroke settings like an
+  ellipse, `getPolygonShape` wraps `getPolygonWorldPoints` (sharp or rounded corners, flipped and rotated),
+  and `drawPolygonLeafNode` mirrors `drawEllipseLeafNode`. Its stroke (`getPolygonStrokeShapes`) is one
+  loop through `getAlignedLoopStrokeShape`, the per-loop band / mode helper both shapes share. SVG/PDF
+  export draws it with the paint drawers (`drawSvgPolygonShape` / `drawPdfPolygonShape`, eligibility from
+  `canExportPaintShapeAsSvgVector` / `canExportPaintShapeAsVector`); the simple-shape files now cover only
+  stars.
   A boolean's own Dynamic or Brush stroke (`getBooleanStrokeModePolygons`) runs the box dynamic / brush
   functions over the centred edges of every loop of its shape; a Basic stroke stays the nonzero ring.
   Vectors carry the same optional stroke mode fields (Offset vector copies them from the line via

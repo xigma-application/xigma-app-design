@@ -34,7 +34,7 @@ const createContext = (overrides: Partial<THoverResolverContext>): THoverResolve
 });
 
 const polygon: TPolygonNode = {
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   flipX: false,
   flipY: false,
   height: 100,

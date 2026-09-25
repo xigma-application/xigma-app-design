@@ -5,7 +5,7 @@ import { NodeType } from 'types/design/enums';
 import { isStrokeableNode } from '../isStrokeableNode';
 
 describe('isStrokeableNode', () => {
-  it.each([NodeType.ellipse, NodeType.line, NodeType.rectangle, NodeType.vector])('should accept a %s node', (type) => {
+  it.each([NodeType.ellipse, NodeType.line, NodeType.polygon, NodeType.rectangle, NodeType.vector])('should accept a %s node', (type) => {
     // result
     expect(isStrokeableNode({ type })).toBe(true);
   });

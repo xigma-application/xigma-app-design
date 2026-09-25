@@ -10,6 +10,7 @@ import { TSceneNode } from 'types/design/types';
 import { drawPdfBoxShape } from './drawPdfBoxShape';
 import { drawPdfEllipseShape } from './drawPdfEllipseShape';
 import { drawPdfLineShape } from './drawPdfLineShape';
+import { drawPdfPolygonShape } from './drawPdfPolygonShape';
 import { drawPdfSimpleShape } from './drawPdfSimpleShape';
 import { drawPdfVectorNodeShape } from './drawPdfVectorNodeShape';
 
@@ -27,6 +28,9 @@ export const drawPdfShape = (
       break;
     case NodeType.ellipse:
       drawPdfEllipseShape(page, node, nodesById, bounds, graphicsStates);
+      break;
+    case NodeType.polygon:
+      drawPdfPolygonShape(page, node, nodesById, bounds, graphicsStates);
       break;
     case NodeType.line:
       drawPdfLineShape(page, node, nodesById, bounds, graphicsStates);

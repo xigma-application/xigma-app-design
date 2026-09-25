@@ -80,7 +80,7 @@ describe('getNodeAtPoint', () => {
   it('should use polygonal hit-testing for polygon nodes, not the bounding box', () => {
     // mock
     const node: TSceneNode = {
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       flipX: false,
       flipY: false,
       height: 10,

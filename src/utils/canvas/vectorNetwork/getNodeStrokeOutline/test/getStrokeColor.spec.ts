@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TLineNode, TRectangleNode } from 'types/design/types';
+import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode } from 'types/design/types';
 
 // utils
 import { getStrokeColor } from '../getStrokeColor';
@@ -68,5 +68,28 @@ describe('getStrokeColor', () => {
     // result
     expect(getStrokeColor({ ...ellipse, strokes: [{ color: '#123456', opacity: 100, type: 'solid' }] })).toBe('#123456');
     expect(getStrokeColor(ellipse)).toBe('');
+  });
+
+  it('should read a polygon stroke from its first visible stroke paint', () => {
+    // mock
+    const polygon = {
+      fills: [],
+      flipX: false,
+      flipY: false,
+      height: 100,
+      id: 'p',
+      name: 'Polygon',
+      parentId: null,
+      rotation: 0,
+      sides: 5,
+      strokeWidth: 10,
+      type: NodeType.polygon,
+      width: 100,
+      x: 0,
+      y: 0,
+    } as TPolygonNode;
+
+    // result
+    expect(getStrokeColor({ ...polygon, strokes: [{ color: '#654321', opacity: 100, type: 'solid' }] })).toBe('#654321');
   });
 });

@@ -19,6 +19,8 @@ export const getStrokeOutlineLoops = (node: TStrokeableNode, outer: number, inne
       return getLineStrokeOutlineLoops(node, (outer + inner) / 2);
     case NodeType.vector:
       return getVectorStrokeOutlineLoops(node, outer);
+    case NodeType.polygon:
+      return null;
     // no default
   }
 };

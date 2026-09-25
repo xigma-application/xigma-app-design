@@ -144,4 +144,37 @@ describe('handlePointerDown', () => {
     // result — the just-created node itself must be excluded from its own snap candidates
     expect(candidateShapesRef.current.length).toBe(preexistingCount);
   });
+
+  it('should give the polygon a solid fill and remove it again when drawing is cancelled', () => {
+    // mock
+    const canvas = createCanvas();
+    const refs = createCanvasRefs();
+    const nodeIdRef: { current: string | null } = { current: null };
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(50, 60),
+      store.dispatch,
+      store,
+      refs,
+      IDENTITY_VIEWPORT,
+      { current: null },
+      nodeIdRef,
+      { current: [] },
+      { current: null },
+      '#ff0000',
+      'Polygon',
+      3,
+    );
+    const id = nodeIdRef.current as string;
+    const { fills } = selectActivePage(store.getState()).nodes[id] as { fills: unknown };
+
+    // action
+    refs.drawing.cancelDrawRef.current?.();
+
+    // result
+    expect(fills).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' }]);
+    expect(selectActivePage(store.getState()).nodes[id]).toBeUndefined();
+  });
 });

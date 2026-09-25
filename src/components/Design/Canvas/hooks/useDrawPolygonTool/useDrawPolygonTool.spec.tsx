@@ -75,7 +75,7 @@ describe('useDrawPolygonTool behaviors', () => {
 
     // result
     expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({
-      fill: CONFIG.fill,
+      fills: [{ color: CONFIG.fill, opacity: 100, type: 'solid' }],
       height: 30,
       sides: CONFIG.sides,
       type: NodeType.polygon,
@@ -135,7 +135,7 @@ describe('useDrawPolygonTool behaviors', () => {
 
     expect(page.rootOrder).toHaveLength(1);
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({
-      fill: CONFIG.fill,
+      fills: [{ color: CONFIG.fill, opacity: 100, type: 'solid' }],
       height: 30,
       name: `${CONFIG.name} (1)`,
       sides: CONFIG.sides,

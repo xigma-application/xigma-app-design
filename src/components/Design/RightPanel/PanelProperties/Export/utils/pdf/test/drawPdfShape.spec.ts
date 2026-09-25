@@ -2,7 +2,7 @@ import { PDFName } from 'pdf-lib';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TFrameNode, TPolygonNode, TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TPolygonNode, TLineNode, TStarNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { drawPdfShape } from '../drawPdfShape';
@@ -10,6 +10,7 @@ import { drawPdfShape } from '../drawPdfShape';
 const drawPdfBoxShapeMock = vi.fn();
 const drawPdfEllipseShapeMock = vi.fn();
 const drawPdfLineShapeMock = vi.fn();
+const drawPdfPolygonShapeMock = vi.fn();
 const drawPdfSimpleShapeMock = vi.fn();
 const drawPdfVectorNodeShapeMock = vi.fn();
 
@@ -18,6 +19,9 @@ vi.mock('../drawPdfEllipseShape', () => ({
   drawPdfEllipseShape: (...args: unknown[]): void => drawPdfEllipseShapeMock(...args),
 }));
 vi.mock('../drawPdfLineShape', () => ({ drawPdfLineShape: (...args: unknown[]): void => drawPdfLineShapeMock(...args) }));
+vi.mock('../drawPdfPolygonShape', () => ({
+  drawPdfPolygonShape: (...args: unknown[]): void => drawPdfPolygonShapeMock(...args),
+}));
 vi.mock('../drawPdfSimpleShape', () => ({ drawPdfSimpleShape: (...args: unknown[]): void => drawPdfSimpleShapeMock(...args) }));
 vi.mock('../drawPdfVectorNodeShape', () => ({
   drawPdfVectorNodeShape: (...args: unknown[]): void => drawPdfVectorNodeShapeMock(...args),
@@ -55,7 +59,7 @@ const ellipse: TEllipseNode = {
 
 const polygon: TPolygonNode = {
   ...ellipse,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   flipX: false,
   flipY: false,
   id: 'p',
@@ -63,6 +67,8 @@ const polygon: TPolygonNode = {
   sides: 5,
   type: NodeType.polygon,
 };
+
+const star: TStarNode = { ...polygon, fill: '#ff0000', id: 's', name: 's', points: 5, ratio: 0.5, type: NodeType.star };
 
 const line: TLineNode = {
   height: 0,
@@ -144,9 +150,18 @@ describe('drawPdfShape', () => {
     expect(drawPdfSimpleShapeMock).not.toHaveBeenCalled();
   });
 
-  it('should dispatch a polygon or star to drawPdfSimpleShape', () => {
+  it('should dispatch a polygon to drawPdfPolygonShape', () => {
     // action
     drawPdfShape(page, polygon, {}, bounds, states);
+
+    // result
+    expect(drawPdfPolygonShapeMock).toHaveBeenCalledTimes(1);
+    expect(drawPdfSimpleShapeMock).not.toHaveBeenCalled();
+  });
+
+  it('should dispatch a star to drawPdfSimpleShape', () => {
+    // action
+    drawPdfShape(page, star, {}, bounds, states);
 
     // result
     expect(drawPdfSimpleShapeMock).toHaveBeenCalledTimes(1);

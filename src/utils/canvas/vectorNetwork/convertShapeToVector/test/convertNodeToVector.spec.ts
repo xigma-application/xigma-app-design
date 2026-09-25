@@ -31,7 +31,7 @@ const ELLIPSE: TEllipseNode = {
   y: 0,
 };
 const POLYGON: TPolygonNode = {
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   flipX: false,
   flipY: false,
   height: 10,

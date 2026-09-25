@@ -7,6 +7,7 @@ export type TPanelNodeType =
   | NodeType.frame
   | NodeType.group
   | NodeType.line
+  | NodeType.polygon
   | NodeType.rectangle
   | NodeType.section
   | NodeType.slice;

@@ -17,7 +17,7 @@ const drawImageMock = vi.fn();
 const drawLineLeafNodeMock = vi.fn();
 const drawMsdfTextMock = vi.fn();
 const drawPathOutlineMock = vi.fn();
-const drawPolygonMock = vi.fn();
+const drawPolygonLeafNodeMock = vi.fn();
 const drawRectMock = vi.fn();
 const drawStarMock = vi.fn();
 const drawThickOutlineMock = vi.fn();
@@ -37,7 +37,9 @@ vi.mock('utils/canvas/drawImage', () => ({ drawImage: (...args: unknown[]): void
 vi.mock('../drawLineLeafNode', () => ({ drawLineLeafNode: (...args: unknown[]): void => drawLineLeafNodeMock(...args) }));
 vi.mock('utils/canvas/text/drawMsdfText', () => ({ drawMsdfText: (...args: unknown[]): void => drawMsdfTextMock(...args) }));
 vi.mock('../drawPathOutline', () => ({ drawPathOutline: (...args: unknown[]): void => drawPathOutlineMock(...args) }));
-vi.mock('utils/canvas/drawPolygon/drawPolygon', () => ({ drawPolygon: (...args: unknown[]): void => drawPolygonMock(...args) }));
+vi.mock('../drawPolygonLeafNode/drawPolygonLeafNode', () => ({
+  drawPolygonLeafNode: (...args: unknown[]): void => drawPolygonLeafNodeMock(...args),
+}));
 vi.mock('utils/canvas/drawRect/drawRect', () => ({ drawRect: (...args: unknown[]): void => drawRectMock(...args) }));
 vi.mock('utils/canvas/drawStar/drawStar', () => ({ drawStar: (...args: unknown[]): void => drawStarMock(...args) }));
 vi.mock('utils/canvas/drawThickOutline/drawThickOutline', () => ({
@@ -279,7 +281,7 @@ describe('drawLeafNode', () => {
   it('should draw a polygon with the threaded opacity', () => {
     // mock
     const node: TSceneNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       flipX: false,
       flipY: false,
       height: 20,
@@ -302,22 +304,13 @@ describe('drawLeafNode', () => {
       },
     });
 
+    const pathOutlineStyles = new Map();
+
     // action
-    drawLeafNode(context, node, new Map(), refs, {});
+    drawLeafNode(context, node, pathOutlineStyles, refs, {});
 
     // result
-    expect(drawPolygonMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      buffer,
-      { ...node, fillAlpha: 0.5 },
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-      false,
-      false,
-      0,
-    );
+    expect(drawPolygonLeafNodeMock).toHaveBeenCalledWith(context, node, 0.5, {}, pathOutlineStyles, refs, undefined, 0);
   });
 
   it('should draw a star with the threaded opacity', () => {

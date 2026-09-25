@@ -13,7 +13,7 @@ import { handleEscape } from '../handleEscape';
 const createPolygonNode = (): string => {
   const { payload } = store.dispatch(
     addNode({
-      fill: '#d9d9d9',
+      fills: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
       flipX: false,
       flipY: false,
       height: 10,

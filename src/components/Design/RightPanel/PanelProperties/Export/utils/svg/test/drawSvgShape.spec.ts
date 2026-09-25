@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TFrameNode, TPolygonNode, TLineNode, TMediaNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TPolygonNode, TLineNode, TStarNode, TMediaNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { drawSvgShape } from '../drawSvgShape';
@@ -9,6 +9,7 @@ const drawSvgBoxShapeMock = vi.fn();
 const drawSvgEllipseShapeMock = vi.fn();
 const drawSvgLineShapeMock = vi.fn();
 const drawSvgMediaNodeShapeMock = vi.fn();
+const drawSvgPolygonShapeMock = vi.fn();
 const drawSvgSimpleShapeMock = vi.fn();
 const drawSvgVectorNodeShapeMock = vi.fn();
 
@@ -19,6 +20,9 @@ vi.mock('../drawSvgEllipseShape', () => ({
 vi.mock('../drawSvgLineShape', () => ({ drawSvgLineShape: (...args: unknown[]): void => drawSvgLineShapeMock(...args) }));
 vi.mock('../drawSvgMediaNodeShape', () => ({
   drawSvgMediaNodeShape: (...args: unknown[]): Promise<void> => drawSvgMediaNodeShapeMock(...args),
+}));
+vi.mock('../drawSvgPolygonShape', () => ({
+  drawSvgPolygonShape: (...args: unknown[]): Promise<void> => drawSvgPolygonShapeMock(...args),
 }));
 vi.mock('../drawSvgSimpleShape', () => ({ drawSvgSimpleShape: (...args: unknown[]): void => drawSvgSimpleShapeMock(...args) }));
 vi.mock('../drawSvgVectorNodeShape', () => ({
@@ -55,7 +59,7 @@ const ellipse: TEllipseNode = {
 
 const polygon: TPolygonNode = {
   ...ellipse,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   flipX: false,
   flipY: false,
   id: 'p',
@@ -63,6 +67,8 @@ const polygon: TPolygonNode = {
   sides: 5,
   type: NodeType.polygon,
 };
+
+const star: TStarNode = { ...polygon, fill: '#ff0000', id: 's', name: 's', points: 5, ratio: 0.5, type: NodeType.star };
 
 const line: TLineNode = {
   height: 0,
@@ -154,8 +160,17 @@ describe('drawSvgShape', () => {
     expect(drawSvgSimpleShapeMock).not.toHaveBeenCalled();
   });
 
-  it('should dispatch a polygon or star to drawSvgSimpleShape', async () => {
+  it('should dispatch a polygon to drawSvgPolygonShape', async () => {
+    // action
     await drawSvgShape([], [], polygon, {}, bounds);
+
+    // result
+    expect(drawSvgPolygonShapeMock).toHaveBeenCalledTimes(1);
+    expect(drawSvgSimpleShapeMock).not.toHaveBeenCalled();
+  });
+
+  it('should dispatch a star to drawSvgSimpleShape', async () => {
+    await drawSvgShape([], [], star, {}, bounds);
 
     expect(drawSvgSimpleShapeMock).toHaveBeenCalledTimes(1);
     expect(drawSvgBoxShapeMock).not.toHaveBeenCalled();

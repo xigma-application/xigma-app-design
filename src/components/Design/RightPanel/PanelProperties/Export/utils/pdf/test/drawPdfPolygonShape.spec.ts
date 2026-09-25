@@ -7,21 +7,23 @@ import { TPolygonNode } from 'types/design/types';
 // utils
 import { drawPdfPolygonShape } from '../drawPdfPolygonShape';
 
-const drawPdfPolygonsMock = vi.fn();
+const drawPdfPaintPolygonsMock = vi.fn();
 
-vi.mock('../drawPdfPolygons', () => ({ drawPdfPolygons: (...args: unknown[]): void => drawPdfPolygonsMock(...args) }));
+vi.mock('../drawPdfPaintPolygons', () => ({ drawPdfPaintPolygons: (...args: unknown[]): void => drawPdfPaintPolygonsMock(...args) }));
 
 const bounds = { height: 100, width: 100, x: 0, y: 0 };
 const page = {} as never;
 const states = new Map<number, PDFName>();
+const fills = [{ color: '#ff0000', opacity: 100, type: 'solid' as const }];
+const strokes = [{ color: '#0000ff', opacity: 100, type: 'solid' as const }];
 
 const polygon = (overrides: Partial<TPolygonNode> = {}): TPolygonNode => ({
-  fill: '#ff0000',
+  fills,
   flipX: false,
   flipY: false,
   height: 20,
-  id: 'p',
-  name: 'p',
+  id: 'e',
+  name: 'e',
   parentId: null,
   rotation: 0,
   sides: 5,
@@ -34,34 +36,34 @@ const polygon = (overrides: Partial<TPolygonNode> = {}): TPolygonNode => ({
 
 describe('drawPdfPolygonShape', () => {
   beforeEach(() => {
-    drawPdfPolygonsMock.mockClear();
+    drawPdfPaintPolygonsMock.mockClear();
   });
 
-  it('should draw the fill polygon with the given opacity', () => {
+  it('should draw the fill paints over the polygon shape with the node opacity', () => {
     // action
-    drawPdfPolygonShape(page, polygon(), 0.5, bounds, states);
+    drawPdfPolygonShape(page, polygon({ opacity: 0.5 }), {}, bounds, states);
 
     // result
-    expect(drawPdfPolygonsMock).toHaveBeenCalledTimes(1);
-    expect(drawPdfPolygonsMock.mock.calls[0][2]).toBe('#ff0000');
-    expect(drawPdfPolygonsMock.mock.calls[0][3]).toBe(0.5);
-    expect(drawPdfPolygonsMock.mock.calls[0][1]).toHaveLength(1);
-    expect(drawPdfPolygonsMock.mock.calls[0][1][0]).toHaveLength(5);
+    expect(drawPdfPaintPolygonsMock).toHaveBeenCalledTimes(1);
+    expect(drawPdfPaintPolygonsMock.mock.calls[0][1]).toBe(fills);
+    expect(drawPdfPaintPolygonsMock.mock.calls[0][2][0]).toHaveLength(5);
+    expect(drawPdfPaintPolygonsMock.mock.calls[0][3]).toBe(0.5);
   });
 
-  it('should facet the corners when there is a corner radius', () => {
+  it('should draw the stroke paints over the stroke ring', () => {
     // action
-    drawPdfPolygonShape(page, polygon({ cornerRadius: 2 }), 1, bounds, states);
+    drawPdfPolygonShape(page, polygon({ strokeWidth: 4, strokes }), {}, bounds, states);
 
     // result
-    expect(drawPdfPolygonsMock.mock.calls[0][1][0].length).toBeGreaterThan(5);
+    expect(drawPdfPaintPolygonsMock).toHaveBeenCalledTimes(2);
+    expect(drawPdfPaintPolygonsMock.mock.calls[1][1]).toBe(strokes);
   });
 
-  it('should skip drawing when the fill is empty', () => {
+  it('should skip the stroke without a stroke width', () => {
     // action
-    drawPdfPolygonShape(page, polygon({ fill: '' }), 1, bounds, states);
+    drawPdfPolygonShape(page, polygon({ strokes }), {}, bounds, states);
 
     // result
-    expect(drawPdfPolygonsMock).not.toHaveBeenCalled();
+    expect(drawPdfPaintPolygonsMock).toHaveBeenCalledTimes(1);
   });
 });

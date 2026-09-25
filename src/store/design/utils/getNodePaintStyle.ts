@@ -14,6 +14,7 @@ export const getNodePaintStyle = (node: TSceneNode | undefined): TNodePaintStyle
   switch (node?.type) {
     case NodeType.boolean:
     case NodeType.ellipse:
+    case NodeType.polygon:
     case NodeType.rectangle:
     case NodeType.section:
       return {
@@ -23,7 +24,6 @@ export const getNodePaintStyle = (node: TSceneNode | undefined): TNodePaintStyle
         strokeWidth: node.strokeWidth,
         strokes: node.strokes,
       };
-    case NodeType.polygon:
     case NodeType.star:
     case NodeType.text:
       return { fills: [makeSolidPaint(node.fill)] };

@@ -153,7 +153,7 @@ const addPolygonNode = (x: number, y: number, size: number, sides: number, corne
   store.dispatch(
     addNode({
       cornerRadius,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       flipX: false,
       flipY: false,
       height: size,

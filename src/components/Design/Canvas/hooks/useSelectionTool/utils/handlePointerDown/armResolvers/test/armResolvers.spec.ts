@@ -184,7 +184,7 @@ const pathText: TTextNode = {
 
 const polygon: TPolygonNode = {
   cornerRadius: 15,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   flipX: false,
   flipY: false,
   height: 100,

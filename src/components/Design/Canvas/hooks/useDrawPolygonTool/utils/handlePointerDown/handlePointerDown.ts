@@ -22,6 +22,7 @@ import { TViewport } from 'types/design/types';
 import { getCandidateShapes, type TCandidateShape } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { handleEscape } from '../handleEscape/handleEscape';
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 import { resolveNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/resolveNewNodeDropTarget';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 
@@ -44,7 +45,7 @@ const createPolygonNode = (
   const { payload } = dispatch(
     addNode(
       {
-        fill,
+        fills: [makeSolidPaint(fill)],
         flipX: false,
         flipY: false,
         height: MIN_SHAPE_SIZE,

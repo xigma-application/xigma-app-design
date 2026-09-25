@@ -63,7 +63,7 @@ describe('isPointOnSceneNode', () => {
   it('should hit-test a polygon against its vertices, not its bounding box', () => {
     // mock
     const node: TSceneNode = {
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       flipX: false,
       flipY: false,
       height: 10,

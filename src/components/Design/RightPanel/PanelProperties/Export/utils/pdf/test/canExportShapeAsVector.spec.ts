@@ -1,6 +1,6 @@
 // types
-import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TFrameNode, TLineNode, TPolygonNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { EffectType, NodeType } from 'types/design/enums';
+import { TEffect, TEllipseNode, TFrameNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { canExportShapeAsVector } from '../canExportShapeAsVector';
@@ -80,20 +80,35 @@ describe('canExportShapeAsVector', () => {
     expect(canExportShapeAsVector({ ...vector, hidden: true }, {})).toBe(false);
   });
 
-  it('should route a polygon through the simple-shape eligibility check', () => {
+  it('should route a polygon through the paint shape eligibility check', () => {
     // mock
-    const polygon = {
+    const polygon: TPolygonNode = { ...ellipse, flipX: false, flipY: false, sides: 5, type: NodeType.polygon };
+
+    // result
+    expect(canExportShapeAsVector(polygon, {})).toBe(true);
+    expect(
+      canExportShapeAsVector(
+        { ...polygon, effects: [{ blur: 4, color: '#000000', type: EffectType.dropShadow, visible: true } as TEffect] },
+        {},
+      ),
+    ).toBe(false);
+  });
+
+  it('should route a star through the simple-shape eligibility check', () => {
+    // mock
+    const star = {
       ...ellipse,
       fill: '#ff0000',
       flipX: false,
       flipY: false,
-      sides: 5,
-      type: NodeType.polygon,
-    } as unknown as TPolygonNode;
+      points: 5,
+      ratio: 0.5,
+      type: NodeType.star,
+    } as unknown as TStarNode;
 
     // result
-    expect(canExportShapeAsVector(polygon, {})).toBe(true);
-    expect(canExportShapeAsVector({ ...polygon, hidden: true }, {})).toBe(false);
+    expect(canExportShapeAsVector(star, {})).toBe(true);
+    expect(canExportShapeAsVector({ ...star, hidden: true }, {})).toBe(false);
   });
 
   it('should route a frame through the box eligibility check', () => {

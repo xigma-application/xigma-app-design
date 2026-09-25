@@ -10,6 +10,7 @@ describe('isStyledNode', () => {
     // result
     expect(isStyledNode({ type: NodeType.rectangle } as TSceneNode)).toBe(true);
     expect(isStyledNode({ type: NodeType.line } as TSceneNode)).toBe(true);
+    expect(isStyledNode({ type: NodeType.polygon } as TSceneNode)).toBe(true);
   });
 
   it('should reject every other node and a missing one', () => {

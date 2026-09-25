@@ -11,7 +11,7 @@ import { store } from 'store';
 
 // types
 import { BooleanOperation, NodeType } from 'types/design/enums';
-import { TBooleanNode, TFrameNode, TGroupNode, TPolygonNode, TRectangleNode } from 'types/design/types';
+import { TBooleanNode, TFrameNode, TGroupNode, TRectangleNode, TStarNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -44,16 +44,17 @@ const groupedRectangle: TRectangleNode = {
   parentId: 'rectangleGroup',
   type: NodeType.rectangle,
 };
-const groupedEllipse: TPolygonNode = {
+const groupedEllipse: TStarNode = {
   ...baseNode,
   fill: '#ffffff',
   flipX: false,
   flipY: false,
   id: 'groupedEllipse',
-  name: 'Polygon',
+  name: 'Star',
   parentId: 'ellipseGroup',
-  sides: 5,
-  type: NodeType.polygon,
+  points: 5,
+  ratio: 0.5,
+  type: NodeType.star,
 };
 const rectangleGroup: TGroupNode = {
   ...baseNode,

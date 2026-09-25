@@ -4,7 +4,7 @@ import { TPaint } from 'types/design/paint/types';
 import { TEffect, TEllipseNode, TFrameNode } from 'types/design/types';
 
 // utils
-import { canExportEllipseAsSvgVector } from '../canExportEllipseAsSvgVector';
+import { canExportPaintShapeAsSvgVector } from '../canExportPaintShapeAsSvgVector';
 
 const ellipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
   fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
@@ -20,9 +20,9 @@ const ellipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
   ...overrides,
 });
 
-const check = (node: TEllipseNode): boolean => canExportEllipseAsSvgVector(node, {});
+const check = (node: TEllipseNode): boolean => canExportPaintShapeAsSvgVector(node, {});
 
-describe('canExportEllipseAsSvgVector', () => {
+describe('canExportPaintShapeAsSvgVector', () => {
   it('should allow a plain ellipse', () => {
     expect(check(ellipse())).toBe(true);
   });
@@ -49,7 +49,7 @@ describe('canExportEllipseAsSvgVector', () => {
       y: 0,
     };
 
-    expect(canExportEllipseAsSvgVector(ellipse({ parentId: 'p' }), { p: parent })).toBe(false);
+    expect(canExportPaintShapeAsSvgVector(ellipse({ parentId: 'p' }), { p: parent })).toBe(false);
   });
 
   it('should reject visible effects and paints the export cannot draw', () => {

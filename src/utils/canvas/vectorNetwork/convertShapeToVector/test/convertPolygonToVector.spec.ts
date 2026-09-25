@@ -1,12 +1,12 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TPolygonNode } from 'types/design/types';
 
 // utils
 import { convertPolygonToVector } from '../convertPolygonToVector';
 
 const buildPolygon = (overrides: Partial<TPolygonNode> = {}): TPolygonNode => ({
-  fill: '#123456',
+  fills: [{ color: '#123456', opacity: 100, type: 'solid' }],
   flipX: false,
   flipY: false,
   height: 100,
@@ -65,5 +65,28 @@ describe('convertPolygonToVector', () => {
 
     expect(minY(unflippedResult)).toBeLessThan(minY(flippedResult));
     expect(maxY(flippedResult)).toBeGreaterThan(maxY(unflippedResult));
+  });
+
+  it('should keep the stroke with its position on the vector', () => {
+    // mock
+    const node = buildPolygon({
+      strokeAlign: StrokeAlign.center,
+      strokeWidth: 3,
+      strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+    });
+
+    // action
+    const result = convertPolygonToVector(node);
+
+    // result
+    expect(result).toMatchObject({ strokeAlign: StrokeAlign.center, strokeColor: '#ff0000', strokeWidth: 3 });
+  });
+
+  it('should fall back to an empty stroke color without a solid fill', () => {
+    // action
+    const result = convertPolygonToVector(buildPolygon({ fills: [] }));
+
+    // result
+    expect(result.strokeColor).toBe('');
   });
 });

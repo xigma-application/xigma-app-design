@@ -8,6 +8,7 @@ import { getEllipseStrokeShapes } from '../../shapes/getEllipseStrokeShapes';
 import { getBoxStrokeRingPolygons } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getBoxStrokeRingPolygons/getBoxStrokeRingPolygons';
 import { getLineStrokeShape } from '../../line/stroke/getLineStrokeShape';
 import { getNestingOrientedLoops } from './getNestingOrientedLoops';
+import { getPolygonStrokeShapes } from '../../shapes/getPolygonStrokeShapes';
 import { getRingMode } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getBoxStrokeRingPolygons/getRingMode';
 import { getStrokeDashPattern } from 'utils/design/stroke/getStrokeDashPattern';
 import { getVectorStrokeShape } from '../../vector/stroke/getVectorStrokeShape';
@@ -31,6 +32,10 @@ export const getModeStrokeOutlineLoops = (node: TStrokeableNode): TPoint[][] | n
     }
     case NodeType.ellipse: {
       const shapes = getEllipseStrokeShapes(node);
+      return shapes ? getNestingOrientedLoops(shapes.flatMap(({ polygons }) => polygons)) : null;
+    }
+    case NodeType.polygon: {
+      const shapes = getPolygonStrokeShapes(node);
       return shapes ? getNestingOrientedLoops(shapes.flatMap(({ polygons }) => polygons)) : null;
     }
     case NodeType.vector: {
