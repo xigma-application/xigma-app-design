@@ -65,3 +65,21 @@ test('a drop shadow on a line is drawn under it', async ({ page }) => {
 
   await expect.poll(async () => (await page.screenshot({ clip: shadowArea })).equals(plain)).toBe(false);
 });
+
+test('Edit objects in the Line panel "…" menu enters point editing on the line', async ({ page }) => {
+  await drawSelectedLine(page, 'e2e-test-line-panel-edit-object');
+
+  await page.getByRole('button', { name: 'More actions' }).first().click();
+  await page.getByText('Edit objects', { exact: true }).click();
+
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+
+        return store.getState().design.vectorEditingNodeIds.length;
+      }),
+    )
+    .toBe(1);
+  await expect.poll(async () => (await readLine(page)).type).toBe('vector');
+});
