@@ -571,3 +571,30 @@ test('a thick stroke on a Union of thin lines is drawn as a solid band, not a ho
 
   await expect.poll(async () => (await page.screenshot({ clip: { height: 4, width: 4, x: 760, y: 305 } })).equals(blank)).toBe(false);
 });
+
+test('a dashed line joined into a Union keeps the gaps between its dashes', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-dashed-line');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await designPage.drawLine(820, 260, 1020, 260);
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { booleanNodes, setSelection, updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+    const lineId = rootOrder.find((id) => nodes[id].type === 'line') ?? '';
+
+    store.dispatch(updateNode({ changes: { strokeDash: 20, strokeGap: 20, strokeStyle: 'dashed', strokeWidth: 10 } as never, id: lineId }));
+    store.dispatch(setSelection(rootOrder));
+    store.dispatch(booleanNodes('union'));
+  });
+  await designPage.click(1500, 900);
+
+  const blank = await page.screenshot({ clip: { height: 4, width: 4, x: 1100, y: 258 } });
+
+  await expect.poll(async () => (await page.screenshot({ clip: { height: 4, width: 4, x: 868, y: 258 } })).equals(blank)).toBe(false);
+  await expect.poll(async () => (await page.screenshot({ clip: { height: 4, width: 4, x: 848, y: 258 } })).equals(blank)).toBe(true);
+});

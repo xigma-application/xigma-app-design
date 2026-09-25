@@ -449,8 +449,11 @@ Two independent render passes, both need updating for a visual change to show up
   used by the canvas, effects and SVG/PDF export): the plain outline for a uniform stroke, or per mode
   dashes / width-profile band / dynamic band (plus solid arrowheads, all filled nonzero) or the brush
   run along an open `TStrokeRing` (`buildOpenStrokeRing`, `closed: false`; the box brush functions take a
-  ring). Inside/Outside shift the whole shape by half the width. Booleans and Outline stroke still use
-  the plain outline.
+  ring). Inside/Outside shift the whole shape by half the width. The same shape drives line hit-testing
+  (`isPointInLineStroke`) and stroked bounds (`getLineStrokeBounds`). Booleans and Outline stroke go
+  through `getNodeStrokeOutline` → `getModeStrokeOutlineLoops`: a line's stroke shape, or a rectangle's
+  non-uniform drawn ring (turned back into its unrotated frame), wound by nesting depth
+  (`getNestingOrientedLoops`) because the loop assembler fills by nonzero winding.
 - `src/constant/canvas.ts` — every magic number (stroke widths, hit-test tolerances, handle sizes,
   dash lengths) lives here, not inline. Roughly alphabetical but not strictly enforced.
 

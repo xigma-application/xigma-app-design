@@ -239,3 +239,15 @@ test('the line stroke settings open without a Join, and the Brush tab hides the 
   await expect.poll(async () => (await readLine(page)).strokeMode).toBe('brush');
   await expect(page.getByText('Start point')).toHaveCount(0);
 });
+
+test('clicking where an inside stroke is drawn, well off the line itself, selects the line', async ({ page }) => {
+  const designPage = await drawSelectedLine(page, 'e2e-test-line-panel-inside-hit');
+
+  await updateLastNode(page, { strokeAlign: 'inside', strokeWidth: 30 });
+  await designPage.click(1500, 900);
+  await expect(page.getByText('Start point')).toHaveCount(0);
+
+  await designPage.click(900, 378);
+
+  await expect(page.getByText('Start point')).toBeVisible();
+});

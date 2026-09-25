@@ -139,6 +139,32 @@ test.describe('Outline as stroke', () => {
 
     expect(state.nodes[id].type).toBe('vector');
   });
+
+  test('outlines a dashed Line into a vector made of its dashes with pixel-identical appearance', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-outline-stroke-dashed-line');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawLine(900, 300, 1050, 420);
+    await setStroke(page, { strokeDash: 20, strokeGap: 20, strokeStyle: 'dashed', strokeWidth: 10 });
+    await designPage.click(DESELECT_POINT.x, DESELECT_POINT.y);
+    await designPage.pointerMove(DESELECT_POINT.x, DESELECT_POINT.y);
+    const before = await page.screenshot({ clip: SHAPE_REGION });
+
+    await designPage.click(975, 360);
+    await page.keyboard.press(OUTLINE_STROKE_SHORTCUT);
+    await designPage.click(DESELECT_POINT.x, DESELECT_POINT.y);
+    await designPage.pointerMove(DESELECT_POINT.x, DESELECT_POINT.y);
+    const after = await page.screenshot({ clip: SHAPE_REGION });
+
+    expect(countMismatchedPixels(after, before)).toBe(0);
+
+    const state = await readDesignState(page);
+    const [id] = state.rootOrder;
+
+    expect(state.nodes[id].type).toBe('vector');
+  });
 });
 
 // unlike shapes, text has no real stroke band to speak of yet (no properties-panel UI to ever set

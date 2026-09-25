@@ -4,6 +4,7 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getLineStrokeBounds } from 'utils/canvas/line/stroke/getLineStrokeBounds';
 import { getNodeBounds } from './getNodeBounds';
 import { getPaddedRect } from 'utils/design/stroke/getPaddedRect';
 import { getRectCorners } from 'utils/canvas/getRectCorners';
@@ -26,6 +27,7 @@ export const getStrokedRotatedNodeBounds = (node: TSceneNode): TDraftRect => {
 
   switch (node.type) {
     case NodeType.line:
+      return getLineStrokeBounds(node) ?? getRotatedNodeBounds(node);
     case NodeType.vector:
       return getRotatedNodeBounds(node);
     default:

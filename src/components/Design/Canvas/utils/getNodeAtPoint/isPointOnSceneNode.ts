@@ -12,10 +12,11 @@ import { isPointInRect } from '../isPointInRect';
 import { isPointInStar } from '../isPointInStar';
 import { isPointInText } from '../isPointInText';
 import { isPointNearLine } from '../isPointNearLine';
+import { isPointInLineStroke } from 'utils/canvas/line/stroke/isPointInLineStroke';
 import { isPointOnVectorNode } from './isPointOnVectorNode';
 
 export const isPointOnSceneNode = (context: TSceneNodeHitContext): boolean => {
-  const { lineTolerance, node, nodesById, pathTextTolerance, point, testPoint, textPathBoundVectorIds, zoom } = context;
+  const { lineTolerance, node, nodesById, pathTextTolerance, point, testPoint, textPathBoundVectorIds } = context;
 
   switch (node.type) {
     case NodeType.ellipse:
@@ -25,7 +26,7 @@ export const isPointOnSceneNode = (context: TSceneNodeHitContext): boolean => {
     case NodeType.star:
       return isPointInStar(testPoint, node);
     case NodeType.line:
-      return isPointNearLine(point, getLinePoints(node), Math.max(lineTolerance, (node.strokeWidth ?? 0) / 2 / zoom));
+      return isPointNearLine(point, getLinePoints(node), lineTolerance) || isPointInLineStroke(point, node);
     case NodeType.text:
       return node.pathId ? isPointInCurvedText(point, node, pathTextTolerance, nodesById[node.pathId]) : isPointInText(testPoint, node);
     case NodeType.path:

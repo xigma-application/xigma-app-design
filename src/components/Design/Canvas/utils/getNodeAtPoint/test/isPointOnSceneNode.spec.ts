@@ -1,5 +1,5 @@
 // types
-import { NodeType, PathType } from 'types/design/enums';
+import { NodeType, PathType, StrokeAlign } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { TPathNode, TSceneNode } from 'types/design/types';
 
@@ -138,6 +138,28 @@ describe('isPointOnSceneNode', () => {
 
     // result
     expect(isPointOnSceneNode(buildContext(line, { x: 5, y: 6 }))).toBe(false);
+  });
+
+  it('should hit a line where its inside stroke is drawn, off to one side of the line', () => {
+    // mock
+    const line: TSceneNode = {
+      height: 0,
+      id: 'a',
+      name: 'Line',
+      parentId: null,
+      rotation: 0,
+      strokeAlign: StrokeAlign.inside,
+      strokeWidth: 30,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      width: 10,
+      x: 0,
+      y: 0,
+    };
+
+    // result
+    expect(isPointOnSceneNode(buildContext(line, { x: 5, y: -25 }))).toBe(true);
+    expect(isPointOnSceneNode(buildContext(line, { x: 5, y: 12 }))).toBe(false);
   });
 
   it('should route text-on-a-path through curved-glyph hit-testing', () => {
