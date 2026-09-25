@@ -20,6 +20,7 @@ import { armHitOnPointerDown } from './armResolvers/armHitOnPointerDown';
 import { armImageCropOnPointerDown } from './armResolvers/armImageCropOnPointerDown/armImageCropOnPointerDown';
 import { armLineEndpointOnPointerDown } from './armResolvers/armLineEndpointOnPointerDown';
 import { armMarqueeOnPointerDown } from './armResolvers/armMarqueeOnPointerDown';
+import { armOffsetVectorOnPointerDown } from './armResolvers/armOffsetVectorOnPointerDown';
 import { armPathOffsetOnPointerDown } from './armResolvers/armPathOffsetOnPointerDown';
 import { armPolygonCornerRadiusOnPointerDown } from './armResolvers/armPolygonCornerRadiusOnPointerDown';
 import { armPolygonVertexCountOnPointerDown } from './armResolvers/armPolygonVertexCountOnPointerDown';
@@ -52,6 +53,7 @@ import { armVectorWidthPointOnPointerDown } from './armResolvers/armVectorWidthP
 import { toggleSelectionOnPointerDown } from './armResolvers/toggleSelectionOnPointerDown';
 
 export const ARM_RESOLVERS = [
+  armOffsetVectorOnPointerDown,
   armVectorLassoOnPointerDown,
   armBakeVectorRotationOnPointerDown,
   armVectorPaintOnPointerDown,

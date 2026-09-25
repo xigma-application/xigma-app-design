@@ -25,6 +25,7 @@ import { continueImageCropResizeDrag } from './continueImageCropResizeDrag';
 import { continueImageCropRotateDrag } from './continueImageCropRotateDrag';
 import { continueImageTileScaleDrag } from './continueImageTileScaleDrag';
 import { continueMarqueeDrag } from './continueMarqueeDrag';
+import { continueOffsetVectorDrag } from './continueOffsetVectorDrag';
 import { continuePathOffsetDrag } from './continuePathOffsetDrag';
 import { continuePolygonCornerRadiusDrag } from './continuePolygonCornerRadiusDrag';
 import { continuePolygonVertexCountDrag } from './continuePolygonVertexCountDrag';
@@ -80,6 +81,7 @@ export const handlePointerMove = (
   continuePolygonVertexCountDrag(canvas, event, dispatch, canvasRefs.vertexCount.polygonVertexCountDragRef);
   continueStarVertexCountDrag(canvas, event, dispatch, canvasRefs.vertexCount.starVertexCountDragRef);
   continueStarRatioDrag(canvas, event, dispatch, canvasRefs.starRatio.starRatioDragRef);
+  continueOffsetVectorDrag(canvas, event, dispatch, canvasRefs.offsetVector.offsetVectorDragRef);
   continueEllipseArcDrag(canvas, event, dispatch, canvasRefs.ellipseArc.ellipseArcDragRef);
   continueEllipseArcRotateDrag(canvas, event, dispatch, canvasRefs.ellipseArc.ellipseArcRotateDragRef);
   continueEllipseArcRatioDrag(canvas, event, dispatch, canvasRefs.ellipseArc.ellipseArcRatioDragRef);

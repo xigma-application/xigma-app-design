@@ -23,6 +23,7 @@ import { useImageCropRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/h
 import { useLassoMarqueeRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useLassoMarqueeRefs/useLassoMarqueeRefs';
 import { useLayoutRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useLayoutRefs/useLayoutRefs';
 import { useMediaRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useMediaRefs/useMediaRefs';
+import { useOffsetVectorRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useOffsetVectorRefs/useOffsetVectorRefs';
 import { usePenRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/usePenRefs/usePenRefs';
 import { useSectionNameRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useSectionNameRefs/useSectionNameRefs';
 import { useSmartSelectionRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useSmartSelectionRefs/useSmartSelectionRefs';
@@ -60,6 +61,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const lassoMarqueeRefs = useLassoMarqueeRefs();
   const layoutRefs = useLayoutRefs();
   const mediaRefs = useMediaRefs();
+  const offsetVectorRefs = useOffsetVectorRefs();
   const penRefs = usePenRefs();
   const progressiveBlurRefs = useProgressiveBlurRefs();
   const sectionNameRefs = useSectionNameRefs();
@@ -103,6 +105,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       lassoMarquee: lassoMarqueeRefs,
       layout: layoutRefs,
       media: mediaRefs,
+      offsetVector: offsetVectorRefs,
       patternThumbnailRequestRef,
       pen: penRefs,
       pencil: pencilRefs,
@@ -137,6 +140,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       lassoMarqueeRefs,
       layoutRefs,
       mediaRefs,
+      offsetVectorRefs,
       penRefs,
       pencilRefs,
       progressiveBlurRefs,

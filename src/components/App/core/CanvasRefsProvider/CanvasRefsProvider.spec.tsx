@@ -91,6 +91,7 @@ describe('CanvasRefsProvider behaviors', () => {
       lassoMarquee: { marqueeRef: { current: null }, vectorLassoPathRef: { current: null } },
       layout: { leftPanelWidthRef: { current: 0 }, rightPanelWidthRef: { current: 0 } },
       media: { armedRef: { current: null }, queueRef: { current: [] } },
+      offsetVector: { hoveredOffsetVectorEdgeRef: { current: null }, offsetVectorDragRef: { current: null } },
       patternThumbnailRequestRef: { current: null },
       pen: {
         penDragOriginRef: { current: null },

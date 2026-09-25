@@ -19,6 +19,7 @@ const createContext = (overrides: Partial<THoverResolverContext>): THoverResolve
   isControlPressed: false,
   leafNodes: [],
   nodesById: {},
+  offsetVector: null,
   openPropertyPanel: null,
   point: { x: 0, y: 0 },
   refs: createCanvasRefs(),

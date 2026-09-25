@@ -124,3 +124,50 @@ test('Offset vector previews the filled offset shape around a polygon and turns 
   await designPage.click(1500, 900);
   await expect.poll(async () => (await page.screenshot({ clip: belowPolygon })).equals(blank)).toBe(false);
 });
+
+test('in Offset vector the polygon shows only its outline and dragging the pink outline out grows the distance', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-polygon-offset-drag');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawPolygon(800, 300, 1000, 500);
+
+  await page.getByRole('button', { name: 'More actions' }).first().click();
+  await page.getByText('Offset vector', { exact: true }).click();
+
+  const distance = page.getByRole('textbox', { name: 'Offset distance' });
+
+  await distance.fill('30');
+  await distance.press('Tab');
+  await expect(distance).toHaveValue('30');
+
+  const isOutlineBlue = async (): Promise<boolean> => {
+    const colors = await Promise.all([449, 450, 451].map((y) => readPixelColor(page, 900, y)));
+    return colors.some(([red, , blue]) => blue - red > 60);
+  };
+
+  await designPage.pointerMove(1500, 900);
+  await expect.poll(isOutlineBlue).toBe(true);
+
+  await designPage.pointerMove(900, 481);
+  await designPage.pointerDown(900, 481);
+  await page.mouse.move(900, 521, { steps: 5 });
+  await designPage.pointerUp();
+
+  await expect(distance).toHaveValue('70');
+
+  await designPage.pointerDown(1000, 500);
+  await page.mouse.move(1100, 600, { steps: 5 });
+  await designPage.pointerUp();
+
+  const polygon = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+
+    return nodes[rootOrder[rootOrder.length - 1]] as unknown as Record<string, unknown>;
+  });
+
+  expect(polygon).toMatchObject({ height: 200, type: 'polygon', width: 200, x: 800, y: 300 });
+  await expect(distance).toHaveValue('70');
+});

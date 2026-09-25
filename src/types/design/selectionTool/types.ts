@@ -71,6 +71,14 @@ export type TStarVertexCountDragState = {
   rotation: number;
 };
 
+export type TOffsetVectorDragState = {
+  angle: number;
+  normal: TPoint;
+  point: TPoint;
+  startDistance: number;
+  startPoint: TPoint;
+};
+
 export type TStarRatioDragState = {
   bounds: TDraftRect;
   flipX: boolean;

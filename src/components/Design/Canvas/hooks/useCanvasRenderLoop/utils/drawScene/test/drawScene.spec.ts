@@ -2,13 +2,22 @@
 import { CARET_BLINK_INTERVAL_MS, GRID_MIN_ZOOM } from 'constant/canvas';
 
 // store
-import { addNode, setBackgroundPaint, setSelection, setViewport, startTextEdit, stopTextEdit, toggleNodeHidden } from 'store/design/slice';
+import {
+  addNode,
+  setBackgroundPaint,
+  setOffsetVector,
+  setSelection,
+  setViewport,
+  startTextEdit,
+  stopTextEdit,
+  toggleNodeHidden,
+} from 'store/design/slice';
 import { DEFAULT_PAINT, DEFAULT_VIEWPORT } from 'store/design/constants';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, StrokeJoin } from 'types/design/enums';
 import { TImageRenderContext } from '../../../types';
 
 // utils
@@ -331,6 +340,44 @@ describe('drawScene', () => {
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, 4);
+  });
+
+  it('should draw only the outline of the layer being offset, without its selection box', () => {
+    // mock
+    const gl = createGlMock();
+    const canvas = document.createElement('canvas');
+
+    store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
+        height: 20,
+        name: 'Frame offset',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 10,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const nodeId = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(setSelection([nodeId]));
+    store.dispatch(setOffsetVector({ distance: 10, join: StrokeJoin.miter, nodeId }));
+
+    // before
+    drawScene(gl, {} as WebGLProgram, {} as WebGLBuffer, IMAGE_CONTEXT, canvas, createCanvasRefs());
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalledWith(gl.LINE_LOOP, 0, 4);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 24);
+
+    // cleanup
+    store.dispatch(setOffsetVector(null));
   });
 
   it('should draw one shared outline and 4 handles for a same-parent multi-selection, not per node', () => {

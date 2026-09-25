@@ -16,6 +16,7 @@ import { resolveImageCropResizeHover } from './hoverResolvers/resolveImageCropRe
 import { resolveImageCropRotateHover } from './hoverResolvers/resolveImageCropRotateHover';
 import { resolveImageTileScaleHover } from './hoverResolvers/resolveImageTileScaleHover';
 import { resolveLineEndpointHover } from './hoverResolvers/resolveLineEndpointHover';
+import { resolveOffsetVectorHover } from './hoverResolvers/resolveOffsetVectorHover';
 import { resolvePathOffsetHover } from './hoverResolvers/resolvePathOffsetHover';
 import { resolvePlainNodeHover } from './hoverResolvers/resolvePlainNodeHover';
 import { resolvePolygonCornerRadiusHover } from './hoverResolvers/resolvePolygonCornerRadiusHover';
@@ -49,6 +50,7 @@ export const HANDLE_HOVER_RESOLVERS = [
 ];
 
 export const HOVER_RESOLVERS = [
+  resolveOffsetVectorHover,
   resolveSmartSelectionGapHover,
   resolveAutoLayoutGapHover,
   resolveAutoLayoutPaddingHover,

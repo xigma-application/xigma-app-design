@@ -12,6 +12,7 @@ import {
   selectImageEditor,
   selectOpenPropertyPanel,
   selectNodes,
+  selectOffsetVector,
   selectSelectedNodes,
   selectSmartSelectionNodes,
   selectVectorEditingNodeIds,
@@ -50,7 +51,8 @@ export const resolveToolHover = (
   const isEditingVector = vectorEditingNodeIds.length > 0;
   const nodesById = selectNodes(state);
   const selectedNodes = selectSelectedNodes(state);
-  const resizableSelectedNodes = isEditingText || isEditingVector ? [] : selectedNodes;
+  const offsetVector = selectOffsetVector(state);
+  const resizableSelectedNodes = isEditingText || isEditingVector || offsetVector ? [] : selectedNodes;
   const applyClassName = isEditingVector ? (): void => {} : setClassName;
   const vectorMultiSelectBox = getVectorMultiSelectBoxForHover(state, refs);
 
@@ -64,6 +66,7 @@ export const resolveToolHover = (
     isControlPressed,
     leafNodes: getHoverLeafNodes(state, nodesById, isControlPressed),
     nodesById,
+    offsetVector,
     openPropertyPanel: selectOpenPropertyPanel(state),
     point,
     refs,

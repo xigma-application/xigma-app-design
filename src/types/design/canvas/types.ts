@@ -15,6 +15,7 @@ import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 import { TGuideAxis } from 'types/design/guides/types';
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TExportRenderRequest } from 'utils/canvas/exportRender/types';
+import { TOffsetVectorEdgeHit } from 'utils/canvas/offsetVector/types';
 import { TPatternThumbnailRequest } from 'utils/canvas/patternThumbnail/types';
 import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 import { TImageCrop, TPaint } from 'types/design/paint/types';
@@ -24,6 +25,7 @@ import {
   TNodeOrigin,
   TPolygonVertexCountDragState,
   TRotateDragState,
+  TOffsetVectorDragState,
   TStarRatioDragState,
   TStarVertexCountDragState,
   TThrottledDispatchState,
@@ -550,6 +552,11 @@ export type TVertexCountRefs = {
   starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>;
 };
 
+export type TOffsetVectorRefs = {
+  hoveredOffsetVectorEdgeRef: RefObject<TOffsetVectorEdgeHit | null>;
+  offsetVectorDragRef: RefObject<TOffsetVectorDragState | null>;
+};
+
 export type TStarRatioRefs = {
   starRatioDragRef: RefObject<TStarRatioDragState | null>;
 };
@@ -689,6 +696,7 @@ export type TCanvasRefs = {
   lassoMarquee: TLassoMarqueeRefs;
   layout: TLayoutRefs;
   media: TMediaRefs;
+  offsetVector: TOffsetVectorRefs;
   patternThumbnailRequestRef: RefObject<TPatternThumbnailRequest | null>;
   pen: TPenRefs;
   pencil: TPencilRefs;

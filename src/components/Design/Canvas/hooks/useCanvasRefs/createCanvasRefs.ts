@@ -15,6 +15,7 @@ import { createImageCropRefs } from './hooks/useImageCropRefs/createImageCropRef
 import { createLassoMarqueeRefs } from './hooks/useLassoMarqueeRefs/createLassoMarqueeRefs';
 import { createLayoutRefs } from './hooks/useLayoutRefs/createLayoutRefs';
 import { createMediaRefs } from './hooks/useMediaRefs/createMediaRefs';
+import { createOffsetVectorRefs } from './hooks/useOffsetVectorRefs/createOffsetVectorRefs';
 import { createPenRefs } from './hooks/usePenRefs/createPenRefs';
 import { createPencilRefs } from './hooks/usePencilRefs/createPencilRefs';
 import { createSectionNameRefs } from './hooks/useSectionNameRefs/createSectionNameRefs';
@@ -56,6 +57,7 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   lassoMarquee: createLassoMarqueeRefs(overrides.lassoMarquee),
   layout: createLayoutRefs(overrides.layout),
   media: createMediaRefs(overrides.media),
+  offsetVector: createOffsetVectorRefs(overrides.offsetVector),
   pen: createPenRefs(overrides.pen),
   pencil: createPencilRefs(overrides.pencil),
   progressiveBlur: createProgressiveBlurRefs(overrides.progressiveBlur),

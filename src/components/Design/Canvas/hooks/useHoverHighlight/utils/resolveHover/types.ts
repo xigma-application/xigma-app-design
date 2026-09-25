@@ -2,7 +2,7 @@
 import { TDraftRect, TEditingTextBox, TPoint, TResizeHandle } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 import { TCanvasRefs, TVectorMultiSelectBox } from 'types/design/canvas/types';
-import { TGradientEditorState, TImageEditorState, TOpenPropertyPanel } from 'store/design/types';
+import { TGradientEditorState, TImageEditorState, TOffsetVectorState, TOpenPropertyPanel } from 'store/design/types';
 import { ToolName } from 'types/design/enums';
 
 export type THoverResult = {
@@ -21,6 +21,7 @@ export type THoverResolverContext = {
   isControlPressed: boolean;
   leafNodes: TSceneNode[];
   nodesById: Record<string, TSceneNode>;
+  offsetVector: TOffsetVectorState | null;
   openPropertyPanel: TOpenPropertyPanel | null;
   point: TPoint;
   refs: TCanvasRefs;

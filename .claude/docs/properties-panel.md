@@ -1025,6 +1025,15 @@ corner radius + distance when the polygon is rounded; the vector keeps the polyg
 (`getClosedLoopPaintFillData`) and its stroke with Position. The preview draws that filled vector
 (`drawVectorNode`) under the magenta outline; ✓ / Enter replaces the polygon with it in one undo step. The toolbar
 distance and corner handlers live in `OffsetVectorToolbar/utils` (`changeOffsetVectorDistance`, `changeOffsetVectorJoin`).
+While offsetting, `drawScene` treats the selection as empty (no selection box, resize / rotate handles, size label or
+shape handles) and draws the layer's hover-style outline instead. `resolveOffsetVectorHover` (first hover resolver)
+finds the pink outline under the pointer (`getOffsetVectorEdgeAtPoint`: nearest flattened segment within
+`OFFSET_VECTOR_EDGE_HIT_PX`, outward normal = the side farther from the source outline), keeps it in
+`refs.offsetVector.hoveredOffsetVectorEdgeRef` and turns the resize cursor across it; every other hover is blank.
+`armOffsetVectorOnPointerDown` (first arm resolver) grabs that edge into `offsetVectorDragRef` and swallows any other
+press; `continueOffsetVectorDrag` sets the distance to the start distance plus the pointer's move along the normal
+(rounded, at least 0). `drawOffsetVectorDistanceLabel` shows the distance in a pink badge at the hovered edge point, or
+at the pointer while dragging.
 
 ## `Star/`
 
