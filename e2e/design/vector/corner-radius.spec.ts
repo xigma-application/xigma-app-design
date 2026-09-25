@@ -5,6 +5,8 @@ import { DesignPage } from '../model/DesignPage';
 
 test.describe.configure({ mode: 'serial' });
 
+const SQUARE_AREA = { height: 250, width: 250, x: 850, y: 250 };
+
 test('corner-radius handles only render once the rectangle is both selected and hovered, not just selected', async ({ page }) => {
   const designPage = new DesignPage(page);
 
@@ -33,11 +35,11 @@ test('dragging the ne handle down to radius 0 keeps it tracking the pointer at t
   await designPage.drawRectangle(900, 300, 1050, 450); // 150x150 square, ne corner at (1050, 300)
   await designPage.click(975, 375);
   await designPage.pointerMove(1020, 330); // hover the zero-state handle to reveal it
-  const restingZeroState = await designPage.canvas.screenshot();
+  const restingZeroState = await page.screenshot({ clip: SQUARE_AREA });
 
   await designPage.pointerDown(1020, 330); // grab the zero-state handle
   await designPage.pointerMove(1050, 300); // drag exactly onto the corner — radius hits 0 mid-drag
-  const midDragAtCorner = await designPage.canvas.screenshot();
+  const midDragAtCorner = await page.screenshot({ clip: SQUARE_AREA });
 
   // mid-drag, the handle must sit right on the corner, not snap back to the zero-state offset
   expect(midDragAtCorner.equals(restingZeroState)).toBe(false);
@@ -47,7 +49,7 @@ test('dragging the ne handle down to radius 0 keeps it tracking the pointer at t
   // that resize handle (nulling the shape hover, same as a plain non-drag hover there would) — move
   // back to the corner-radius handle's own resting spot to compare like-for-like
   await designPage.pointerMove(1020, 330);
-  const afterRelease = await designPage.canvas.screenshot();
+  const afterRelease = await page.screenshot({ clip: SQUARE_AREA });
 
   // once released, the handle returns to the exact same zero-state offset position as before the drag
   expect(afterRelease.equals(restingZeroState)).toBe(true);
