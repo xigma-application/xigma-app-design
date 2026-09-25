@@ -16,6 +16,7 @@ const computeOffsetVector = (node: TOffsetVectorNode, distance: number, join: St
     case NodeType.line:
       return { ...getLineOffsetVector(node, distance, join), id: node.id };
     case NodeType.polygon:
+    case NodeType.star:
       return getPolygonOffsetVector(node, distance, join);
     // no default
   }

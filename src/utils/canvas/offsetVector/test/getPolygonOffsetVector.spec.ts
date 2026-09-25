@@ -1,6 +1,6 @@
 // types
 import { NodeType, StrokeAlign, StrokeJoin } from 'types/design/enums';
-import { TPolygonNode, TVectorNode } from 'types/design/types';
+import { TPolygonNode, TStarNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getPolygonOffsetVector } from '../getPolygonOffsetVector';
@@ -92,5 +92,30 @@ describe('getPolygonOffsetVector', () => {
 
     // result
     expect(getXRange(vector)).toEqual([0, 0]);
+  });
+
+  it('should push every side of a star out by the distance from its sharp tips', () => {
+    // mock
+    const star: TStarNode = { ...polygon({ id: 'star' }), points: 5, ratio: 0.382, type: NodeType.star };
+
+    // before
+    const vector = getPolygonOffsetVector(star, 10, StrokeJoin.miter);
+    const ys = Object.values(vector.vertices).map(({ y }) => y);
+
+    // result
+    expect(vector).toMatchObject({ defaultFill: fills, id: 'star', type: NodeType.vector });
+    expect(Object.keys(vector.vertices)).toHaveLength(10);
+    expect(Math.min(...ys)).toBeLessThan(-10);
+  });
+
+  it('should grow the rounded corners of a star by the distance', () => {
+    // mock
+    const star: TStarNode = { ...polygon({ cornerRadius: 4, id: 'star' }), points: 5, ratio: 0.382, type: NodeType.star };
+
+    // before
+    const vector = getPolygonOffsetVector(star, 10, StrokeJoin.miter);
+
+    // result
+    expect(Object.values(vector.segments).some((segment) => segment.tangentStart !== null)).toBe(true);
   });
 });

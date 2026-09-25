@@ -6,10 +6,11 @@ import { TSceneNode } from 'types/design/types';
 import { isOffsetVectorNode } from '../isOffsetVectorNode';
 
 describe('isOffsetVectorNode', () => {
-  it('should offset a line and a polygon', () => {
+  it('should offset a line, a polygon and a star', () => {
     // result
     expect(isOffsetVectorNode({ type: NodeType.line } as TSceneNode)).toBe(true);
     expect(isOffsetVectorNode({ type: NodeType.polygon } as TSceneNode)).toBe(true);
+    expect(isOffsetVectorNode({ type: NodeType.star } as TSceneNode)).toBe(true);
   });
 
   it('should not offset other layers or a missing one', () => {

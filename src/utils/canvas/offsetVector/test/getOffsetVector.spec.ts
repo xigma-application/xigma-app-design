@@ -1,6 +1,6 @@
 // types
 import { NodeType, StrokeJoin } from 'types/design/enums';
-import { TLineNode, TPolygonNode } from 'types/design/types';
+import { TLineNode, TPolygonNode, TStarNode } from 'types/design/types';
 
 // utils
 import { getOffsetVector } from '../getOffsetVector';
@@ -52,6 +52,18 @@ describe('getOffsetVector', () => {
 
     // result
     expect(vector).toMatchObject({ defaultFill: fills, id: 'polygon' });
+  });
+
+  it('should turn a star into its filled offset vector', () => {
+    // mock
+    const star: TStarNode = { ...polygon({ id: 'star' }), points: 5, ratio: 0.5, type: NodeType.star };
+
+    // before
+    const vector = getOffsetVector(star, 10, StrokeJoin.miter);
+
+    // result
+    expect(vector).toMatchObject({ defaultFill: fills, id: 'star' });
+    expect(Object.keys(vector.vertices)).toHaveLength(10);
   });
 
   it('should reuse the vector for the same node, distance and join and rebuild it otherwise', () => {

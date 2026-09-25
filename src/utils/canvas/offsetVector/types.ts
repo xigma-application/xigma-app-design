@@ -1,4 +1,4 @@
 // types
-import { TLineNode, TPolygonNode } from 'types/design/types';
+import { TLineNode, TPolygonNode, TStarNode } from 'types/design/types';
 
-export type TOffsetVectorNode = TLineNode | TPolygonNode;
+export type TOffsetVectorNode = TLineNode | TPolygonNode | TStarNode;
