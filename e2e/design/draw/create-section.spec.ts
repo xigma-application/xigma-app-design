@@ -1,7 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { Page, test, expect } from '@playwright/test';
 
 // components
 import { DesignPage } from '../model/DesignPage';
+
+const readPixelColor = async (page: Page, x: number, y: number): Promise<[number, number, number]> => {
+  const { PNG } = await import('pngjs');
+  const screenshot = await page.screenshot({ clip: { height: 1, width: 1, x, y } });
+  const png = PNG.sync.read(screenshot);
+
+  return [png.data[0], png.data[1], png.data[2]];
+};
 
 test('draws a new section on the canvas using the Section option from the Frame dropdown', async ({ page }) => {
   const designPage = new DesignPage(page);
@@ -119,4 +127,31 @@ test('starts selected immediately after being drawn, without an extra click', as
   const deselected = await designPage.canvas.screenshot();
 
   expect(selected.equals(deselected)).toBe(false);
+});
+
+test('a new section is filled #444444, edged by a faint white inside stroke and stores a 2px corner radius', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-section-default-style');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawSection(700, 200, 1000, 500);
+  await designPage.click(1500, 900);
+  await designPage.pointerMove(1500, 900);
+
+  const [red, green, blue] = await readPixelColor(page, 850, 350);
+  const [edgeRed] = await readPixelColor(page, 700, 350);
+
+  expect([red, green, blue].map((channel) => Math.abs(channel - 0x44) <= 2)).toEqual([true, true, true]);
+  expect(edgeRed).toBeGreaterThan(red + 10);
+
+  const cornerRadius = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+
+    return (nodes[rootOrder[rootOrder.length - 1]] as { cornerRadius?: number }).cornerRadius;
+  });
+
+  expect(cornerRadius).toBe(2);
 });

@@ -8,6 +8,7 @@ import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 export const convertSectionToFrame = (node: TSectionNode): TFrameNode => ({
   childIds: node.childIds,
   clipContent: true,
+  cornerRadius: node.cornerRadius,
   fills: [makeSolidPaint(node.fill)],
   height: node.height,
   hidden: node.hidden,

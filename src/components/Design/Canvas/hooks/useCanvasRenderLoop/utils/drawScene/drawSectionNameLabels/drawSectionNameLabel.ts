@@ -14,6 +14,7 @@ import { TImageRenderContext } from '../../../types';
 // utils
 import { drawMsdfGlyphs } from 'utils/canvas/text/drawMsdfGlyphs';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
+import { drawSectionStroke } from '../drawBoxLeafNode/drawSectionStroke';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 import { getSectionNameLabelBadgeRect, TSectionNameLabelBadgeRect } from './getSectionNameLabelBadgeRect';
 import { getSectionNameLabelVertices } from './getSectionNameLabelVertices';
@@ -75,6 +76,12 @@ const drawSectionNameLabelBadge = (
       canvasHeight,
       viewport,
       0,
+    );
+    drawSectionStroke(
+      { buffer, canvasHeight, canvasWidth, gl, program, viewport },
+      { ...badge, cornerRadius: SECTION_NAME_LABEL_CORNER_RADIUS_PX / viewport.zoom },
+      0,
+      1,
     );
 
     drawSectionNameLabelText(gl, imageContext, badge, canvasWidth, canvasHeight, viewport);

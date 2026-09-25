@@ -60,6 +60,7 @@ describe('handleWrapInSection', () => {
     const [sectionId] = selectSelectedIds(store.getState());
     expect(selectNodes(store.getState())[sectionId]).toMatchObject({
       childIds: ['a', 'b'],
+      cornerRadius: 2,
       fill: SECTION_FILL,
       height: 140,
       name: 'Section (1)',

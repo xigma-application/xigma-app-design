@@ -1,4 +1,5 @@
 // others
+import { SECTION_CORNER_RADIUS } from 'constant/canvas';
 import { SECTION_FILL } from 'components/Design/Canvas/constants';
 
 // types
@@ -24,9 +25,10 @@ const group: TGroupNode = {
 };
 
 describe('convertGroupToSection', () => {
-  it('should keep the id, children, box and flags and give the section its default fill', () => {
+  it('should keep the id, children, box and flags and give the section its default fill and corner radius', () => {
     expect(convertGroupToSection(group)).toEqual({
       childIds: ['a'],
+      cornerRadius: SECTION_CORNER_RADIUS,
       fill: SECTION_FILL,
       height: 100,
       hidden: true,

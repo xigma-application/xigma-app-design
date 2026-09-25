@@ -21,7 +21,7 @@ describe('buildShapeNode', () => {
     const node = buildShapeNode(RECT, '#444444', 'Section', NodeType.section, 'parent-id');
 
     // result
-    expect(node).toMatchObject({ childIds: [], fill: '#444444', parentId: 'parent-id', type: NodeType.section });
+    expect(node).toMatchObject({ childIds: [], cornerRadius: 2, fill: '#444444', parentId: 'parent-id', type: NodeType.section });
     expect(node).not.toHaveProperty('clipContent');
   });
 

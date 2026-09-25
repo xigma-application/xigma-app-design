@@ -27,6 +27,7 @@ describe('convertSectionToFrame', () => {
     expect(convertSectionToFrame(section)).toEqual({
       childIds: [],
       clipContent: true,
+      cornerRadius: undefined,
       fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 100,
       hidden: undefined,
@@ -52,5 +53,9 @@ describe('convertSectionToFrame', () => {
     const section = buildSection({ childIds: ['a', 'b'] });
 
     expect(convertSectionToFrame(section).childIds).toEqual(['a', 'b']);
+  });
+
+  it('should carry the section corner radius over to the frame', () => {
+    expect(convertSectionToFrame(buildSection({ cornerRadius: 2 })).cornerRadius).toBe(2);
   });
 });

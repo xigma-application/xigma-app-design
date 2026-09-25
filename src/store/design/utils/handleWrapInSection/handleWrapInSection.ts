@@ -1,4 +1,5 @@
 // others
+import { SECTION_CORNER_RADIUS } from 'constant/canvas';
 import { SECTION_FILL } from 'components/Design/Canvas/constants';
 import { WRAP_IN_SECTION_PADDING } from '../../constants';
 
@@ -27,6 +28,7 @@ export const handleWrapInSection = (state: TDesignState, sectionId: string): voi
 
     page.nodes[sectionId] = {
       childIds: memberIds,
+      cornerRadius: SECTION_CORNER_RADIUS,
       fill: SECTION_FILL,
       height: bounds.height + WRAP_IN_SECTION_PADDING * 2,
       id: sectionId,

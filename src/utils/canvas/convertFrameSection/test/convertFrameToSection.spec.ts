@@ -1,3 +1,6 @@
+// others
+import { SECTION_CORNER_RADIUS } from 'constant/canvas';
+
 // types
 import { NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
@@ -27,6 +30,7 @@ describe('convertFrameToSection', () => {
 
     expect(convertFrameToSection(frame)).toEqual({
       childIds: [],
+      cornerRadius: SECTION_CORNER_RADIUS,
       fill: '#ff0000',
       height: 100,
       hidden: undefined,
@@ -68,5 +72,9 @@ describe('convertFrameToSection', () => {
     const frame = buildFrame({ childIds: ['a', 'b'] });
 
     expect(convertFrameToSection(frame).childIds).toEqual(['a', 'b']);
+  });
+
+  it('should keep the frame corner radius when it has one', () => {
+    expect(convertFrameToSection(buildFrame({ cornerRadius: 12 })).cornerRadius).toBe(12);
   });
 });

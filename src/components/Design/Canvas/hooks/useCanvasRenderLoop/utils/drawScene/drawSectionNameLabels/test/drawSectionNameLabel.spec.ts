@@ -16,6 +16,7 @@ const translateGlyphVerticesMock = vi.fn();
 const getMsdfAtlasTextureMock = vi.fn();
 const drawMsdfGlyphsMock = vi.fn();
 const drawRectMock = vi.fn();
+const drawSectionStrokeMock = vi.fn();
 
 vi.mock('utils/canvas/text/buildGlyphQuads', () => ({
   buildGlyphQuads: (...args: unknown[]): unknown => buildGlyphQuadsMock(...args),
@@ -37,6 +38,9 @@ vi.mock('utils/canvas/text/drawMsdfGlyphs', () => ({
 }));
 vi.mock('utils/canvas/drawRect/drawRect', () => ({
   drawRect: (...args: unknown[]): void => drawRectMock(...args),
+}));
+vi.mock('../../drawBoxLeafNode/drawSectionStroke', () => ({
+  drawSectionStroke: (...args: unknown[]): void => drawSectionStrokeMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -87,6 +91,19 @@ describe('drawSectionNameLabel', () => {
       150,
       IDENTITY_VIEWPORT,
       0,
+    );
+  });
+
+  it('should outline the badge with the section stroke, following its rounded corners', () => {
+    // before
+    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection(), 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(drawSectionStrokeMock).toHaveBeenCalledWith(
+      expect.objectContaining({ buffer, canvasHeight: 150, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT }),
+      expect.objectContaining({ cornerRadius: 5, height: 20, width: 60, x: 10, y: -30 }),
+      0,
+      1,
     );
   });
 
