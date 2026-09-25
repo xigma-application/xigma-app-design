@@ -9,6 +9,7 @@ import {
   TRectangleNode,
   TSceneNode,
   TSectionNode,
+  TStarNode,
 } from 'types/design/types';
 import { TOpenPropertyPanel } from 'store/design/types';
 
@@ -18,7 +19,7 @@ import { isProgressiveBlur } from 'utils/design/effects/isProgressiveBlur';
 export type TOpenProgressiveBlur = {
   effect: TEffect;
   effectIndex: number;
-  node: TBooleanNode | TEllipseNode | TFrameNode | TPolygonNode | TRectangleNode | TSectionNode;
+  node: TBooleanNode | TEllipseNode | TFrameNode | TPolygonNode | TRectangleNode | TSectionNode | TStarNode;
 };
 
 export const getOpenProgressiveBlur = (

@@ -1,12 +1,12 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TStarNode } from 'types/design/types';
 
 // utils
 import { convertStarToVector } from '../convertStarToVector';
 
 const buildStar = (overrides: Partial<TStarNode> = {}): TStarNode => ({
-  fill: '#654321',
+  fills: [{ color: '#654321', opacity: 100, type: 'solid' }],
   flipX: false,
   flipY: false,
   height: 100,
@@ -65,5 +65,29 @@ describe('convertStarToVector', () => {
     const minY = (node: typeof unflippedResult): number => Math.min(...Object.values(node.vertices).map((vertex) => vertex.y));
 
     expect(minY(unflippedResult)).toBeLessThan(minY(flippedResult));
+  });
+
+  it('should keep the star stroke on the vector with its position', () => {
+    // mock
+    const node = buildStar({
+      strokeAlign: StrokeAlign.outside,
+      strokeWidth: 4,
+      strokes: [{ color: '#123456', opacity: 100, type: 'solid' }],
+    });
+
+    // action
+    const result = convertStarToVector(node);
+
+    // result
+    expect(result).toMatchObject({ strokeAlign: StrokeAlign.outside, strokeColor: '#123456', strokeWidth: 4 });
+  });
+
+  it('should fall back to an empty stroke colour when the star has no solid fill', () => {
+    // action
+    const result = convertStarToVector(buildStar({ fills: [] }));
+
+    // result
+    expect(result.strokeColor).toBe('');
+    expect(result.defaultFill).toEqual([]);
   });
 });

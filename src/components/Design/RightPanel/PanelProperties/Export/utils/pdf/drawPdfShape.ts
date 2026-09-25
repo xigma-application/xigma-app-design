@@ -11,7 +11,6 @@ import { drawPdfBoxShape } from './drawPdfBoxShape';
 import { drawPdfEllipseShape } from './drawPdfEllipseShape';
 import { drawPdfLineShape } from './drawPdfLineShape';
 import { drawPdfPolygonShape } from './drawPdfPolygonShape';
-import { drawPdfSimpleShape } from './drawPdfSimpleShape';
 import { drawPdfVectorNodeShape } from './drawPdfVectorNodeShape';
 
 export const drawPdfShape = (
@@ -30,15 +29,13 @@ export const drawPdfShape = (
       drawPdfEllipseShape(page, node, nodesById, bounds, graphicsStates);
       break;
     case NodeType.polygon:
+    case NodeType.star:
       drawPdfPolygonShape(page, node, nodesById, bounds, graphicsStates);
       break;
     case NodeType.line:
       drawPdfLineShape(page, node, nodesById, bounds, graphicsStates);
       break;
-    case NodeType.vector:
-      drawPdfVectorNodeShape(page, node, nodesById, bounds, graphicsStates);
-      break;
     default:
-      drawPdfSimpleShape(page, node, nodesById, bounds, graphicsStates);
+      drawPdfVectorNodeShape(page, node, nodesById, bounds, graphicsStates);
   }
 };

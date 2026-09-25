@@ -1,6 +1,6 @@
 // types
 import { NodeType, StrokeStyle } from 'types/design/enums';
-import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getModeStrokeOutlineLoops } from '../getModeStrokeOutlineLoops';
@@ -113,5 +113,29 @@ describe('getModeStrokeOutlineLoops', () => {
     // result
     expect(getModeStrokeOutlineLoops(polygon)).toHaveLength(2);
     expect(getModeStrokeOutlineLoops({ ...polygon, strokeWidth: 0 })).toBeNull();
+  });
+
+  it('should outline a star by its drawn stroke band', () => {
+    // mock
+    const star = {
+      fills: [],
+      flipX: false,
+      flipY: false,
+      height: 100,
+      id: 's',
+      name: 'Star',
+      parentId: null,
+      points: 5,
+      ratio: 0.5,
+      rotation: 0,
+      strokeWidth: 10,
+      type: NodeType.star,
+      width: 100,
+      x: 0,
+      y: 0,
+    } as TStarNode;
+
+    // result
+    expect(getModeStrokeOutlineLoops(star)).toHaveLength(2);
   });
 });

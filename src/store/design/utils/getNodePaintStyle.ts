@@ -17,6 +17,7 @@ export const getNodePaintStyle = (node: TSceneNode | undefined): TNodePaintStyle
     case NodeType.polygon:
     case NodeType.rectangle:
     case NodeType.section:
+    case NodeType.star:
       return {
         effects: node.effects,
         fills: node.fills,
@@ -24,7 +25,6 @@ export const getNodePaintStyle = (node: TSceneNode | undefined): TNodePaintStyle
         strokeWidth: node.strokeWidth,
         strokes: node.strokes,
       };
-    case NodeType.star:
     case NodeType.text:
       return { fills: [makeSolidPaint(node.fill)] };
     case NodeType.vector:

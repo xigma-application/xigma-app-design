@@ -2,7 +2,7 @@ import { PDFName, PDFPage } from 'pdf-lib';
 
 // types
 import { TDraftRect } from 'types/canvas';
-import { TPolygonNode, TSceneNode } from 'types/design/types';
+import { TPolygonNode, TSceneNode, TStarNode } from 'types/design/types';
 import { TPaint } from 'types/design/paint/types';
 
 // utils
@@ -13,7 +13,7 @@ import { getPolygonWorldPoints } from 'utils/canvas/shapes/getPolygonWorldPoints
 
 export const drawPdfPolygonShape = (
   page: PDFPage,
-  node: TPolygonNode,
+  node: TPolygonNode | TStarNode,
   nodesById: Record<string, TSceneNode>,
   bounds: TDraftRect,
   graphicsStates: Map<number, PDFName>,

@@ -1,7 +1,7 @@
 // types
 import { StrokeDashCap, StrokeProfile } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
-import { TEllipseNode, TPolygonNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TPolygonNode, TStarNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { buildStrokeRing } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/buildStrokeRing';
@@ -14,7 +14,10 @@ import { getStrokeDynamicValues } from 'utils/design/stroke/getStrokeDynamicValu
 import { getStrokeOutlinePolygons } from 'utils/canvas/vectorNetwork/getStrokeOutlinePolygons/getStrokeOutlinePolygons';
 import { getVectorProfileRingPolygons } from './getVectorProfileRingPolygons';
 
-export const getVectorModeStrokePolygons = (node: TEllipseNode | TPolygonNode | TVectorNode, loop: TPoint[]): TPoint[][] | null => {
+export const getVectorModeStrokePolygons = (
+  node: TEllipseNode | TPolygonNode | TStarNode | TVectorNode,
+  loop: TPoint[],
+): TPoint[][] | null => {
   const dashPattern = getStrokeDashPattern(node);
   const strokeWidth = node.strokeWidth ?? 0;
   const halfWidth = strokeWidth / 2;

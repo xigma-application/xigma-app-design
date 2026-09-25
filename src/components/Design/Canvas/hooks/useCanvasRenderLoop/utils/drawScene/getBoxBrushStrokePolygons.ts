@@ -8,6 +8,7 @@ import {
   TPolygonNode,
   TRectangleNode,
   TSectionNode,
+  TStarNode,
   TVectorNode,
 } from 'types/design/types';
 import { TPoint } from 'types/canvas';
@@ -23,7 +24,7 @@ import { getStrokeBrushValues } from 'utils/design/stroke/getStrokeBrushValues';
 import { memoizeBrushPolygons } from './memoizeBrushPolygons';
 
 const getKey = (
-  node: TBooleanNode | TEllipseNode | TFrameNode | TLineNode | TPolygonNode | TRectangleNode | TSectionNode | TVectorNode,
+  node: TBooleanNode | TEllipseNode | TFrameNode | TLineNode | TPolygonNode | TRectangleNode | TSectionNode | TStarNode | TVectorNode,
   ring: TStrokeRing,
   isTraced: boolean,
 ): string =>
@@ -39,7 +40,7 @@ const getKey = (
   ].join('|');
 
 export const getBoxBrushStrokePolygons = (
-  node: TBooleanNode | TEllipseNode | TFrameNode | TLineNode | TPolygonNode | TRectangleNode | TSectionNode | TVectorNode,
+  node: TBooleanNode | TEllipseNode | TFrameNode | TLineNode | TPolygonNode | TRectangleNode | TSectionNode | TStarNode | TVectorNode,
   ring: TStrokeRing,
 ): TPoint[][] | null => {
   const values = getStrokeBrushValues(node);

@@ -7,4 +7,5 @@ export const isStrokeableNode = (node: { type: NodeType }): node is TStrokeableN
   node.type === NodeType.line ||
   node.type === NodeType.polygon ||
   node.type === NodeType.rectangle ||
+  node.type === NodeType.star ||
   node.type === NodeType.vector;

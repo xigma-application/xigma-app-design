@@ -1,6 +1,6 @@
 // types
 import { TDraftRect } from 'types/canvas';
-import { TPolygonNode, TSceneNode } from 'types/design/types';
+import { TPolygonNode, TSceneNode, TStarNode } from 'types/design/types';
 import { TPaint } from 'types/design/paint/types';
 
 // utils
@@ -12,7 +12,7 @@ import { getPolygonWorldPoints } from 'utils/canvas/shapes/getPolygonWorldPoints
 export const drawSvgPolygonShape = async (
   elements: string[],
   defs: string[],
-  node: TPolygonNode,
+  node: TPolygonNode | TStarNode,
   nodesById: Record<string, TSceneNode>,
   bounds: TDraftRect,
 ): Promise<void> => {

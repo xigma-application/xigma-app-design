@@ -155,7 +155,7 @@ describe('drawHoverOutline', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const star: TSceneNode = {
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       flipX: false,
       flipY: false,
       height: 20,

@@ -26,7 +26,7 @@ const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> =
 const createStarNode = (points: number, ratio: number): string => {
   const { payload } = store.dispatch(
     addNode({
-      fill: '#00ff00',
+      fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
       flipX: false,
       flipY: false,
       height: 1,

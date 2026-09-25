@@ -7,7 +7,8 @@ import { buildClosedVectorLoop } from './utils/buildClosedVectorLoop';
 import { getFillDataForClosedLoop } from './utils/getFillDataForClosedLoop';
 import { getMaxStarCornerRadius } from 'utils/canvas/cornerRadius/star/getMaxStarCornerRadius';
 import { getStarPoints } from 'utils/canvas/shapes/getStarPoints';
-import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
+import { getShapeVectorStrokeSettings } from './utils/getShapeVectorStrokeSettings';
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { flipPoint } from 'utils/math/flipPoint';
 
 const SHAPE_VECTOR_STROKE_WIDTH = 0;
@@ -17,20 +18,21 @@ export const convertStarToVector = (node: TStarNode): TVectorNode => {
   const sharpVertices = getStarPoints(node, node.points, node.ratio).map((point) => flipPoint(point, center, node.flipX, node.flipY));
   const radius = Math.min(Math.max(node.cornerRadius ?? 0, 0), getMaxStarCornerRadius(node, node.points, node.ratio));
   const { segments, vertices } = buildClosedVectorLoop(sharpVertices, radius);
+  const fillColor = getSolidPaintColor(node.fills) ?? '';
   const base: TVectorNode = {
-    defaultFill: [makeSolidPaint(node.fill)],
+    defaultFill: node.fills,
     filledFaceKeys: [],
     id: node.id,
     name: node.name,
     parentId: node.parentId,
     rotation: node.rotation,
     segments,
-    strokeColor: node.fill,
+    strokeColor: fillColor,
     strokeWidth: SHAPE_VECTOR_STROKE_WIDTH,
     type: NodeType.vector,
     vertexHandleModes: {},
     vertices,
   };
 
-  return { ...base, ...getFillDataForClosedLoop(base, node.fill) };
+  return { ...base, ...getFillDataForClosedLoop(base, fillColor), ...getShapeVectorStrokeSettings(node) };
 };

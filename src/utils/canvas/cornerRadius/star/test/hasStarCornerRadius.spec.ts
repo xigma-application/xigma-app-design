@@ -6,7 +6,7 @@ import { TEllipseNode, TStarNode } from 'types/design/types';
 import { hasStarCornerRadius } from '../hasStarCornerRadius';
 
 const star: TStarNode = {
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   flipX: false,
   flipY: false,
   height: 100,

@@ -2,7 +2,7 @@ import { omit } from 'lodash';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getStrokeOutlineLoops } from '../getStrokeOutlineLoops';
@@ -87,8 +87,9 @@ describe('getStrokeOutlineLoops', () => {
     expect(Math.max(...outerXs)).toBeCloseTo(20);
   });
 
-  it('should leave a polygon to its drawn stroke band', () => {
+  it('should leave a polygon or a star to its drawn stroke band', () => {
     // result
     expect(getStrokeOutlineLoops({ type: NodeType.polygon } as TPolygonNode, 2)).toBeNull();
+    expect(getStrokeOutlineLoops({ type: NodeType.star } as TStarNode, 2)).toBeNull();
   });
 });

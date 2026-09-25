@@ -4,4 +4,8 @@ import { TSceneNode } from 'types/design/types';
 import { TStyledNode, isAppearanceNode } from '../types';
 
 export const isStyledNode = (node: TSceneNode | undefined): node is TStyledNode =>
-  isAppearanceNode(node) || node?.type === NodeType.ellipse || node?.type === NodeType.line || node?.type === NodeType.polygon;
+  isAppearanceNode(node) ||
+  node?.type === NodeType.ellipse ||
+  node?.type === NodeType.line ||
+  node?.type === NodeType.polygon ||
+  node?.type === NodeType.star;

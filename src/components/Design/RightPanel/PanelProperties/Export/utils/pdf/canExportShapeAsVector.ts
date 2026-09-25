@@ -7,7 +7,6 @@ import { TPdfShapeNode } from './types';
 import { canExportBoxShapeAsVector } from './canExportBoxShapeAsVector';
 import { canExportPaintShapeAsVector } from './canExportPaintShapeAsVector';
 import { canExportLineAsVector } from './canExportLineAsVector';
-import { canExportSimpleShapeAsVector } from './canExportSimpleShapeAsVector';
 import { canExportVectorNodeAsVector } from './canExportVectorNodeAsVector';
 
 export const canExportShapeAsVector = (node: TPdfShapeNode, nodesById: Record<string, TSceneNode>): boolean => {
@@ -17,12 +16,11 @@ export const canExportShapeAsVector = (node: TPdfShapeNode, nodesById: Record<st
       return canExportBoxShapeAsVector(node, nodesById);
     case NodeType.ellipse:
     case NodeType.polygon:
+    case NodeType.star:
       return canExportPaintShapeAsVector(node, nodesById);
     case NodeType.line:
       return canExportLineAsVector(node, nodesById);
-    case NodeType.vector:
-      return canExportVectorNodeAsVector(node, nodesById);
     default:
-      return canExportSimpleShapeAsVector(node, nodesById);
+      return canExportVectorNodeAsVector(node, nodesById);
   }
 };

@@ -130,7 +130,7 @@ const addStarNode = (x: number, y: number, size: number, points: number, ratio: 
   store.dispatch(
     addNode({
       cornerRadius,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       flipX: false,
       flipY: false,
       height: size,

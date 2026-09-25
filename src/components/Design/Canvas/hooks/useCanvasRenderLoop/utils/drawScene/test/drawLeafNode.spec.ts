@@ -19,7 +19,6 @@ const drawMsdfTextMock = vi.fn();
 const drawPathOutlineMock = vi.fn();
 const drawPolygonLeafNodeMock = vi.fn();
 const drawRectMock = vi.fn();
-const drawStarMock = vi.fn();
 const drawThickOutlineMock = vi.fn();
 const drawVectorFillGroupMock = vi.fn();
 const drawVectorNodeOrTextPathGuideMock = vi.fn();
@@ -41,7 +40,6 @@ vi.mock('../drawPolygonLeafNode/drawPolygonLeafNode', () => ({
   drawPolygonLeafNode: (...args: unknown[]): void => drawPolygonLeafNodeMock(...args),
 }));
 vi.mock('utils/canvas/drawRect/drawRect', () => ({ drawRect: (...args: unknown[]): void => drawRectMock(...args) }));
-vi.mock('utils/canvas/drawStar/drawStar', () => ({ drawStar: (...args: unknown[]): void => drawStarMock(...args) }));
 vi.mock('utils/canvas/drawThickOutline/drawThickOutline', () => ({
   drawThickOutline: (...args: unknown[]): void => drawThickOutlineMock(...args),
 }));
@@ -313,10 +311,10 @@ describe('drawLeafNode', () => {
     expect(drawPolygonLeafNodeMock).toHaveBeenCalledWith(context, node, 0.5, {}, pathOutlineStyles, refs, undefined, 0);
   });
 
-  it('should draw a star with the threaded opacity', () => {
+  it('should draw a star through the polygon drawer with the threaded opacity', () => {
     // mock
     const node: TSceneNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       flipX: false,
       flipY: false,
       height: 20,
@@ -340,22 +338,13 @@ describe('drawLeafNode', () => {
       },
     });
 
+    const pathOutlineStyles = new Map();
+
     // action
-    drawLeafNode(context, node, new Map(), refs, {});
+    drawLeafNode(context, node, pathOutlineStyles, refs, {});
 
     // result
-    expect(drawStarMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      buffer,
-      { ...node, fillAlpha: 0.5 },
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-      false,
-      false,
-      0,
-    );
+    expect(drawPolygonLeafNodeMock).toHaveBeenCalledWith(context, node, 0.5, {}, pathOutlineStyles, refs, undefined, 0);
   });
 
   it('should draw media through the image pipeline', () => {

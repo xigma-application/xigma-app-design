@@ -9,7 +9,7 @@ import { rotatePoint } from 'utils/math/rotatePoint';
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const star = (id: string, x: number, y: number, width: number, height: number, points: number, ratio: number, rotation = 0): TStarNode => ({
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   flipX: false,
   flipY: false,
   height,

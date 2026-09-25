@@ -2,7 +2,7 @@
 import { EffectType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../types';
-import { TPolygonNode, TSceneNode } from 'types/design/types';
+import { TPolygonNode, TSceneNode, TStarNode } from 'types/design/types';
 import { TPaint } from 'types/design/paint/types';
 import { TPathOutlineStyle } from '../getPathOutlineStyles';
 
@@ -14,7 +14,7 @@ import { getPolygonStrokeShapes } from 'utils/canvas/shapes/getPolygonStrokeShap
 
 export const drawPolygonLeafNode = (
   context: TDrawSceneContext,
-  node: TPolygonNode,
+  node: TPolygonNode | TStarNode,
   opacity: number,
   nodesById: Record<string, TSceneNode>,
   pathOutlineStyles: Map<string, TPathOutlineStyle>,

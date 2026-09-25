@@ -10,7 +10,6 @@ import { drawSvgEllipseShape } from './drawSvgEllipseShape';
 import { drawSvgLineShape } from './drawSvgLineShape';
 import { drawSvgMediaNodeShape } from './drawSvgMediaNodeShape';
 import { drawSvgPolygonShape } from './drawSvgPolygonShape';
-import { drawSvgSimpleShape } from './drawSvgSimpleShape';
 import { drawSvgVectorNodeShape } from './drawSvgVectorNodeShape';
 
 export const drawSvgShape = async (
@@ -29,6 +28,7 @@ export const drawSvgShape = async (
       await drawSvgEllipseShape(elements, defs, node, nodesById, bounds);
       break;
     case NodeType.polygon:
+    case NodeType.star:
       await drawSvgPolygonShape(elements, defs, node, nodesById, bounds);
       break;
     case NodeType.line:
@@ -37,10 +37,7 @@ export const drawSvgShape = async (
     case NodeType.vector:
       await drawSvgVectorNodeShape(elements, defs, node, nodesById, bounds);
       break;
-    case NodeType.media:
-      await drawSvgMediaNodeShape(elements, node, nodesById, bounds);
-      break;
     default:
-      drawSvgSimpleShape(elements, node, nodesById, bounds);
+      await drawSvgMediaNodeShape(elements, node, nodesById, bounds);
   }
 };

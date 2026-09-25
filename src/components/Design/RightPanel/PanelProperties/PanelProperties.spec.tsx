@@ -303,16 +303,17 @@ describe('PanelProperties behaviors', () => {
     const rectangleId = addRectangleNode();
     store.dispatch(
       addNode({
+        content: 'Text',
         fill: '#ffffff',
         flipX: false,
         flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 12,
         height: 20,
-        name: 'Star',
+        name: 'Text',
         parentId: null,
-        points: 5,
-        ratio: 0.5,
         rotation: 0,
-        type: NodeType.star,
+        type: NodeType.text,
         width: 20,
         x: 0,
         y: 0,
@@ -490,16 +491,17 @@ describe('PanelProperties behaviors', () => {
     const rectangleId = addRectangleNode();
     store.dispatch(
       addNode({
+        content: 'Text',
         fill: '#ffffff',
         flipX: false,
         flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 12,
         height: 20,
-        name: 'Star',
+        name: 'Text',
         parentId: null,
-        points: 5,
-        ratio: 0.5,
         rotation: 0,
-        type: NodeType.star,
+        type: NodeType.text,
         width: 20,
         x: 0,
         y: 0,

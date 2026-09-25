@@ -10,7 +10,8 @@ export type TPanelNodeType =
   | NodeType.polygon
   | NodeType.rectangle
   | NodeType.section
-  | NodeType.slice;
+  | NodeType.slice
+  | NodeType.star;
 
 export type TPanelSection =
   | 'appearance'

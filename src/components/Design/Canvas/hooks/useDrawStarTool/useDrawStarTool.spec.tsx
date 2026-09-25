@@ -75,7 +75,7 @@ describe('useDrawStarTool behaviors', () => {
 
     // result
     expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({
-      fill: CONFIG.fill,
+      fills: [{ color: CONFIG.fill, opacity: 100, type: 'solid' }],
       height: 30,
       points: CONFIG.points,
       ratio: CONFIG.ratio,
@@ -136,7 +136,7 @@ describe('useDrawStarTool behaviors', () => {
 
     expect(page.rootOrder).toHaveLength(1);
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({
-      fill: CONFIG.fill,
+      fills: [{ color: CONFIG.fill, opacity: 100, type: 'solid' }],
       height: 30,
       name: `${CONFIG.name} (1)`,
       points: CONFIG.points,

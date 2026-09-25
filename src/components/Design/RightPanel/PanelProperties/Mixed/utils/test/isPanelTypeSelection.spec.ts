@@ -15,7 +15,7 @@ describe('isPanelTypeSelection', () => {
 
   it('should reject a selection with a type that has no panel', () => {
     // action / result
-    expect(isPanelTypeSelection([makeNode(NodeType.rectangle), makeNode(NodeType.star)])).toBe(false);
+    expect(isPanelTypeSelection([makeNode(NodeType.rectangle), makeNode(NodeType.text)])).toBe(false);
   });
 
   it('should reject an empty selection or a missing node', () => {

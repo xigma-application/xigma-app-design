@@ -97,20 +97,19 @@ test.describe('Flatten — shapes', () => {
     expect(state.nodes[id].type).toBe('vector');
   });
 
-  for (const shape of ['Rectangle', 'Ellipse', 'Polygon'] as const) {
+  for (const shape of ['Rectangle', 'Ellipse', 'Polygon', 'Star'] as const) {
     test(`flattens a ${shape} with an inside stroke into a vector that keeps the stroke inside its outline`, async ({ page }) => {
       const designPage = new DesignPage(page);
 
       await designPage.goto(`e2e-test-flatten-${shape.toLowerCase()}-stroke`);
       await expect(designPage.canvas).toBeVisible();
 
-      await { Ellipse: designPage.drawEllipse, Polygon: designPage.drawPolygon, Rectangle: designPage.drawRectangle }[shape].call(
-        designPage,
-        900,
-        300,
-        1050,
-        420,
-      );
+      await {
+        Ellipse: designPage.drawEllipse,
+        Polygon: designPage.drawPolygon,
+        Rectangle: designPage.drawRectangle,
+        Star: designPage.drawStar,
+      }[shape].call(designPage, 900, 300, 1050, 420);
       await page.evaluate(async () => {
         const { store } = await import('/src/store/index.ts');
         const { updateNode } = await import('/src/store/design/slice.ts');

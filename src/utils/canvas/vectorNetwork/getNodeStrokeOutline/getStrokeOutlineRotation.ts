@@ -7,6 +7,7 @@ export const getStrokeOutlineRotation = (node: TStrokeableNode): number => {
     case NodeType.ellipse:
     case NodeType.line:
     case NodeType.polygon:
+    case NodeType.star:
       return 0;
     default:
       return node.rotation;

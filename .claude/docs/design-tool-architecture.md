@@ -469,8 +469,10 @@ Two independent render passes, both need updating for a visual change to show up
   and `drawPolygonLeafNode` mirrors `drawEllipseLeafNode`. Its stroke (`getPolygonStrokeShapes`) is one
   loop through `getAlignedLoopStrokeShape`, the per-loop band / mode helper both shapes share. SVG/PDF
   export draws it with the paint drawers (`drawSvgPolygonShape` / `drawPdfPolygonShape`, eligibility from
-  `canExportPaintShapeAsSvgVector` / `canExportPaintShapeAsVector`); the simple-shape files now cover only
-  stars.
+  `canExportPaintShapeAsSvgVector` / `canExportPaintShapeAsVector`).
+  A star is stored and drawn exactly like a polygon: `getPolygonWorldPoints` switches to the star outline
+  (`getStarShapePoints`) for `NodeType.star`, and the polygon leaf drawer, stroke shapes, SVG/PDF drawers,
+  Outline stroke and Flatten take `TPolygonNode | TStarNode`. The old simple-shape export path is gone.
   A boolean's own Dynamic or Brush stroke (`getBooleanStrokeModePolygons`) runs the box dynamic / brush
   functions over the centred edges of every loop of its shape; a Basic stroke stays the nonzero ring.
   Vectors carry the same optional stroke mode fields (Offset vector copies them from the line via

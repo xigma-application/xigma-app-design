@@ -46,7 +46,7 @@ const POLYGON: TPolygonNode = {
   y: 0,
 };
 const STAR: TStarNode = {
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   flipX: false,
   flipY: false,
   height: 10,

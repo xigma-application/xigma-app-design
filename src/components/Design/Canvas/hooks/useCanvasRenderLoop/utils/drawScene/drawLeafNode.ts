@@ -13,7 +13,6 @@ import { drawLineLeafNode } from './drawLineLeafNode';
 import { drawMediaLeafNode } from './drawMediaLeafNode';
 import { drawPathOutline } from './drawPathOutline';
 import { drawPolygonLeafNode } from './drawPolygonLeafNode/drawPolygonLeafNode';
-import { drawStarLeafNode } from './drawStarLeafNode';
 import { drawTextLeafNode } from './drawTextLeafNode';
 import { drawVectorNodeOrTextPathGuide } from './drawVectorNodeOrTextPathGuide/drawVectorNodeOrTextPathGuide';
 import { getAutoLayoutDragOpacity } from './getAutoLayoutDragOpacity';
@@ -42,10 +41,8 @@ export const drawLeafNode = (
       drawEllipseLeafNode(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
       break;
     case NodeType.polygon:
-      drawPolygonLeafNode(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
-      break;
     case NodeType.star:
-      drawStarLeafNode(context, node, opacity);
+      drawPolygonLeafNode(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
       break;
     case NodeType.media:
       drawMediaLeafNode(context, node);

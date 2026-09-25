@@ -11,7 +11,6 @@ const drawPdfBoxShapeMock = vi.fn();
 const drawPdfEllipseShapeMock = vi.fn();
 const drawPdfLineShapeMock = vi.fn();
 const drawPdfPolygonShapeMock = vi.fn();
-const drawPdfSimpleShapeMock = vi.fn();
 const drawPdfVectorNodeShapeMock = vi.fn();
 
 vi.mock('../drawPdfBoxShape', () => ({ drawPdfBoxShape: (...args: unknown[]): void => drawPdfBoxShapeMock(...args) }));
@@ -22,7 +21,6 @@ vi.mock('../drawPdfLineShape', () => ({ drawPdfLineShape: (...args: unknown[]): 
 vi.mock('../drawPdfPolygonShape', () => ({
   drawPdfPolygonShape: (...args: unknown[]): void => drawPdfPolygonShapeMock(...args),
 }));
-vi.mock('../drawPdfSimpleShape', () => ({ drawPdfSimpleShape: (...args: unknown[]): void => drawPdfSimpleShapeMock(...args) }));
 vi.mock('../drawPdfVectorNodeShape', () => ({
   drawPdfVectorNodeShape: (...args: unknown[]): void => drawPdfVectorNodeShapeMock(...args),
 }));
@@ -68,7 +66,7 @@ const polygon: TPolygonNode = {
   type: NodeType.polygon,
 };
 
-const star: TStarNode = { ...polygon, fill: '#ff0000', id: 's', name: 's', points: 5, ratio: 0.5, type: NodeType.star };
+const star: TStarNode = { ...polygon, id: 's', name: 's', points: 5, ratio: 0.5, type: NodeType.star };
 
 const line: TLineNode = {
   height: 0,
@@ -117,7 +115,7 @@ describe('drawPdfShape', () => {
   beforeEach(() => {
     drawPdfBoxShapeMock.mockClear();
     drawPdfLineShapeMock.mockClear();
-    drawPdfSimpleShapeMock.mockClear();
+    drawPdfPolygonShapeMock.mockClear();
     drawPdfVectorNodeShapeMock.mockClear();
   });
 
@@ -128,7 +126,6 @@ describe('drawPdfShape', () => {
     // result
     expect(drawPdfBoxShapeMock).toHaveBeenCalledTimes(1);
     expect(drawPdfLineShapeMock).not.toHaveBeenCalled();
-    expect(drawPdfSimpleShapeMock).not.toHaveBeenCalled();
   });
 
   it('should dispatch a frame to drawPdfBoxShape', () => {
@@ -138,7 +135,6 @@ describe('drawPdfShape', () => {
     // result
     expect(drawPdfBoxShapeMock).toHaveBeenCalledTimes(1);
     expect(drawPdfLineShapeMock).not.toHaveBeenCalled();
-    expect(drawPdfSimpleShapeMock).not.toHaveBeenCalled();
   });
 
   it('should dispatch an ellipse to drawPdfEllipseShape', () => {
@@ -147,7 +143,6 @@ describe('drawPdfShape', () => {
 
     // result
     expect(drawPdfEllipseShapeMock).toHaveBeenCalledTimes(1);
-    expect(drawPdfSimpleShapeMock).not.toHaveBeenCalled();
   });
 
   it('should dispatch a polygon to drawPdfPolygonShape', () => {
@@ -156,15 +151,14 @@ describe('drawPdfShape', () => {
 
     // result
     expect(drawPdfPolygonShapeMock).toHaveBeenCalledTimes(1);
-    expect(drawPdfSimpleShapeMock).not.toHaveBeenCalled();
   });
 
-  it('should dispatch a star to drawPdfSimpleShape', () => {
+  it('should dispatch a star to drawPdfPolygonShape', () => {
     // action
     drawPdfShape(page, star, {}, bounds, states);
 
     // result
-    expect(drawPdfSimpleShapeMock).toHaveBeenCalledTimes(1);
+    expect(drawPdfPolygonShapeMock).toHaveBeenCalledTimes(1);
     expect(drawPdfBoxShapeMock).not.toHaveBeenCalled();
     expect(drawPdfLineShapeMock).not.toHaveBeenCalled();
   });
@@ -176,7 +170,6 @@ describe('drawPdfShape', () => {
     // result
     expect(drawPdfLineShapeMock).toHaveBeenCalledTimes(1);
     expect(drawPdfBoxShapeMock).not.toHaveBeenCalled();
-    expect(drawPdfSimpleShapeMock).not.toHaveBeenCalled();
   });
 
   it('should dispatch a pen-tool vector node to drawPdfVectorNodeShape', () => {
@@ -187,6 +180,5 @@ describe('drawPdfShape', () => {
     expect(drawPdfVectorNodeShapeMock).toHaveBeenCalledTimes(1);
     expect(drawPdfBoxShapeMock).not.toHaveBeenCalled();
     expect(drawPdfLineShapeMock).not.toHaveBeenCalled();
-    expect(drawPdfSimpleShapeMock).not.toHaveBeenCalled();
   });
 });

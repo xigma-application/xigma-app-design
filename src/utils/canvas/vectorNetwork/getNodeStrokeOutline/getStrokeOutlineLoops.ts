@@ -20,6 +20,7 @@ export const getStrokeOutlineLoops = (node: TStrokeableNode, outer: number, inne
     case NodeType.vector:
       return getVectorStrokeOutlineLoops(node, outer);
     case NodeType.polygon:
+    case NodeType.star:
       return null;
     // no default
   }

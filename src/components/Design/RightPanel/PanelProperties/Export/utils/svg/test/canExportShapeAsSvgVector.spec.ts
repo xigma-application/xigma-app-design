@@ -144,20 +144,17 @@ describe('canExportShapeAsSvgVector', () => {
     ).toBe(false);
   });
 
-  it('should route a star through the simple-shape eligibility check', () => {
+  it('should route a star through the paint shape eligibility check', () => {
     // mock
-    const star = {
-      ...ellipse,
-      fill: '#ff0000',
-      flipX: false,
-      flipY: false,
-      points: 5,
-      ratio: 0.5,
-      type: NodeType.star,
-    } as unknown as TStarNode;
+    const star: TStarNode = { ...ellipse, flipX: false, flipY: false, points: 5, ratio: 0.5, type: NodeType.star };
 
     // result
     expect(canExportShapeAsSvgVector(star, {})).toBe(true);
-    expect(canExportShapeAsSvgVector({ ...star, hidden: true }, {})).toBe(false);
+    expect(
+      canExportShapeAsSvgVector(
+        { ...star, effects: [{ blur: 4, color: '#000000', type: EffectType.dropShadow, visible: true } as TEffect] },
+        {},
+      ),
+    ).toBe(false);
   });
 });

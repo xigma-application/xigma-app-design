@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode } from 'types/design/types';
+import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode } from 'types/design/types';
 
 // utils
 import { getStrokeColor } from '../getStrokeColor';
@@ -91,5 +91,29 @@ describe('getStrokeColor', () => {
 
     // result
     expect(getStrokeColor({ ...polygon, strokes: [{ color: '#654321', opacity: 100, type: 'solid' }] })).toBe('#654321');
+  });
+
+  it('should read a star stroke from its first visible stroke paint', () => {
+    // mock
+    const star = {
+      fills: [],
+      flipX: false,
+      flipY: false,
+      height: 100,
+      id: 's',
+      name: 'Star',
+      parentId: null,
+      points: 5,
+      ratio: 0.5,
+      rotation: 0,
+      strokeWidth: 10,
+      type: NodeType.star,
+      width: 100,
+      x: 0,
+      y: 0,
+    } as TStarNode;
+
+    // result
+    expect(getStrokeColor({ ...star, strokes: [{ color: '#654321', opacity: 100, type: 'solid' }] })).toBe('#654321');
   });
 });

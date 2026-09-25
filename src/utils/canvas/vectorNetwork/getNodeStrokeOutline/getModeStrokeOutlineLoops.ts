@@ -34,7 +34,8 @@ export const getModeStrokeOutlineLoops = (node: TStrokeableNode): TPoint[][] | n
       const shapes = getEllipseStrokeShapes(node);
       return shapes ? getNestingOrientedLoops(shapes.flatMap(({ polygons }) => polygons)) : null;
     }
-    case NodeType.polygon: {
+    case NodeType.polygon:
+    case NodeType.star: {
       const shapes = getPolygonStrokeShapes(node);
       return shapes ? getNestingOrientedLoops(shapes.flatMap(({ polygons }) => polygons)) : null;
     }
