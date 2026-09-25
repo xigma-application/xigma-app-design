@@ -976,6 +976,28 @@ stroke, effects, export — no fill or corner radius), and `useStrokeSettingsRow
 Weight across every `isStyledNode` (so a line with a rectangle shares it), while Position and the
 per-side strokes stay on the `isAppearanceNode` shapes only.
 
+## `Ellipse/`
+
+`Ellipse.tsx` (shown while every selected layer is an ellipse) = `EllipseHeader` (same buttons as
+`RectangleHeader`) → `PositionSection` → Layout (`ColumnDimensions`, `ColumnSpacing`,
+`ColumnGridChildSpan`) → `AppearanceSection withArc withBlendMode={false} withCornerRadius={false} withEllipseCornerRadius` (one Corner
+radius field next to Opacity through `useEllipseCornerRadius`, no individual corners; the row gets a bottom margin
+above Arc) →
+`Export`. Fill, Stroke and Effects are not there yet: an ellipse still stores `fill` / `strokeColor` as
+plain colors, not paints. Opacity reaches ellipses through `isOpacityNode` (`isStyledNode` or ellipse),
+kept separate from `isStyledNode` because the stroke and effects hooks rely on paint fields.
+`Common/AppearanceSection/Arc/ArcRow` is one `UITools.FieldGroup` of Start (°, with the `Arc` icon as
+the scrub handle), Sweep (%) and Ratio (%), read with the same helpers as the canvas arc labels
+(`getEllipseArcValues` → `getEllipseArcStartAngleDegrees` / `getEllipseArcSweepPercent`). Typing Start
+turns both arc angles by the difference (like the rotate handle), Sweep sets `arcEndAngle` through
+`getEllipseArcSweepSpan` (100% closes the ellipse), Ratio sets `arcRatio`; several ellipses show Mixed
+and commit in one undo step. Sweep and Ratio scrub from their left edge (`UITools.ScrubbableEdge`).
+An ellipse `cornerRadius` rounds only the sharp corners of a cut arc (`hasEllipseCorners`): the centre
+and both arc ends of a pie, or the four ends of a ring segment. `getEllipseFillPoints` rounds them with
+`roundPolygonCorners` (each corner's cut limited to half of each neighbouring edge, joined by a circular
+fillet), and that one shape is drawn (stencil fill), outlined on hover, hit-tested, exported and turned
+into a vector.
+
 ## `ImageCrop/`
 
 **Routed ahead of every node-type panel, not by node type at all.** `PanelProperties.tsx`'s switch

@@ -1,14 +1,13 @@
 // others
-import { ELLIPSE_ARC_MAX_RATIO, ELLIPSE_DEFAULT_ARC_ANGLE, ELLIPSE_SEGMENTS } from 'constant/canvas';
+import { ELLIPSE_ARC_MAX_RATIO, ELLIPSE_DEFAULT_ARC_ANGLE } from 'constant/canvas';
 
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
 import { flipPoint } from 'utils/math/flipPoint';
-import { getEffectiveArcAngles } from 'utils/canvas/ellipseArc/getEffectiveArcAngles';
 import { getEllipseArcMajorArc } from 'utils/canvas/ellipseArc/getEllipseArcMajorArc';
-import { getEllipseArcPoints } from 'utils/canvas/shapes/getEllipseArcPoints';
+import { getEllipseFillPoints } from 'utils/canvas/shapes/getEllipseFillPoints';
 import { hasEllipseArc } from 'utils/canvas/ellipseArc/hasEllipseArc';
 import { isPointInPolygonVertices } from './isPointInPolygonVertices';
 
@@ -19,6 +18,7 @@ export const isPointInEllipse = (
     arcRatio?: number;
     arcRatioInverted?: boolean;
     arcStartAngle?: number;
+    cornerRadius?: number;
     flipX?: boolean;
     flipY?: boolean;
   },
@@ -30,35 +30,23 @@ export const isPointInEllipse = (
   const normalizedX = (point.x - centerX) / radiusX;
   const normalizedY = (point.y - centerY) / radiusY;
   const normalizedRadiusSquared = normalizedX * normalizedX + normalizedY * normalizedY;
-
-  if (normalizedRadiusSquared > 1) {
-    return false;
-  }
-
   const arcStartAngle = ellipse.arcStartAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE;
   const arcEndAngle = ellipse.arcEndAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE;
   const arcRatio = Math.min(Math.max(ellipse.arcRatio ?? 0, 0), ELLIPSE_ARC_MAX_RATIO);
-
-  if (!hasEllipseArc(arcStartAngle, arcEndAngle)) {
-    return normalizedRadiusSquared >= arcRatio * arcRatio;
-  }
-
-  if (getEllipseArcMajorArc(arcStartAngle, arcEndAngle).majorSweep === 0) {
-    return true;
-  }
-
-  if (arcRatio >= 1) {
-    return true;
-  }
-
   const center: TPoint = { x: centerX, y: centerY };
-  const testPoint = flipPoint(point, center, ellipse.flipX ?? false, ellipse.flipY ?? false);
-  const { effectiveEndAngle, effectiveStartAngle } = getEffectiveArcAngles(arcStartAngle, arcEndAngle, ellipse.arcRatioInverted ?? false);
-  const outerPoints = getEllipseArcPoints(ellipse, effectiveStartAngle, effectiveEndAngle, ELLIPSE_SEGMENTS);
-  const vertices =
-    arcRatio > 0
-      ? [...outerPoints, ...[...getEllipseArcPoints(ellipse, effectiveStartAngle, effectiveEndAngle, ELLIPSE_SEGMENTS, arcRatio)].reverse()]
-      : [center, ...outerPoints];
 
-  return isPointInPolygonVertices(testPoint, vertices);
+  switch (true) {
+    case normalizedRadiusSquared > 1:
+      return false;
+    case !hasEllipseArc(arcStartAngle, arcEndAngle):
+      return normalizedRadiusSquared >= arcRatio * arcRatio;
+    case getEllipseArcMajorArc(arcStartAngle, arcEndAngle).majorSweep === 0:
+    case arcRatio >= 1:
+      return true;
+    default:
+      return isPointInPolygonVertices(
+        flipPoint(point, center, ellipse.flipX ?? false, ellipse.flipY ?? false),
+        getEllipseFillPoints(ellipse),
+      );
+  }
 };

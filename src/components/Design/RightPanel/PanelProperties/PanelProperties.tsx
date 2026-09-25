@@ -2,6 +2,7 @@ import { FC } from 'react';
 
 // components
 import BooleanPanel from './Boolean/Boolean';
+import Ellipse from './Ellipse/Ellipse';
 import Frame from './Frame/Frame';
 import FrameTool from './FrameTool/FrameTool';
 import GridSettings from './GridSettings/GridSettings';
@@ -42,6 +43,7 @@ const PanelProperties: FC = () => {
   const isEveryGroupSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.group);
   const isEverySectionSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.section);
   const isEveryLineSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.line);
+  const isEveryEllipseSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.ellipse);
   const isEverySliceSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.slice);
 
   useCloseGridSettingsPanelOnReselect(selectedNodes.length > 0, isGridSettingsPanelOpen);
@@ -69,6 +71,8 @@ const PanelProperties: FC = () => {
       return <Slice />;
     case isEveryLineSelected:
       return <Line />;
+    case isEveryEllipseSelected:
+      return <Ellipse />;
     case isPanelTypeSelection(selectedNodes):
       return <Mixed />;
     default:

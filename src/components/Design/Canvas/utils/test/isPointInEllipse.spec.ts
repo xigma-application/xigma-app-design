@@ -75,4 +75,15 @@ describe('isPointInEllipse', () => {
     // a flipX'd shape un-mirrors it back to the filled 315° position before testing
     expect(isPointInEllipse({ x: 67.6777, y: 32.3223 }, node)).toBe(true);
   });
+
+  it('should miss a rounded-off corner of a cut arc but hit the rest of it', () => {
+    // mock
+    const pie = { ...CIRCLE, arcEndAngle: 360, arcStartAngle: 90, cornerRadius: 30 };
+    const nearCentre = { x: 52, y: 48 };
+
+    // result
+    expect(isPointInEllipse(nearCentre, { ...pie, cornerRadius: 0 })).toBe(true);
+    expect(isPointInEllipse(nearCentre, pie)).toBe(false);
+    expect(isPointInEllipse({ x: 70, y: 30 }, pie)).toBe(true);
+  });
 });

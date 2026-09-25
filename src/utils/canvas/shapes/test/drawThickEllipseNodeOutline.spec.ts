@@ -7,6 +7,11 @@ const drawThickEllipseOutlineMock = vi.fn();
 vi.mock('../../drawThickEllipseArcOutline/drawThickEllipseArcOutline', () => ({
   drawThickEllipseArcOutline: (...args: unknown[]): void => drawThickEllipseArcOutlineMock(...args),
 }));
+const drawThickEllipseShapeOutlineMock = vi.fn();
+
+vi.mock('../drawThickEllipseShapeOutline', () => ({
+  drawThickEllipseShapeOutline: (...args: unknown[]): void => drawThickEllipseShapeOutlineMock(...args),
+}));
 vi.mock('../drawThickEllipseOutline', () => ({
   drawThickEllipseOutline: (...args: unknown[]): void => drawThickEllipseOutlineMock(...args),
 }));
@@ -92,6 +97,28 @@ describe('drawThickEllipseNodeOutline', () => {
 
     // result
     expect(drawThickEllipseOutlineMock).toHaveBeenCalled();
+    expect(drawThickEllipseArcOutlineMock).not.toHaveBeenCalled();
+  });
+
+  it('should route to the shape outline for an arc with rounded corners', () => {
+    // before
+    drawThickEllipseNodeOutline(
+      {} as WebGL2RenderingContext,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
+      { ...BOUNDS, arcEndAngle: 180, arcStartAngle: 90, cornerRadius: 8 },
+      '#0d99ff',
+      2,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      false,
+      0,
+    );
+
+    // result
+    expect(drawThickEllipseShapeOutlineMock).toHaveBeenCalled();
     expect(drawThickEllipseArcOutlineMock).not.toHaveBeenCalled();
   });
 });

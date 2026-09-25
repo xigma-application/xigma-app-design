@@ -60,4 +60,13 @@ describe('convertEllipseToVector', () => {
     expect(Object.keys(result.vertices).length).toBeGreaterThan(4);
     expect(Object.values(result.segments).every((segment) => segment.tangentStart === null)).toBe(true);
   });
+
+  it('should keep the rounded corners of a cut arc in the polyline', () => {
+    // mock
+    const sharp = convertEllipseToVector(buildEllipse({ arcEndAngle: 180, arcStartAngle: 90 }));
+    const rounded = convertEllipseToVector(buildEllipse({ arcEndAngle: 180, arcStartAngle: 90, cornerRadius: 10 }));
+
+    // result
+    expect(Object.keys(rounded.vertices).length).toBeGreaterThan(Object.keys(sharp.vertices).length);
+  });
 });

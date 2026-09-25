@@ -5,13 +5,21 @@ import { TViewport } from 'types/design/types';
 // utils
 import { drawThickEllipseArcOutline } from '../drawThickEllipseArcOutline/drawThickEllipseArcOutline';
 import { drawThickEllipseOutline } from './drawThickEllipseOutline';
+import { drawThickEllipseShapeOutline } from './drawThickEllipseShapeOutline';
 import { hasEllipseArc } from '../ellipseArc/hasEllipseArc';
+import { hasEllipseCorners } from '../ellipseArc/hasEllipseCorners';
 
 export const drawThickEllipseNodeOutline = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  ellipse: TDraftRect & { arcEndAngle: number; arcRatio?: number; arcRatioInverted?: boolean; arcStartAngle: number },
+  ellipse: TDraftRect & {
+    arcEndAngle: number;
+    arcRatio?: number;
+    arcRatioInverted?: boolean;
+    arcStartAngle: number;
+    cornerRadius?: number;
+  },
   color: string,
   strokeWidth: number,
   canvasWidth: number,
@@ -21,7 +29,22 @@ export const drawThickEllipseNodeOutline = (
   flipY: boolean,
   rotation: number,
 ): void => {
-  if (hasEllipseArc(ellipse.arcStartAngle, ellipse.arcEndAngle) || (ellipse.arcRatio ?? 0) > 0) {
+  if (hasEllipseCorners(ellipse)) {
+    drawThickEllipseShapeOutline(
+      gl,
+      program,
+      buffer,
+      ellipse,
+      color,
+      strokeWidth,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      flipX,
+      flipY,
+      rotation,
+    );
+  } else if (hasEllipseArc(ellipse.arcStartAngle, ellipse.arcEndAngle) || (ellipse.arcRatio ?? 0) > 0) {
     drawThickEllipseArcOutline(
       gl,
       program,

@@ -1,6 +1,3 @@
-// others
-import { ELLIPSE_SEGMENTS } from 'constant/canvas';
-
 // types
 import { NodeType } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
@@ -8,8 +5,7 @@ import { TEllipseNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { buildClosedLoopFromEdges, TLoopEdge } from './utils/buildClosedVectorLoop';
-import { getEffectiveArcAngles } from 'utils/canvas/ellipseArc/getEffectiveArcAngles';
-import { getEllipseArcPoints } from 'utils/canvas/shapes/getEllipseArcPoints';
+import { getEllipseFillPoints } from 'utils/canvas/shapes/getEllipseFillPoints';
 import { getFillDataForClosedLoop } from './utils/getFillDataForClosedLoop';
 import { hasEllipseArc } from 'utils/canvas/ellipseArc/hasEllipseArc';
 import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
@@ -50,18 +46,12 @@ const getFullEllipseEdges = (centerX: number, centerY: number, radiusX: number, 
 
 const getArcCutEdges = (node: TEllipseNode, arcStartAngle: number, arcEndAngle: number): TLoopEdge[] => {
   const center = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
-  const arcRatio = Math.min(Math.max(node.arcRatio ?? 0, 0), 1);
-  const { effectiveEndAngle, effectiveStartAngle } = getEffectiveArcAngles(arcStartAngle, arcEndAngle, node.arcRatioInverted ?? false);
-  const outerPoints = getEllipseArcPoints(node, effectiveStartAngle, effectiveEndAngle, ELLIPSE_SEGMENTS).map((point) =>
-    flipPoint(point, center, node.flipX ?? false, node.flipY ?? false),
-  );
-  const innerPoints =
-    arcRatio > 0
-      ? getEllipseArcPoints(node, effectiveStartAngle, effectiveEndAngle, ELLIPSE_SEGMENTS, arcRatio).map((point) =>
-          flipPoint(point, center, node.flipX ?? false, node.flipY ?? false),
-        )
-      : null;
-  const loopPoints = innerPoints ? [...outerPoints, ...[...innerPoints].reverse()] : [center, ...outerPoints];
+  const loopPoints = getEllipseFillPoints({
+    ...node,
+    arcEndAngle,
+    arcRatio: Math.min(Math.max(node.arcRatio ?? 0, 0), 1),
+    arcStartAngle,
+  }).map((point) => flipPoint(point, center, node.flipX ?? false, node.flipY ?? false));
 
   return loopPoints.map((start, index) => ({
     end: loopPoints[(index + 1) % loopPoints.length],

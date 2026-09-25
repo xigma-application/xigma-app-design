@@ -9,15 +9,16 @@ import { useAppDispatch, useAppSelector } from 'store';
 import { TUseOpacityResult } from './types';
 
 // utils
-import { isStyledNode } from '../../utils/isStyledNode';
 import { clampOpacity } from './utils/clampOpacity';
 import { commitOnNodes } from '../../utils/commitOnNodes';
+import { isOpacityNode } from '../../utils/isOpacityNode';
 import { commitOpacityChange } from './utils/commitOpacityChange';
 import { getOpacityPercentage } from './utils/getOpacityPercentage';
+import { handleOpacityBlur } from './utils/handleOpacityBlur';
 
 export const useOpacity = (): TUseOpacityResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isOpacityNode);
   const [firstNode] = nodes;
   const value = getOpacityPercentage(firstNode);
   const isMixed = nodes.some((node) => getOpacityPercentage(node) !== value);
@@ -25,16 +26,7 @@ export const useOpacity = (): TUseOpacityResult => {
 
   return {
     displayValue,
-    onBlur: (event): void => {
-      const stripped = event.target.value.trim().replace(/[^\d.-]/g, '');
-      const parsed = Number(stripped);
-
-      if (stripped !== '' && !Number.isNaN(parsed)) {
-        commitOnNodes(dispatch, nodes, (node) => commitOpacityChange(dispatch, node.id, clampOpacity(parsed)));
-      } else {
-        event.target.value = displayValue;
-      }
-    },
+    onBlur: (event): void => handleOpacityBlur(event, dispatch, nodes, displayValue),
     onScrub: (next): void =>
       commitOnNodes(dispatch, nodes, (node) =>
         commitOpacityChange(dispatch, node.id, clampOpacity(getOpacityPercentage(node) + next - value)),

@@ -168,6 +168,7 @@ export type TEllipseNode = TBaseNode & {
   arcRatio?: number;
   arcRatioInverted?: boolean;
   arcStartAngle?: number;
+  cornerRadius?: number;
   fill: string;
   flipX?: boolean;
   flipY?: boolean;

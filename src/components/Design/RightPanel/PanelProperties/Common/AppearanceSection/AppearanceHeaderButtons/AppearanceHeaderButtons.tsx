@@ -4,10 +4,12 @@ import { FC, Fragment } from 'react';
 import BlendModeButton from './BlendModeButton/BlendModeButton';
 import VisibilityToggle from './VisibilityToggle';
 
-const AppearanceHeaderButtons: FC = () => (
+export type TAppearanceHeaderButtonsProps = { withBlendMode?: boolean };
+
+const AppearanceHeaderButtons: FC<TAppearanceHeaderButtonsProps> = ({ withBlendMode = true }) => (
   <Fragment>
     <VisibilityToggle />
-    <BlendModeButton />
+    {withBlendMode && <BlendModeButton />}
   </Fragment>
 );
 

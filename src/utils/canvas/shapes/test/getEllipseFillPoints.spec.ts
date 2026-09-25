@@ -31,4 +31,18 @@ describe('getEllipseFillPoints', () => {
   it('should return a donut arc as an outer/inner ring outline', () => {
     expect(getEllipseFillPoints(ellipse({ arcEndAngle: 180, arcRatio: 0.5, arcStartAngle: 0 }))).toHaveLength(66);
   });
+
+  it('should round the corners of a cut arc with a corner radius, leaving the plain shape without one', () => {
+    // mock
+    const pie = ellipse({ arcEndAngle: 180, height: 100, width: 100 });
+
+    // before
+    const sharp = getEllipseFillPoints(pie);
+    const rounded = getEllipseFillPoints({ ...pie, cornerRadius: 10 });
+
+    // result
+    expect(sharp[0]).toEqual({ x: pie.x + 50, y: pie.y + 50 });
+    expect(rounded).not.toContainEqual(sharp[0]);
+    expect(rounded.length).toBeGreaterThan(sharp.length);
+  });
 });

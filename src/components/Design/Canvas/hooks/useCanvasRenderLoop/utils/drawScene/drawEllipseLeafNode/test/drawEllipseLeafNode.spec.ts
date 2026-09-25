@@ -1,6 +1,6 @@
 // types
 import { NodeType, StrokeAlign } from 'types/design/enums';
-import { TDrawContext } from '../../types';
+import { TDrawSceneContext } from '../../types';
 import { TEllipseNode } from 'types/design/types';
 
 // utils
@@ -8,8 +8,12 @@ import { drawEllipseLeafNode } from '../drawEllipseLeafNode';
 
 const drawEllipseNodeMock = vi.fn();
 const drawThickEllipseOutlineMock = vi.fn();
+const drawVectorFillMock = vi.fn();
 
 vi.mock('../drawEllipseNode', () => ({ drawEllipseNode: (...args: unknown[]): void => drawEllipseNodeMock(...args) }));
+vi.mock('utils/canvas/drawVectorNode/drawVectorFill', () => ({
+  drawVectorFill: (...args: unknown[]): void => drawVectorFillMock(...args),
+}));
 vi.mock('utils/canvas/shapes/drawThickEllipseOutline', () => ({
   drawThickEllipseOutline: (...args: unknown[]): void => drawThickEllipseOutlineMock(...args),
 }));
@@ -18,7 +22,15 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const gl = {} as WebGL2RenderingContext;
 const program = {} as WebGLProgram;
 const buffer = {} as WebGLBuffer;
-const context: TDrawContext = { buffer, canvasHeight: 150, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT };
+const context = {
+  buffer,
+  canvasHeight: 150,
+  canvasWidth: 200,
+  gl,
+  imageContext: { isAlphaWriteEnabled: false },
+  program,
+  viewport: IDENTITY_VIEWPORT,
+} as TDrawSceneContext;
 
 const ellipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
   fill: '#fff',
@@ -116,5 +128,30 @@ describe('drawEllipseLeafNode', () => {
 
     // result
     expect(drawThickEllipseOutlineMock).not.toHaveBeenCalled();
+  });
+
+  it('should fill an arc with rounded corners through the stencil fill with the threaded opacity', () => {
+    // mock
+    const node = ellipse({ arcEndAngle: 180, cornerRadius: 4 });
+
+    // action
+    drawEllipseLeafNode(context, node, 0.5);
+
+    // result
+    expect(drawEllipseNodeMock).not.toHaveBeenCalled();
+    expect(drawVectorFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      [expect.any(Array)],
+      '#fff',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      false,
+      0.5,
+    );
   });
 });

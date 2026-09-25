@@ -360,6 +360,22 @@ describe('PanelProperties behaviors', () => {
     expect(screen.queryByText('Fill')).not.toBeInTheDocument();
   });
 
+  it('should show the Ellipse panel with the Arc row while an ellipse is selected', () => {
+    // mock
+    store.dispatch(
+      addNode({ fill: '#d9d9d9', height: 20, name: 'Ellipse', parentId: null, rotation: 0, type: NodeType.ellipse, width: 20, x: 0, y: 0 }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Ellipse')).toBeInTheDocument();
+    expect(screen.getByText('Arc')).toBeInTheDocument();
+  });
+
   it('should show the Line panel with a stroke and no fill section while a line is selected', () => {
     // mock
     store.dispatch(
