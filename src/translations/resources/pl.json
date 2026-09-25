@@ -940,6 +940,7 @@
   "design.rightPanel.panelProperties.section.sectionHeader.menuAriaLabel": "Typ elementu",
   "design.rightPanel.panelProperties.section.sectionHeader.typeMenu.frame": "Ramka",
   "design.rightPanel.panelProperties.section.sectionHeader.typeMenu.group": "Grupa",
+  "design.rightPanel.panelProperties.line.header.offsetVector": "Odsunięcie wektora",
   "design.rightPanel.panelProperties.line.header.label": "Linia",
   "design.rightPanel.panelProperties.line.strokeSettings.startPoint.label": "Punkt początkowy",
   "design.rightPanel.panelProperties.line.strokeSettings.endPoint.label": "Punkt końcowy",

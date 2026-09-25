@@ -389,6 +389,33 @@ describe('PanelProperties behaviors', () => {
     expect(screen.queryByText('Fill')).not.toBeInTheDocument();
   });
 
+  it('should show the Mixed panel without a Fill section for a line selected with a rectangle', () => {
+    // mock
+    const rectangleId = addRectangleNode();
+    store.dispatch(
+      addNode({
+        height: 0,
+        name: 'Line',
+        parentId: null,
+        rotation: 0,
+        strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+        type: NodeType.line,
+        width: 40,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    store.dispatch(setSelection([rectangleId, rootOrder[rootOrder.length - 1]]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Stroke')).toBeInTheDocument();
+    expect(screen.queryByText('Fill')).not.toBeInTheDocument();
+  });
+
   it('should render nothing while a rectangle and a layer without a panel are selected together', () => {
     // mock
     const rectangleId = addRectangleNode();

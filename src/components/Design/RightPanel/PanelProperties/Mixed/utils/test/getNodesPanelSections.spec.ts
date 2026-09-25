@@ -30,6 +30,19 @@ describe('getNodesPanelSections', () => {
     expect(getNodesPanelSections([makeNode(NodeType.rectangle), makeNode(NodeType.frame)], PANEL_SECTIONS)).toContain('cornerRadius');
   });
 
+  it('should leave out fill and corner radius for a line with a rectangle', () => {
+    // action / result
+    expect(getNodesPanelSections([makeNode(NodeType.rectangle), makeNode(NodeType.line)], PANEL_SECTIONS)).toEqual([
+      'position',
+      'rotation',
+      'layout',
+      'appearance',
+      'stroke',
+      'effects',
+      'export',
+    ]);
+  });
+
   it('should return nothing when a node type has no panel', () => {
     // action / result
     expect(getNodesPanelSections([makeNode(NodeType.rectangle), makeNode(NodeType.text)], PANEL_SECTIONS)).toEqual([]);

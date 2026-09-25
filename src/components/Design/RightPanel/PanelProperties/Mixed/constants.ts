@@ -34,6 +34,7 @@ export const PANEL_SECTIONS: Record<TPanelNodeType, TPanelSection[]> = {
     'selectionColors',
     'export',
   ],
+  [NodeType.line]: ['position', 'rotation', 'layout', 'appearance', 'stroke', 'effects', 'export'],
   [NodeType.rectangle]: ['position', 'rotation', 'layout', 'appearance', 'cornerRadius', 'fill', 'stroke', 'effects', 'export'],
   [NodeType.section]: ['position', 'layout', 'appearance', 'cornerRadius', 'fill', 'stroke', 'selectionColors', 'export'],
   [NodeType.slice]: ['position', 'rotation', 'layout', 'export'],

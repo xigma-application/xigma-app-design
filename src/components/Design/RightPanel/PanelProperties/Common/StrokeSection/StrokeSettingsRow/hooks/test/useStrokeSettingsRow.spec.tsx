@@ -13,7 +13,7 @@ import { undo } from 'store/history/actions';
 
 // types
 import { NodeType, StrokeAlign, StrokeMode, StrokeSides } from 'types/design/enums';
-import { TRectangleNode } from 'types/design/types';
+import { TLineNode, TRectangleNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -40,6 +40,16 @@ const addAndSelect = (overrides: Partial<TRectangleNode> = {}): string => {
   store.dispatch(setSelection([id]));
 
   return id;
+};
+
+const addLine = (strokeWidth: number): string => {
+  store.dispatch(
+    addNode({ height: 0, name: 'Line', parentId: null, rotation: 0, strokeWidth, strokes: [], type: NodeType.line, width: 40, x: 0, y: 0 }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
 };
 
 const readNode = (id: string): TRectangleNode => selectActivePage(store.getState()).nodes[id] as TRectangleNode;
@@ -307,5 +317,122 @@ describe('useStrokeSettingsRow', () => {
 
     // result
     expect(result.current.sides).toBeUndefined();
+  });
+
+  it('should read and write the weight of a line selected with a rectangle, leaving its position and sides to the rectangle', () => {
+    // mock
+    const rectangleId = addAndSelect({ strokeAlign: StrokeAlign.outside, strokeWidth: 2 });
+    const lineId = addLine(2);
+
+    store.dispatch(setSelection([rectangleId, lineId]));
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsRow(), { wrapper });
+
+    // action
+    act(() => {
+      result.current.onWeightBlur(blurEventFor('6'));
+    });
+
+    // result
+    expect(result.current.position).toBe(StrokeAlign.outside);
+    expect(readNode(rectangleId).strokeWidth).toBe(6);
+    expect((selectActivePage(store.getState()).nodes[lineId] as TLineNode).strokeWidth).toBe(6);
+    expect(selectActivePage(store.getState()).nodes[lineId]).not.toHaveProperty('strokeAlign');
+  });
+
+  it('should scrub the weight of a lone line too', () => {
+    // mock
+    const lineId = addLine(3);
+
+    store.dispatch(setSelection([lineId]));
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsRow(), { wrapper });
+
+    // action
+    act(() => {
+      result.current.onWeightScrub(5);
+    });
+
+    // result
+    expect((selectActivePage(store.getState()).nodes[lineId] as TLineNode).strokeWidth).toBe(5);
+  });
+
+  it('should leave a lone line untouched by the position, sides and single-side edits it has no fields for', () => {
+    // mock
+    const lineId = addLine(3);
+
+    store.dispatch(setSelection([lineId]));
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsRow(), { wrapper });
+
+    // action
+    act(() => {
+      result.current.onSideScrub('left')(2);
+    });
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[lineId]).toMatchObject({ strokeWidth: 3 });
+  });
+
+  it('should write nothing when a weight is scrubbed with nothing selected', () => {
+    // mock
+    store.dispatch(setSelection([]));
+    const before = selectActivePage(store.getState()).nodes;
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsRow(), { wrapper });
+
+    // action
+    act(() => {
+      result.current.onWeightScrub(4);
+    });
+
+    // result
+    expect(selectActivePage(store.getState()).nodes).toBe(before);
+  });
+
+  it('should skip re-picking the current position or sides and restore an invalid side weight', () => {
+    // mock
+    const id = addAndSelect({ strokeAlign: StrokeAlign.center, strokeWidth: 4 });
+    const event = blurEventFor('abc', '4');
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsRow(), { wrapper });
+
+    // action
+    act(() => {
+      result.current.onPositionSelect(StrokeAlign.center);
+      result.current.onSidesSelect(StrokeSides.all);
+      result.current.onSideBlur('top')(event);
+    });
+
+    // result
+    expect(readNode(id)).toMatchObject({ strokeAlign: StrokeAlign.center, strokeWidth: 4 });
+    expect(readNode(id).strokeSides).toBeUndefined();
+    expect(event.target.value).toBe('4');
+  });
+
+  it('should scrub a single side and bracket a weight drag in one history gesture', () => {
+    // mock
+    const id = addAndSelect({ strokeWidth: 4 });
+
+    // before
+    const { result, rerender } = renderHook(() => useStrokeSettingsRow(), { wrapper });
+
+    act(() => result.current.onSidesSelect(StrokeSides.custom));
+    rerender();
+
+    // action
+    act(() => {
+      result.current.onWeightDragStart();
+      result.current.onSideScrub('left')(7);
+      result.current.onWeightDragEnd();
+    });
+
+    // result
+    expect(readNode(id).strokeLeftWidth).toBe(7);
   });
 });

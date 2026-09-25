@@ -2,12 +2,12 @@ import { FC, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import LineMoreActionsButton from './LineMoreActionsButton/LineMoreActionsButton';
 import PanelHeader from '../../Common/PanelHeader/PanelHeader';
 import PanelHeaderBooleanButton from '../../Common/PanelHeader/PanelHeaderBooleanButton';
 import PanelHeaderComponentButton from '../../Common/PanelHeader/PanelHeaderComponentButton';
 import PanelHeaderMaskButton from '../../Common/PanelHeader/PanelHeaderMaskButton';
 import PanelHeaderMatchingLayersButton from '../../Common/PanelHeader/PanelHeaderMatchingLayersButton';
-import PanelHeaderMoreActionsButton from '../../Common/PanelHeader/PanelHeaderMoreActionsButton';
 
 // others
 import { translationNameSpace } from './constants';
@@ -28,7 +28,7 @@ const LineHeader: FC = () => {
           {!isMultiple && <PanelHeaderComponentButton />}
           <PanelHeaderMaskButton />
           <PanelHeaderBooleanButton />
-          <PanelHeaderMoreActionsButton />
+          <LineMoreActionsButton />
         </Fragment>
       }
       e2eValue="line"

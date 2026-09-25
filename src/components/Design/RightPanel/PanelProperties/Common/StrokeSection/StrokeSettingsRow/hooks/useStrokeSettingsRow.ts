@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { StrokeAlign, StrokeMode, StrokeSides } from 'types/design/enums';
-import { TAppearanceNode, isAppearanceNode } from '../../../AppearanceSection/types';
+import { TAppearanceNode, TStyledNode, isAppearanceNode } from '../../../AppearanceSection/types';
 import { TSceneNodeChanges } from 'types/design/types';
 import { TStrokeSide } from 'utils/design/stroke/types';
 
@@ -24,6 +24,7 @@ import { getStrokeSideWidths } from 'utils/design/stroke/getStrokeSideWidths';
 import { getStrokeSidesChange } from 'utils/design/stroke/getStrokeSidesChange';
 import { getStrokeWeightChange } from 'utils/design/stroke/getStrokeWeightChange';
 import { getStrokeWeightDisplay } from 'utils/design/stroke/getStrokeWeightDisplay';
+import { isStyledNode } from '../../../AppearanceSection/utils/isStyledNode';
 import { parseStrokeWeight } from '../utils/parseStrokeWeight';
 
 export type TUseStrokeSettingsRowResult = {
@@ -47,10 +48,11 @@ export type TUseStrokeSettingsRowResult = {
 
 export const useStrokeSettingsRow = (): TUseStrokeSettingsRowResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
-  const [firstNode] = nodes;
+  const styledNodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
+  const nodes = styledNodes.filter(isAppearanceNode);
+  const [firstNode] = styledNodes;
   const weight = firstNode?.strokeWidth ?? 1;
-  const weightDisplay = nodes.length > 0 ? getSharedValue(nodes.map(getStrokeWeightDisplay)) : weight;
+  const weightDisplay = styledNodes.length > 0 ? getSharedValue(styledNodes.map(getStrokeWeightDisplay)) : weight;
   const sideWidthsList = nodes.map(getStrokeSideWidths);
   const sideScrubValues = sideWidthsList[0] ?? { bottom: 0, left: 0, right: 0, top: 0 };
   const getSideWeight = (side: TStrokeSide): number | undefined => getSharedValue(sideWidthsList.map((widths) => widths[side]));
@@ -70,6 +72,12 @@ export const useStrokeSettingsRow = (): TUseStrokeSettingsRowResult => {
     dispatch(endHistoryGesture());
   };
 
+  const commitWeight = (getChanges: TFunc<[TStyledNode], TSceneNodeChanges>): void => {
+    if (styledNodes.length > 0) {
+      dispatch(updateNodes(styledNodes.map((node) => ({ changes: getChanges(node), id: node.id }))));
+    }
+  };
+
   const onPositionSelect = (strokeAlign: StrokeAlign): void => {
     if (strokeAlign !== position) {
       commitEachWithHistory(() => ({ strokeAlign }));
@@ -85,8 +93,10 @@ export const useStrokeSettingsRow = (): TUseStrokeSettingsRowResult => {
   const onWeightBlur = (event: FocusEvent<HTMLInputElement>): void => {
     const parsed = parseStrokeWeight(event.target.value);
 
-    if (nodes.length > 0 && parsed !== null && parsed !== weightDisplay) {
-      commitEachWithHistory((node) => getStrokeWeightChange(node, parsed));
+    if (styledNodes.length > 0 && parsed !== null && parsed !== weightDisplay) {
+      dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+      commitWeight((node) => getStrokeWeightChange(node, parsed));
+      dispatch(endHistoryGesture());
     } else {
       event.target.value = event.target.defaultValue;
     }
@@ -119,7 +129,7 @@ export const useStrokeSettingsRow = (): TUseStrokeSettingsRowResult => {
     onWeightDragEnd: () => dispatch(endHistoryGesture()),
     onWeightDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
     onWeightScrub: (value) =>
-      commitEach((node) => getStrokeWeightChange(node, clampStrokeWeight((node.strokeWidth ?? 1) + value - weight))),
+      commitWeight((node) => getStrokeWeightChange(node, clampStrokeWeight((node.strokeWidth ?? 1) + value - weight))),
     position,
     sideScrubValues,
     sideWeights: { bottom: getSideWeight('bottom'), left: getSideWeight('left'), right: getSideWeight('right'), top: getSideWeight('top') },

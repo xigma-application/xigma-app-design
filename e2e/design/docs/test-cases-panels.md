@@ -1475,9 +1475,10 @@ A selected line gets its own panel: Position, Layout (height locked at 0), Appea
 radius, Stroke with Position (fixed Center), Weight, Start point and End point, Effects and Export.
 There is no Fill section.
 
-| #   | Scenario                                                                                      | Unit |           E2E           |
-| --- | --------------------------------------------------------------------------------------------- | :--: | :---------------------: |
-| 632 | A selected line shows the Line panel, and picking an end point draws it on the line           |  ✅  | ✅ `line-panel.spec.ts` |
-| 633 | A drop shadow on a line is drawn under it                                                     |  ✅  | ✅ `line-panel.spec.ts` |
-| 634 | Several lines with different weights show Mixed, and a typed weight applies to all            |  ✅  | — covered by unit tests |
-| 635 | Edit objects in the Line panel "…" menu turns the line into a vector and enters point editing |  ✅  | ✅ `line-panel.spec.ts` |
+| #   | Scenario                                                                                                                                                      | Unit |           E2E           |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :---------------------: |
+| 632 | A selected line shows the Line panel, and picking an end point draws it on the line                                                                           |  ✅  | ✅ `line-panel.spec.ts` |
+| 633 | A drop shadow on a line is drawn under it                                                                                                                     |  ✅  | ✅ `line-panel.spec.ts` |
+| 634 | Several lines with different weights show Mixed, and an end point picked applies to all                                                                       |  ✅  | ✅ `line-panel.spec.ts` |
+| 635 | Edit object in the Line panel "…" menu (Edit object, then a disabled Offset vector, no component items) turns the line into a vector and enters point editing |  ✅  | ✅ `line-panel.spec.ts` |
+| 638 | A line selected with a rectangle shows the Mixed panel without Fill, and a typed stroke weight applies to both                                                |  ✅  | ✅ `line-panel.spec.ts` |
