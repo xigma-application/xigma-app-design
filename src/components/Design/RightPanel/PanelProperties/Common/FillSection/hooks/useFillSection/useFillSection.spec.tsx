@@ -6,13 +6,16 @@ import { act, renderHook } from '@testing-library/react';
 import { useFillSection } from './useFillSection';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, addNodes, setImageEditor, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TRectangleNode } from 'types/design/types';
+import { TRectangleNode, TVectorNode } from 'types/design/types';
+
+// utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -49,6 +52,79 @@ describe('useFillSection', () => {
 
   it('should return an empty fills array when no node is selected', () => {
     expect(renderUseFillSection().result.current.fills).toEqual([]);
+  });
+
+  it('should read a vector fill shared by its areas, show Mixed when they differ and fill them all with +', () => {
+    // mock
+    const red = [{ color: '#ff0000', opacity: 100, type: 'solid' as const }];
+    const blue = [{ color: '#0000ff', opacity: 100, type: 'solid' as const }];
+
+    store.dispatch(
+      addNodes({
+        nodes: [
+          makeSquareVector({ fillByKey: { a: red, b: red }, filledFaceKeys: ['a', 'b'], id: 'fill-shared-vector' }),
+          makeSquareVector({ fillByKey: { a: red, b: blue }, filledFaceKeys: ['a', 'b'], id: 'fill-mixed-vector' }),
+        ],
+        rootIds: ['fill-shared-vector', 'fill-mixed-vector'],
+      }),
+    );
+    store.dispatch(setSelection(['fill-shared-vector']));
+
+    // before
+    const shared = renderUseFillSection();
+
+    // result
+    expect(shared.result.current.fills).toEqual(red);
+    expect(shared.result.current.isMixed).toBe(false);
+    expect(shared.result.current.disabledFillModes).toEqual(['crop']);
+
+    // action
+    act(() => store.dispatch(setSelection(['fill-mixed-vector'])));
+
+    const mixed = renderUseFillSection();
+
+    // result
+    expect(mixed.result.current.isMixed).toBe(true);
+    expect(mixed.result.current.fills).toEqual([]);
+
+    // action
+    act(() => mixed.result.current.onAdd());
+
+    // result
+    const vector = selectActivePage(store.getState()).nodes['fill-mixed-vector'] as TVectorNode;
+
+    expect(vector.fillByKey?.a).toEqual(vector.fillByKey?.b);
+    expect(vector.fillByKey?.a).toHaveLength(1);
+  });
+
+  it('should hide the node id and disable crop and tile while several layers are selected', () => {
+    // mock
+    store.dispatch(setSelection([addRectangle(), addRectangle()]));
+
+    // before
+    const { result } = renderUseFillSection();
+
+    // result
+    expect(result.current.nodeId).toBeUndefined();
+    expect(result.current.nodeIds).toHaveLength(2);
+    expect(result.current.disabledFillModes).toEqual(['crop', 'tile']);
+  });
+
+  it('should keep the fills while the image editor of the fill property is open', () => {
+    // mock
+    const id = addRectangle();
+
+    store.dispatch(setSelection([id]));
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: id, paintIndex: 0 }));
+
+    // before
+    const { result } = renderUseFillSection();
+
+    // result
+    expect(result.current.fills).toHaveLength(1);
+
+    // action
+    act(() => store.dispatch(setImageEditor(null)));
   });
 
   it('should read the selected node’s fills', () => {

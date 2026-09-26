@@ -6,6 +6,7 @@ import { StrokeAlign } from 'types/design/enums';
 
 // utils
 import { commitFills } from '../commitFills';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 describe('commitFills', () => {
   it('should dispatch updateNode for a single target', () => {
@@ -18,6 +19,19 @@ describe('commitFills', () => {
 
     // result
     expect(dispatch).toHaveBeenCalledWith(updateNode({ changes: { fills }, id: 'node-1' }));
+  });
+
+  it('should write a vector fill onto its filled areas', () => {
+    // mock
+    const dispatch = vi.fn();
+    const fills = [{ color: '#000000', opacity: 100, type: 'solid' as const }];
+    const vector = makeSquareVector({ fillByKey: { a: [] }, filledFaceKeys: ['a'] });
+
+    // before
+    commitFills(dispatch, [{ id: 'vector', vector }], fills);
+
+    // result
+    expect(dispatch).toHaveBeenCalledWith(updateNode({ changes: { defaultFill: fills, fillByKey: { a: fills } }, id: 'vector' }));
   });
 
   it('should not dispatch when there are no targets', () => {

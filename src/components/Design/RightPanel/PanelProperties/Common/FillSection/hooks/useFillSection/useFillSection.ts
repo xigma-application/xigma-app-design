@@ -6,9 +6,6 @@ import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { selectAppearanceNodes, selectImageEditor, selectImageFillPickerFocus } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
-// others
-import { MULTI_SELECTION_DISABLED_FILL_MODES } from '../../constants';
-
 // types
 import { TPaint, TPaintProperty } from 'types/design/paint/types';
 import { TUseFillSectionResult } from './types';
@@ -17,10 +14,11 @@ import { TUseFillSectionResult } from './types';
 import { commitFills } from './utils/commitFills';
 import { getFillTargets } from './utils/getFillTargets';
 import { hasMixedPaints } from './utils/hasMixedPaints';
-import { isPaintPropertyNode } from './utils/isPaintPropertyNode';
+import { isFillPanelNode } from './utils/isFillPanelNode';
 import { getDefaultPaintColor } from './utils/getDefaultPaintColor';
+import { getDisabledFillModes } from './utils/getDisabledFillModes';
 import { getInitialOpenPickerIndex } from './utils/getInitialOpenPickerIndex';
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPanelPaints } from './utils/getPanelPaints';
 import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 import { resolveFillDragIndices } from './utils/resolveFillDragIndices';
 import { toggleFillVisibility } from './utils/toggleFillVisibility';
@@ -34,11 +32,11 @@ import { useOpenPickerIndex } from './hooks/useOpenPickerIndex/useOpenPickerInde
 
 export const useFillSection = (property: TPaintProperty = 'fills'): TUseFillSectionResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter((selected) => isPaintPropertyNode(selected, property));
+  const nodes = useAppSelector(selectAppearanceNodes).filter((selected) => isFillPanelNode(selected, property));
   const [node] = nodes;
   const isMultiSelection = nodes.length > 1;
   const isMixed = hasMixedPaints(nodes, property);
-  const fills = node && !isMixed ? getNodePaints(node, property) : [];
+  const fills = (!isMixed && node && getPanelPaints(node, property)) || [];
   const panelNodeId = node?.id;
   const nodeId = isMultiSelection ? undefined : panelNodeId;
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -58,7 +56,7 @@ export const useFillSection = (property: TPaintProperty = 'fills'): TUseFillSect
 
   return {
     containerRef,
-    disabledFillModes: isMultiSelection ? MULTI_SELECTION_DISABLED_FILL_MODES : undefined,
+    disabledFillModes: getDisabledFillModes(nodes),
     dropIndicatorOffset: dragState?.hasMoved ? dragState.dropOffset : null,
     fills,
     isMixed,

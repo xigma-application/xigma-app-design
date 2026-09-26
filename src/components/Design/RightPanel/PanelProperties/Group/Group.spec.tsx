@@ -74,16 +74,13 @@ describe('Group behaviors', () => {
       addNodes({
         nodes: [
           {
-            fill: '#ffffff',
-            flipX: false,
-            flipY: false,
-            height: 20,
+            height: 0,
             id: 'panelEllipse',
-            name: 'Polygon',
+            name: 'Line',
             parentId: null,
             rotation: 0,
-            sides: 5,
-            type: NodeType.polygon,
+            strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+            type: NodeType.line,
             width: 20,
             x: 0,
             y: 0,

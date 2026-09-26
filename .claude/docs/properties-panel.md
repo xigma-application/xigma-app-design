@@ -1071,6 +1071,15 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
   Mixed across vectors, and an aspect-ratio lock stored as `TVectorNode.lockedAspectRatio`.
   `resizeVectorToDimensions` scales through the canvas `resizeNode` around the top-left of the bounds, leaving an
   axis with no extent (a straight line) unscaled.
+- Fill: `Common/FillSection` takes vectors for `fills` (`useFillSection/utils/isFillPanelNode`). A vector keeps a
+  paint stack per filled area (`fillByKey` over `filledFaceKeys`); `getVectorPanelFills` shows the stack every
+  filled area shares, or `null` (Mixed, "Click + to replace mixed content") when they differ, and
+  `hasMixedPaints`/`getPanelPaints` treat that `null` as mixed. Writes go through `commitFills` →
+  `getVectorFillsChange` (the target carries the vector): the new stack goes to every filled area and to
+  `defaultFill`; on a vector with no filled area it fills every closed area (`getClosedLoopPaintFillData`); an
+  empty stack clears every area. Image fills cover the whole vector's bounds; Crop is disabled for a vector
+  (`getDisabledFillModes`). The Paint tool is separate: it fills or clears one area with its own Solid/Gradient
+  paint, which is what makes the areas differ. A group's Fill now also includes its vectors.
 
 ## `ImageCrop/`
 

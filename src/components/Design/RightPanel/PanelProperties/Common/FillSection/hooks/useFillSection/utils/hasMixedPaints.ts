@@ -1,11 +1,14 @@
 import { isEqual } from 'lodash';
 
 // types
-import { TStyledNode } from '../../../../AppearanceSection/types';
 import { TPaintProperty } from 'types/design/paint/types';
+import { TStyledNode } from '../../../../AppearanceSection/types';
+import { TVectorNode } from 'types/design/types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPanelPaints } from './getPanelPaints';
 
-export const hasMixedPaints = (nodes: TStyledNode[], property: TPaintProperty): boolean =>
-  nodes.some((node) => !isEqual(getNodePaints(node, property), getNodePaints(nodes[0], property)));
+export const hasMixedPaints = (nodes: (TStyledNode | TVectorNode)[], property: TPaintProperty): boolean => {
+  const paints = nodes.map((node) => getPanelPaints(node, property));
+  return paints.some((nodePaints) => nodePaints === null || !isEqual(nodePaints, paints[0]));
+};

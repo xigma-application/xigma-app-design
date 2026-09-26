@@ -4,6 +4,7 @@ import { TAppearanceNode } from '../../../../../AppearanceSection/types';
 
 // utils
 import { getFillTargets } from '../getFillTargets';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 describe('getFillTargets', () => {
   it('should keep the id and stroke geometry of each node', () => {
@@ -12,6 +13,14 @@ describe('getFillTargets', () => {
 
     // result
     expect(getFillTargets(nodes)).toEqual([{ id: 'a', strokeAlign: StrokeAlign.outside, strokeWidth: 2 }]);
+  });
+
+  it('should carry a vector along so its fills can be written per area', () => {
+    // mock
+    const vector = makeSquareVector();
+
+    // result
+    expect(getFillTargets([vector])).toEqual([{ id: 'vector', strokeWidth: 10, vector }]);
   });
 
   it('should mark a line stroke as centered', () => {

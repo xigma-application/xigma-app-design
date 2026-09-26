@@ -9,7 +9,16 @@ import { TooltipProvider } from 'shared';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
-import { addNode, addNodes, groupNodes, setActiveTool, setGridSettingsPanelOpen, setImageEditor, setSelection, updateNode } from 'store/design/slice';
+import {
+  addNode,
+  addNodes,
+  groupNodes,
+  setActiveTool,
+  setGridSettingsPanelOpen,
+  setImageEditor,
+  setSelection,
+  updateNode,
+} from 'store/design/slice';
 import { selectActivePage, selectIsGridSettingsPanelOpen } from 'store/design/selectors';
 import { store } from 'store';
 

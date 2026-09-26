@@ -5,16 +5,18 @@ import { updateNode, updateNodes } from 'store/design/slice';
 // types
 import { StrokeAlign } from 'types/design/enums';
 import { TPaint, TPaintProperty } from 'types/design/paint/types';
+import { TVectorNode } from 'types/design/types';
 
 // utils
 import { getPaintsChange } from 'utils/design/paint/getPaintsChange';
+import { getVectorFillsChange } from 'utils/canvas/vectorNetwork/getVectorFillsChange';
 
 const DEFAULT_STROKE_WIDTH = 1;
 const DEFAULT_STROKE_ALIGN = StrokeAlign.inside;
 
 export type TStrokeSettings = { strokeAlign?: StrokeAlign; strokeWidth?: number };
 
-export type TFillTarget = TStrokeSettings & { id: string };
+export type TFillTarget = TStrokeSettings & { id: string; vector?: TVectorNode };
 
 const getStrokeDefaults = (property: TPaintProperty, current: TStrokeSettings): TStrokeSettings => {
   if (property === 'strokes') {
@@ -33,8 +35,10 @@ export const commitFills = (
   nextFills: TPaint[],
   property: TPaintProperty = 'fills',
 ): void => {
-  const updates = targets.map(({ id, ...stroke }) => ({
-    changes: { ...getPaintsChange(property, nextFills), ...getStrokeDefaults(property, stroke) },
+  const updates = targets.map(({ id, vector, ...stroke }) => ({
+    changes: vector
+      ? getVectorFillsChange(vector, nextFills)
+      : { ...getPaintsChange(property, nextFills), ...getStrokeDefaults(property, stroke) },
     id,
   }));
 

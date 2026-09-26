@@ -32,7 +32,7 @@ beforeAll(() => {
 });
 
 describe('Vector snapshots', () => {
-  it('should render the header, position, layout and export', () => {
+  it('should render the header, position, layout, fill and export', () => {
     // before
     const { asFragment } = renderVector();
 

@@ -156,7 +156,7 @@ A vector gets its own panel like in Figma: Position, Layout, Appearance, Fill, S
 and Export. The Paint tool keeps painting single areas; the Fill section changes the fill of the whole vector.
 
 - [x] the header says Vector path, and position, rotation, flips, width and height (with a ratio lock) work
-- [ ] Fill for the whole vector, "Click + to replace mixed content" when areas differ
+- [x] Fill for the whole vector, "Click + to replace mixed content" when areas differ
 - [ ] opacity, blend mode and selection colors
 - [ ] strokes with colors, gradients and images, position and weight
 - [ ] effects

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import Export from '../Export/Export';
+import FillSection from '../Common/FillSection/FillSection';
 import PositionSection from '../Common/PositionSection/PositionSection';
 import VectorDimensions from './VectorDimensions/VectorDimensions';
 import VectorHeader from './VectorHeader/VectorHeader';
@@ -21,6 +22,7 @@ const Vector: FC = () => {
       <UITools.Section e2eValue="layout" label={t(`${translationNameSpace}.layoutSection.label`)}>
         <VectorDimensions />
       </UITools.Section>
+      <FillSection />
       <Export />
     </Fragment>
   );

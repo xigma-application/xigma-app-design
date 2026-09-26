@@ -12,3 +12,5 @@ export const getPaintTranslationNamespace = (property: TPaintProperty): string =
   property === 'strokes' ? strokeTranslationNameSpace : translationNameSpace;
 
 export const MULTI_SELECTION_DISABLED_FILL_MODES: TImageFillMode[] = ['crop', 'tile'];
+
+export const VECTOR_DISABLED_FILL_MODES: TImageFillMode[] = ['crop'];

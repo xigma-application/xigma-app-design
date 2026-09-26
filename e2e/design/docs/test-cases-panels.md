@@ -1514,3 +1514,4 @@ There is no Fill section.
 | 669 | Selecting an image and a video together shows "N selected" in the rectangle panel header instead of Image or Video |  ✅  |   ✅ `create-media.spec.ts`    |
 | 670 | Selecting several images shows a floating toolbar with only Remove background and Boost resolution (icon and text); a single image keeps its full toolbar, and a selection with a video shows none |  ✅  |   ✅ `create-media.spec.ts`    |
 | 671 | A selected vector shows the Vector path panel; its X, W (with the aspect-ratio lock) and Rotation fields move, resize around the top-left and turn it |  ✅  |   ✅ `vector-panel.spec.ts`    |
+| 672 | The vector Fill section: + on a vector without fills fills every closed area, − on the last fill empties them, and areas with different fills show "Click + to replace mixed content" where + gives them all one fill |  ✅  |   ✅ `vector-panel.spec.ts`    |

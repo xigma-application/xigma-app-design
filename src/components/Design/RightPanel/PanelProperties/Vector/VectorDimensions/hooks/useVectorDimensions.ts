@@ -20,6 +20,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 // utils
 import { getLockedDimensionsChanges } from '../../../Common/ColumnDimensions/utils/getLockedDimensionsChanges';
 import { getMixedOrValue } from '../../../Common/utils/getMixedOrValue';
+import { getRoundedVectorSizes } from '../utils/getRoundedVectorSizes';
 import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 import { resizeVectorToDimensions } from '../utils/resizeVectorToDimensions';
 
@@ -41,10 +42,7 @@ export type TUseVectorDimensionsResult = {
 export const useVectorDimensions = (): TUseVectorDimensionsResult => {
   const dispatch = useAppDispatch();
   const vectors = useAppSelector(selectSelectedNodes).filter((node): node is TVectorNode => node?.type === NodeType.vector);
-  const sizes = vectors.map((vector) => getVectorNodeBounds(vector)).map(({ height, width }) => ({
-    height: Math.round(height * 100) / 100,
-    width: Math.round(width * 100) / 100,
-  }));
+  const sizes = getRoundedVectorSizes(vectors);
   const width = sizes[0]?.width ?? 0;
   const height = sizes[0]?.height ?? 0;
   const mixedWidth = getMixedOrValue(sizes.map((size) => size.width));
