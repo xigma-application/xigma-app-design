@@ -643,7 +643,7 @@ test('a dynamic or brush stroke on a Union is drawn as that stroke, not as a pla
   }
 });
 
-test('a Union of a rectangle and a vector turns as one: the vector bakes the turn into its points and the Union keeps its size', async ({
+test('a Union of a rectangle and a vector turns as one: the vector bakes the turn into its points and the Union keeps its size and centre', async ({
   page,
 }) => {
   const designPage = new DesignPage(page);
@@ -697,7 +697,7 @@ test('a Union of a rectangle and a vector turns as one: the vector bakes the tur
     store.dispatch(booleanNodes('union' as never));
   });
 
-  const readUnion = async (): Promise<{ height: number; vectorRotation: number; width: number }> =>
+  const readUnion = async (): Promise<{ centerX: number; centerY: number; height: number; vectorRotation: number; width: number }> =>
     page.evaluate(async () => {
       const { store } = await import('/src/store/index.ts');
       const { activePageId, pages } = store.getState().design;
@@ -707,7 +707,13 @@ test('a Union of a rectangle and a vector turns as one: the vector bakes the tur
       >;
       const union = Object.values(nodes).find((node) => node.type === 'boolean')!;
 
-      return { height: Math.round(union.height), vectorRotation: nodes['union-vector'].rotation, width: Math.round(union.width) };
+      return {
+        centerX: Math.round(union.x + union.width / 2),
+        centerY: Math.round(union.y + union.height / 2),
+        height: Math.round(union.height),
+        vectorRotation: nodes['union-vector'].rotation,
+        width: Math.round(union.width),
+      };
     });
 
   const before = await readUnion();

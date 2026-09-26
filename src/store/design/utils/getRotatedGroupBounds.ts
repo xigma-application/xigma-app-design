@@ -3,13 +3,13 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getNodeWorldCorners } from './getNodeWorldCorners';
+import { getNodeLocalCorners } from './getNodeLocalCorners';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 const ORIGIN: TPoint = { x: 0, y: 0 };
 
 export const getRotatedGroupBounds = (children: TSceneNode[], rotation: number): TDraftRect => {
-  const localCorners = children.flatMap((child) => getNodeWorldCorners(child).map((corner) => rotatePoint(corner, ORIGIN, -rotation)));
+  const localCorners = children.flatMap((child) => getNodeLocalCorners(child, rotation));
   const xs = localCorners.map((corner) => corner.x);
   const ys = localCorners.map((corner) => corner.y);
   const minX = Math.min(...xs);

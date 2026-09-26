@@ -5636,7 +5636,10 @@ turned as part of a selected group or boolean (a rigid-transform descendant). `g
 `getBakedRotatedVectorChanges`: the old rotation and the delta are baked into the points around the pivot and added
 to `fillRotation`, so the fill stays turned. Directly selected vectors keep their turn in `rotation` (§85). Keeping
 `rotation` on a descendant broke its parent: `getNodeWorldCorners` read the unrotated vertex bounds, so a turned
-Union got a wrong frame; it now reads the drawn shape (`getRenderedVectorNode`). A turned boolean paints its fills
+Union got a wrong frame; it now reads the drawn shape (`getRenderedVectorNode`). `getRotatedGroupBounds` takes a
+vector's corners in the group's own turned frame (`getNodeLocalCorners`: the drawn shape turned back by the group's
+rotation), because the corners of its world axis-aligned box overshoot there; the overshoot moved the frame's x/y
+while the rotate pinned its width/height, so the frame slid off the Union. A turned boolean paints its fills
 and strokes over its own frame (`getBooleanPaintBox`: `x`, `y`, `width`, `height`, `rotation`) so an image, video
 or pattern turns with it; an unturned one keeps the shape bounds.
 
