@@ -950,6 +950,15 @@ component button, no dropdown) → `Common/PositionSection` → a bare `UITools.
 "Layout" holding `Common/ColumnDimensions` + `Common/ColumnGridChildSpan` → `Common/AppearanceSection`
 → `Common/FillSection`. No auto-layout rows.
 
+Images and videos placed with the Media tool (toolbar Image/video… or File → Place image) are plain
+rectangles with one `image`/`video` fill (`useDrawMediaTool/utils/buildMediaRectangleNode`, named
+"Image"/"Video"), so they use this panel. `RectangleHeader/utils/getRectangleHeaderLabelKey` switches
+the header label to Image/Video when every selected rectangle is filled only with images/videos
+("N selected" when images and videos are selected together)
+(`utils/design/paint/getNodeMediaFillType`), and the Layers row shows the `Image`/`Video` icon instead
+of the shape outline. Legacy `NodeType.media` nodes in old files still render, but are no longer
+created and have no panel.
+
 ## `Line/`
 
 `Line.tsx` = `LineHeader` (component, mask, boolean buttons + the shared shape "…" menu

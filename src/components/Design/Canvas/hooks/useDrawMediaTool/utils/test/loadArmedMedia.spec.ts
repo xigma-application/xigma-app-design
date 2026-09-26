@@ -3,6 +3,7 @@ import { OBJECT_URLS_BY_FILE_HASH, VIDEO_FRAMES_BY_FILE_HASH } from 'utils/media
 
 // utils
 import { loadArmedMedia } from '../loadArmedMedia';
+import { videoSrcUrlCache } from 'shared/UITools/ColorPicker/Body/VideoPanel/utils/videoSrcUrlCache';
 
 type TFakeImage = { naturalHeight: number; naturalWidth: number; onload: (() => void) | null; src: string };
 
@@ -73,7 +74,7 @@ describe('loadArmedMedia', () => {
 
     // result
     expect(image.src).toBe('blob:mock-url');
-    expect(onLoad).toHaveBeenCalledWith({ naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' });
+    expect(onLoad).toHaveBeenCalledWith({ kind: 'image', naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' });
   });
 
   it('should extract a video frame instead of loading the file as an image', async () => {
@@ -82,7 +83,11 @@ describe('loadArmedMedia', () => {
     const file = new File(['x'], 'clip.mp4', { type: 'video/mp4' });
     const onLoad = vi.fn();
 
-    URL.createObjectURL = vi.fn().mockReturnValueOnce('blob:mock-video-url').mockReturnValueOnce('blob:mock-frame-url');
+    URL.createObjectURL = vi
+      .fn()
+      .mockReturnValueOnce('blob:mock-source-url')
+      .mockReturnValueOnce('blob:mock-video-url')
+      .mockReturnValueOnce('blob:mock-frame-url');
     URL.revokeObjectURL = vi.fn();
 
     // spy
@@ -100,6 +105,7 @@ describe('loadArmedMedia', () => {
     getLastVideo().onloadeddata?.(new Event('loadeddata'));
 
     // result
-    expect(onLoad).toHaveBeenCalledWith({ naturalHeight: 90, naturalWidth: 160, src: 'blob:mock-frame-url' });
+    expect(onLoad).toHaveBeenCalledWith({ kind: 'video', naturalHeight: 90, naturalWidth: 160, src: 'blob:mock-frame-url' });
+    expect(videoSrcUrlCache.get('blob:mock-frame-url')).toBe('blob:mock-source-url');
   });
 });

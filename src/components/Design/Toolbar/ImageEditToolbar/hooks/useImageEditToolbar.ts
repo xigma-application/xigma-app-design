@@ -14,7 +14,8 @@ export type TUseImageEditToolbarResult = {
 };
 
 export const useImageEditToolbar = (): TUseImageEditToolbarResult => {
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
+  const selectedNodes = useAppSelector(selectSelectedNodes);
+  const [selectedNode] = selectedNodes;
   const vectorEditingNodeIds = useAppSelector(selectVectorEditingNodeIds);
   const imageEditor = useAppSelector(selectImageEditor);
   const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
@@ -25,6 +26,7 @@ export const useImageEditToolbar = (): TUseImageEditToolbarResult => {
   }, []);
 
   const isVisible =
+    selectedNodes.length === 1 &&
     vectorEditingNodeIds.length === 0 &&
     imageEditor?.mode !== 'crop' &&
     imageEditor?.property !== 'strokes' &&

@@ -2,6 +2,9 @@
 import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
+// utils
+import { getNodeMediaFillType } from 'utils/design/paint/getNodeMediaFillType';
+
 const NODE_SHAPE_OUTLINE_TYPES = new Set<NodeType>([
   NodeType.ellipse,
   NodeType.line,
@@ -11,4 +14,4 @@ const NODE_SHAPE_OUTLINE_TYPES = new Set<NodeType>([
   NodeType.vector,
 ]);
 
-export const hasNodeShapeOutline = (node: TSceneNode): boolean => NODE_SHAPE_OUTLINE_TYPES.has(node.type);
+export const hasNodeShapeOutline = (node: TSceneNode): boolean => NODE_SHAPE_OUTLINE_TYPES.has(node.type) && !getNodeMediaFillType(node);

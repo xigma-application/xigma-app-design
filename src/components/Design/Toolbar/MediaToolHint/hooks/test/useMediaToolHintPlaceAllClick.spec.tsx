@@ -38,7 +38,7 @@ describe('useMediaToolHintPlaceAllClick', () => {
 
     vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ height: 600, left: 0, top: 0, width: 1000 } as DOMRect);
 
-    const armed: TArmedMedia = { naturalHeight: 50, naturalWidth: 100, src: 'blob:armed' };
+    const armed: TArmedMedia = { kind: 'image', naturalHeight: 50, naturalWidth: 100, src: 'blob:armed' };
     const refs = createCanvasRefs({ canvasRef: { current: canvas }, media: { armedRef: { current: armed }, queueRef: { current: [] } } });
     const rootOrderLengthBefore = selectActivePage(store.getState()).rootOrder.length;
 

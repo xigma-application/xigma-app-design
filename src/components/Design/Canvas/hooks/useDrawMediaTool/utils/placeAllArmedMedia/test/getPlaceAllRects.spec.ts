@@ -4,19 +4,19 @@ import { getPlaceAllRects } from '../getPlaceAllRects';
 describe('getPlaceAllRects', () => {
   it('should center the largest (only) media on the given point', () => {
     // action
-    const placed = getPlaceAllRects([{ naturalHeight: 50, naturalWidth: 100, src: 'a' }], { x: 0, y: 0 });
+    const placed = getPlaceAllRects([{ kind: 'image', naturalHeight: 50, naturalWidth: 100, src: 'a' }], { x: 0, y: 0 });
 
     // result
     expect(placed).toEqual([
-      { media: { naturalHeight: 50, naturalWidth: 100, src: 'a' }, rect: { height: 50, width: 100, x: -50, y: -25 } },
+      { media: { kind: 'image', naturalHeight: 50, naturalWidth: 100, src: 'a' }, rect: { height: 50, width: 100, x: -50, y: -25 } },
     ]);
   });
 
   it('should rank by pixel area rather than list order, and butt each remaining rect exactly against the previous one', () => {
     // mock
-    const small = { naturalHeight: 10, naturalWidth: 10, src: 'small' };
-    const largest = { naturalHeight: 100, naturalWidth: 100, src: 'largest' };
-    const medium = { naturalHeight: 40, naturalWidth: 40, src: 'medium' };
+    const small = { kind: 'image' as const, naturalHeight: 10, naturalWidth: 10, src: 'small' };
+    const largest = { kind: 'image' as const, naturalHeight: 100, naturalWidth: 100, src: 'largest' };
+    const medium = { kind: 'image' as const, naturalHeight: 40, naturalWidth: 40, src: 'medium' };
 
     // action
     const placed = getPlaceAllRects([small, largest, medium], { x: 0, y: 0 });

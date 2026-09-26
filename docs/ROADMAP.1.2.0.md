@@ -140,3 +140,12 @@ points are cut in. Fills, strokes and effects work the same as on a rectangle.
       that already shows the fill
 - [x] Flatten, Edit object and Offset vector keep the star's fill and stroke
 - [x] stars show Fill and Stroke when selected together with other layers
+
+## Stage 17 — Image and video
+
+A placed image or video is a rectangle filled with it, like in Figma, so it has the rectangle panel:
+Position, Layout, Appearance, Fill, Stroke, Effects and Export. The panel header says Image or Video.
+
+- [x] placing an image or video from the toolbar or File → Place image adds such a rectangle
+- [x] the layer shows an image or video icon in Layers
+- [x] several selected images show a toolbar with Remove background and Boost resolution; videos show none

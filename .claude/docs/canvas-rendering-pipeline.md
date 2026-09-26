@@ -976,6 +976,11 @@ frequency — the per-dispatch cost that matters for a drag gesture is a non-iss
 
 ## 6. Texture/image pipeline (Media nodes)
 
+The Media tool now places rectangles with an `image`/`video` fill (see properties-panel.md, `Rectangle/`);
+`NodeType.media` + `drawMediaLeafNode` only remain for documents that already contain such nodes.
+A placed video's fill `ref` is its first-frame PNG and `videoSrcUrlCache` maps it to the video's
+object URL, the same as picking a video in the Fill panel.
+
 `utils/canvas/getOrLoadTexture.ts` — cache + placeholder-then-swap:
 ```ts
 export const getOrLoadTexture = (gl, cache, src) => {

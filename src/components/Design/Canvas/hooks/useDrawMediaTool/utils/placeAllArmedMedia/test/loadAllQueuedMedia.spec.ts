@@ -11,11 +11,11 @@ describe('loadAllQueuedMedia', () => {
 
   it('should resolve every queued file through loadArmedMedia and prepend the armed media', async () => {
     // mock
-    const armed: TArmedMedia = { naturalHeight: 50, naturalWidth: 100, src: 'blob:armed' };
+    const armed: TArmedMedia = { kind: 'image', naturalHeight: 50, naturalWidth: 100, src: 'blob:armed' };
     const fileA = new File(['a'], 'a.png');
     const fileB = new File(['b'], 'b.png');
-    const loadedA: TArmedMedia = { naturalHeight: 10, naturalWidth: 20, src: 'blob:a' };
-    const loadedB: TArmedMedia = { naturalHeight: 30, naturalWidth: 40, src: 'blob:b' };
+    const loadedA: TArmedMedia = { kind: 'image', naturalHeight: 10, naturalWidth: 20, src: 'blob:a' };
+    const loadedB: TArmedMedia = { kind: 'image', naturalHeight: 30, naturalWidth: 40, src: 'blob:b' };
 
     vi.mocked(loadArmedMedia).mockImplementation((file, onLoad) => onLoad(file === fileA ? loadedA : loadedB));
 
@@ -29,7 +29,7 @@ describe('loadAllQueuedMedia', () => {
   it('should return only the queued media when nothing is armed', async () => {
     // mock
     const file = new File(['a'], 'a.png');
-    const loaded: TArmedMedia = { naturalHeight: 10, naturalWidth: 20, src: 'blob:a' };
+    const loaded: TArmedMedia = { kind: 'image', naturalHeight: 10, naturalWidth: 20, src: 'blob:a' };
 
     vi.mocked(loadArmedMedia).mockImplementation((_, onLoad) => onLoad(loaded));
 

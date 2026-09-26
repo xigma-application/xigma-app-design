@@ -337,9 +337,9 @@ describe('useDrawMediaTool behaviors', () => {
 
     // result — raw 50x50 drag locked to a 2:1 ratio, driven by the taller raw axis
     expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({
+      fills: [expect.objectContaining({ ref: 'blob:mock-url', type: 'image' })],
       height: 50,
-      src: 'blob:mock-url',
-      type: NodeType.media,
+      type: NodeType.rectangle,
       width: 100,
       x: 0,
       y: 0,
@@ -372,10 +372,10 @@ describe('useDrawMediaTool behaviors', () => {
 
     expect(page.rootOrder).toHaveLength(1);
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({
+      fills: [expect.objectContaining({ ref: 'blob:mock-url', type: 'image' })],
       height: 100,
       name: 'Image',
-      src: 'blob:mock-url',
-      type: NodeType.media,
+      type: NodeType.rectangle,
       width: 200,
       x: -90,
       y: -40,

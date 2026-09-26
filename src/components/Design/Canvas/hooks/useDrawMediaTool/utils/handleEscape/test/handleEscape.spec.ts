@@ -36,7 +36,7 @@ describe('handleEscape', () => {
     store.dispatch(setActiveTool(ToolName.media));
 
     const nodeId = createMediaNode();
-    const armedRef = { current: { naturalHeight: 1, naturalWidth: 1, src: 'blob:mock-url' } };
+    const armedRef = { current: { kind: 'image' as const, naturalHeight: 1, naturalWidth: 1, src: 'blob:mock-url' } };
     const queueRef = { current: [new File(['x'], 'next.png', { type: 'image/png' })] };
     const startRef = { current: { x: 1, y: 1 } };
     const nodeIdRef = { current: nodeId };

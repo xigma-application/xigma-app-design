@@ -3,6 +3,7 @@ import { TIconProps } from '@xigma/components';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TMediaFillType } from 'utils/design/paint/getNodeMediaFillType';
 
 export const NODE_SHAPE_ICON_VIEW_BOX_SIZE = 16;
 export const NODE_SHAPE_ICON_PADDING = 2;
@@ -28,4 +29,9 @@ export const NODE_TYPE_ICON: Record<NodeType, TIconProps['name']> = {
   [NodeType.star]: 'StarTool',
   [NodeType.text]: 'TextTool',
   [NodeType.vector]: 'PenTool',
+};
+
+export const MEDIA_FILL_ICON: Record<TMediaFillType, TIconProps['name']> = {
+  image: 'Image',
+  video: 'Video',
 };

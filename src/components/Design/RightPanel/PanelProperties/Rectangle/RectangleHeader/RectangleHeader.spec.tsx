@@ -43,8 +43,14 @@ const makeRectangle = (id: string): TRectangleNode => ({
 beforeAll(() => {
   store.dispatch(
     addNodes({
-      nodes: [makeRectangle('headerA'), makeRectangle('headerB'), { ...makeRectangle('headerNested'), parentId: 'headerB' }],
-      rootIds: ['headerA', 'headerB'],
+      nodes: [
+        makeRectangle('headerA'),
+        makeRectangle('headerB'),
+        { ...makeRectangle('headerNested'), parentId: 'headerB' },
+        { ...makeRectangle('headerImage'), fills: [{ opacity: 100, ref: 'blob:image', rotation: 0, scaleMode: 'fill', type: 'image' }] },
+        { ...makeRectangle('headerVideo'), fills: [{ opacity: 100, ref: 'blob:video', rotation: 0, scaleMode: 'fill', type: 'video' }] },
+      ],
+      rootIds: ['headerA', 'headerB', 'headerImage', 'headerVideo'],
     }),
   );
 });
@@ -70,6 +76,28 @@ describe('RectangleHeader behaviors', () => {
 
     // result
     expect(screen.getByText('Rectangle')).toBeInTheDocument();
+  });
+
+  it('should render the Image label while a rectangle filled with an image is selected', () => {
+    // mock
+    store.dispatch(setSelection(['headerImage']));
+
+    // before
+    renderRectangleHeader();
+
+    // result
+    expect(screen.getByText('Image')).toBeInTheDocument();
+  });
+
+  it('should render the selected count while an image and a video are selected together', () => {
+    // mock
+    store.dispatch(setSelection(['headerImage', 'headerVideo']));
+
+    // before
+    renderRectangleHeader();
+
+    // result
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
   });
 
   it('should render the create component button and no element type menu', () => {

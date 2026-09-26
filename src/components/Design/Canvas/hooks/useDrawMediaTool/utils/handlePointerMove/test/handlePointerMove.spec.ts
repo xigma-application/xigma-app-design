@@ -27,7 +27,7 @@ const createArmedRef = (armed: TArmedMedia | null = null): RefObject<TArmedMedia
 const createStartRef = (point: TPoint | null = null): RefObject<TPoint | null> => ({ current: point });
 const createAspectRatioLockGuideRef = (): RefObject<TAspectRatioLockGuide | null> => ({ current: null });
 
-const armed: TArmedMedia = { naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' };
+const armed: TArmedMedia = { kind: 'image', naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' };
 
 const createMediaNode = (): string => {
   const { payload } = store.dispatch(

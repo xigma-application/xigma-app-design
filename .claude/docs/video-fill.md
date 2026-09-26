@@ -321,3 +321,10 @@ whole picker system, not something this cache changes.
 - `ImageFillModeRow`'s rotate button aria-label/tooltip text says "Rotate image" even when editing a
   video paint (`colorPicker.image.rotateAriaLabel`/`rotateTooltip`) — the component is reused as-is,
   not parametrized with a translation namespace. Cosmetic only.
+
+## Multi-image toolbar
+
+`Toolbar/MultiImageEditToolbar` floats over the canvas (same look as `ImageEditToolbar`) while two or
+more layers are selected and each has an image fill and no video fill (`utils/isMultiImageSelection`).
+It only shows Remove background and Boost resolution, both still without actions. `ImageEditToolbar`
+itself now needs exactly one selected layer; any video in the selection hides both toolbars.

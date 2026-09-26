@@ -1,6 +1,6 @@
 // types
 import { BooleanOperation, LayoutMode, NodeType } from 'types/design/enums';
-import { TBooleanNode, TFrameNode, TMaskNode, TTextNode } from 'types/design/types';
+import { TBooleanNode, TFrameNode, TMaskNode, TRectangleNode, TTextNode } from 'types/design/types';
 
 // utils
 import { getNodeTypeIconName } from '../getNodeTypeIconName';
@@ -41,6 +41,31 @@ const textNode: TTextNode = {
 describe('getNodeTypeIconName', () => {
   it('should fall back to the shared NODE_TYPE_ICON entry for a non-text node', () => {
     expect(getNodeTypeIconName(frameNode, false)).toBe('FrameTool');
+  });
+
+  it('should return the Image and Video icons for rectangles filled only with an image or a video', () => {
+    // mock
+    const rectangle: TRectangleNode = {
+      fills: [{ opacity: 100, ref: 'blob:media', rotation: 0, scaleMode: 'fill', type: 'image' }],
+      height: 10,
+      id: 'rect-1',
+      name: 'Image',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 10,
+      x: 0,
+      y: 0,
+    };
+    const videoRectangle: TRectangleNode = {
+      ...rectangle,
+      fills: [{ opacity: 100, ref: 'blob:media', rotation: 0, scaleMode: 'fill', type: 'video' }],
+    };
+
+    // result
+    expect(getNodeTypeIconName(rectangle, false)).toBe('Image');
+    expect(getNodeTypeIconName(videoRectangle, false)).toBe('Video');
+    expect(getNodeTypeIconName({ ...rectangle, fills: [] }, false)).toBe('RectangleTool');
   });
 
   it('should return the plain text icon for a text node with no pathId', () => {

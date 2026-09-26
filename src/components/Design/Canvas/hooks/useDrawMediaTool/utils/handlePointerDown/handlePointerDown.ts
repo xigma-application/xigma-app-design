@@ -9,7 +9,6 @@ import { AppDispatch, AppStore, RootState } from 'store';
 
 // types
 import { MouseButton } from 'types/enums';
-import { NodeType } from 'types/design/enums';
 import { TArmedMedia } from '../loadArmedMedia';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/types';
@@ -17,6 +16,7 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { appendLastCreatedNodeToSelection } from '../../../../utils/appendLastCreatedNodeToSelection';
+import { buildMediaRectangleNode } from '../buildMediaRectangleNode';
 import { getCenteredMediaRect } from '../handlePointerUp/utils/getCenteredMediaRect';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { handleEscape } from '../handleEscape/handleEscape';
@@ -39,12 +39,7 @@ const createArmedMediaNode = (
   queueRef: RefObject<File[]>,
 ): void => {
   const rect = roundRect(getCenteredMediaRect(point, armed.naturalWidth, armed.naturalHeight));
-  const { payload } = dispatch(
-    addNode(
-      { ...rect, flipX: false, flipY: false, name, parentId: dropTarget.parentId, rotation: 0, src: armed.src, type: NodeType.media },
-      dropTarget.targetIndex,
-    ),
-  );
+  const { payload } = dispatch(addNode(buildMediaRectangleNode(rect, armed, name, dropTarget.parentId), dropTarget.targetIndex));
 
   nodeIdRef.current = payload.id;
   appendLastCreatedNodeToSelection(dispatch, appStore);

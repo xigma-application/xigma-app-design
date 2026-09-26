@@ -41,6 +41,28 @@ describe('getNodeOutlinePath', () => {
     expect(result?.d).toMatch(/^M/);
   });
 
+  it('should return null for a rectangle filled only with an image', () => {
+    // mock
+    const node: TRectangleNode = {
+      fills: [{ opacity: 100, ref: 'blob:image', rotation: 0, scaleMode: 'fill', type: 'image' }],
+      height: 40,
+      id: 'rect-image',
+      name: 'Image',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 40,
+      x: 0,
+      y: 0,
+    };
+
+    // action
+    const result = getNodeOutlinePath(node);
+
+    // result
+    expect(result).toBeNull();
+  });
+
   it('should return an outline for an ellipse node', () => {
     // mock
     const node: TEllipseNode = {

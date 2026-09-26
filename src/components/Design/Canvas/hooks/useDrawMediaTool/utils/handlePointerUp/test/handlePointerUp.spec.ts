@@ -32,7 +32,7 @@ const createAspectRatioLockGuideRef = (): RefObject<TAspectRatioLockGuide | null
   current: { height: 1, rotation: 0, width: 1, x: 0, y: 0 },
 });
 
-const armed: TArmedMedia = { naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' };
+const armed: TArmedMedia = { kind: 'image', naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' };
 
 const createMediaNode = (rect: TDraftRect): string => {
   const { payload } = store.dispatch(

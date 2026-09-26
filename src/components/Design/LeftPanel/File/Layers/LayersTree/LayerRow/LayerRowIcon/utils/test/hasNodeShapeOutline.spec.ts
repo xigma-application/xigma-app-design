@@ -9,8 +9,19 @@ describe('hasNodeShapeOutline', () => {
   it('should be true for shapes, lines and vectors', () => {
     // result
     [NodeType.ellipse, NodeType.line, NodeType.polygon, NodeType.rectangle, NodeType.star, NodeType.vector].forEach((type) =>
-      expect(hasNodeShapeOutline({ type } as TSceneNode)).toBe(true),
+      expect(hasNodeShapeOutline({ fills: [], type } as unknown as TSceneNode)).toBe(true),
     );
+  });
+
+  it('should be false for a rectangle filled only with an image', () => {
+    // mock
+    const node = {
+      fills: [{ opacity: 100, ref: 'blob:image', rotation: 0, scaleMode: 'fill', type: 'image' }],
+      type: NodeType.rectangle,
+    } as TSceneNode;
+
+    // result
+    expect(hasNodeShapeOutline(node)).toBe(false);
   });
 
   it('should be false for containers and text', () => {

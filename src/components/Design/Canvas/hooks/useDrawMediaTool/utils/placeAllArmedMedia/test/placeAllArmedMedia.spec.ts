@@ -66,7 +66,7 @@ describe('placeAllArmedMedia', () => {
   it('should place the armed file and every queued file — largest centered on the panel-aware visible canvas center, the rest cascading up-left — then select them all and revert to the default tool', async () => {
     // mock
     const canvas = createCanvas();
-    const armed: TArmedMedia = { naturalHeight: 50, naturalWidth: 50, src: 'blob:armed' };
+    const armed: TArmedMedia = { kind: 'image', naturalHeight: 50, naturalWidth: 50, src: 'blob:armed' };
     const bigFile = new File(['big'], 'big.png', { type: 'image/png' });
     const refs = createCanvasRefs({
       canvasRef: { current: canvas },
@@ -101,9 +101,21 @@ describe('placeAllArmedMedia', () => {
     const [secondToLastId, lastId] = rootOrder.slice(-2);
     const page = store.getState().design.pages[store.getState().design.activePageId];
 
-    expect(page.nodes[secondToLastId]).toMatchObject({ height: 200, src: 'blob:big', width: 200, x: 400, y: 200 });
+    expect(page.nodes[secondToLastId]).toMatchObject({
+      fills: [expect.objectContaining({ ref: 'blob:big' })],
+      height: 200,
+      width: 200,
+      x: 400,
+      y: 200,
+    });
     // the armed 50x50 media's bottom-right corner (400, 200) lands exactly on bigFile's top-left corner — no gap
-    expect(page.nodes[lastId]).toMatchObject({ height: 50, src: 'blob:armed', width: 50, x: 350, y: 150 });
+    expect(page.nodes[lastId]).toMatchObject({
+      fills: [expect.objectContaining({ ref: 'blob:armed' })],
+      height: 50,
+      width: 50,
+      x: 350,
+      y: 150,
+    });
     expect(selectSelectedIds(store.getState()).slice(selectedIdsBefore)).toEqual([secondToLastId, lastId]);
     expect(store.getState().design.activeTool).toBe(ToolName.default);
   });

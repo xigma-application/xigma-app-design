@@ -14,12 +14,17 @@ import PanelHeaderMoreActionsButton from '../../Common/PanelHeader/PanelHeaderMo
 import { translationNameSpace } from './constants';
 
 // store
-import { selectSelectedIds } from 'store/design/selectors';
+import { selectSelectedIds, selectSelectedNodes } from 'store/design/selectors';
 import { useAppSelector } from 'store';
+
+// utils
+import { getRectangleHeaderLabelKey } from './utils/getRectangleHeaderLabelKey';
 
 const RectangleHeader: FC = () => {
   const { t } = useTranslation();
   const isMultiple = useAppSelector(selectSelectedIds).length > 1;
+  const selectedNodes = useAppSelector(selectSelectedNodes);
+  const labelKey = getRectangleHeaderLabelKey(selectedNodes);
 
   return (
     <PanelHeader
@@ -33,7 +38,7 @@ const RectangleHeader: FC = () => {
         </Fragment>
       }
       e2eValue="rectangle"
-      label={t(`${translationNameSpace}.label`)}
+      label={t(`${translationNameSpace}.${labelKey}`, { count: selectedNodes.length })}
     />
   );
 };

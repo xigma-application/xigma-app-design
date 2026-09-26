@@ -6,11 +6,12 @@ import { selectViewport } from 'store/design/selectors';
 import { AppDispatch, AppStore } from 'store';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { appendLastCreatedNodeToSelection } from '../../../../utils/appendLastCreatedNodeToSelection';
+import { buildMediaRectangleNode } from '../buildMediaRectangleNode';
 import { getPlaceAllRects, TPlacedMedia } from './getPlaceAllRects';
 import { getRectCenter } from '../../../../utils/getRectCenter';
 import { getVisibleCanvasRect } from '../../../../utils/getVisibleCanvasRect';
@@ -19,7 +20,7 @@ import { screenToWorld } from 'utils/transform/screenToWorld';
 
 const addPlacedMediaNodes = (dispatch: AppDispatch, appStore: AppStore, placedMedia: TPlacedMedia[], name: string): void => {
   placedMedia.forEach(({ media, rect }) => {
-    dispatch(addNode({ ...rect, flipX: false, flipY: false, name, parentId: null, rotation: 0, src: media.src, type: NodeType.media }));
+    dispatch(addNode(buildMediaRectangleNode(rect, media, name, null)));
     appendLastCreatedNodeToSelection(dispatch, appStore);
   });
 };

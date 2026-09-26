@@ -1,0 +1,66 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MultiImageEditToolbar snapshots > should render Remove background and Boost resolution while several images are selected 1`] = `
+<DocumentFragment>
+  <div
+    class="_MultiImageEditToolbar_dca8d5"
+  >
+    <button
+      aria-label="Remove background"
+      aria-pressed="false"
+      class="_Button_b88d2e _Button--link_b88d2e _Button--primary_b88d2e _ToolbarButton_33ba33"
+      data-state="closed"
+      type="button"
+    >
+      <svg
+        class="Icon"
+        data-fpl-icon-size="24"
+        fill="none"
+        height="24"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 24 24"
+        width="24"
+      >
+        <path
+          d="M11.973 15c1.56 0 2.93.795 3.738 2h.789a.5.5 0 0 0 .5-.5V16a.5.5 0 0 1 1 0v.5a1.5 1.5 0 0 1-1.5 1.5h-1.049a.55.55 0 0 1-.464-.28 3.5 3.5 0 0 0-6.029 0 .6.6 0 0 1-.093.119.5.5 0 0 1-.35.159L8.5 18h-1A1.5 1.5 0 0 1 6 16.5V16a.5.5 0 0 1 1 0v.5a.5.5 0 0 0 .5.5h.734a4.49 4.49 0 0 1 3.739-2M6.5 12.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5m11 0a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5M12 9a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5m0 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-5.5-.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5m11 .5a.5.5 0 0 1 .5.5v.5a.5.5 0 0 1-1 0v-.5a.5.5 0 0 1 .5-.5m-.484-5.62c.126-.504.843-.504.97 0l.326 1.308 1.308.328c.505.126.505.843 0 .97l-1.308.327-.327 1.307c-.126.505-.843.505-.97 0l-.326-1.307-1.308-.328c-.505-.126-.505-.843 0-.97l1.308-.327zM8 6a.5.5 0 0 1 0 1h-.5a.5.5 0 0 0-.5.5V8a.5.5 0 0 1-1 0v-.5A1.5 1.5 0 0 1 7.5 6zm3 0a.5.5 0 0 1 0 1h-1a.5.5 0 0 1 0-1zm2.5 0a.5.5 0 0 1 0 1H13a.5.5 0 0 1 0-1z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+      <span
+        class="_ToolbarButton__label_33ba33"
+      >
+        Remove background
+      </span>
+    </button>
+    <button
+      aria-label="Boost resolution"
+      aria-pressed="false"
+      class="_Button_b88d2e _Button--link_b88d2e _Button--primary_b88d2e _ToolbarButton_33ba33"
+      data-state="closed"
+      type="button"
+    >
+      <svg
+        class="Icon"
+        data-fpl-icon-size="24"
+        fill="none"
+        height="24"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 24 24"
+        width="24"
+      >
+        <path
+          d="M5.015 14.437c.126-.505.844-.505.97 0l.315 1.26 1.26.314c.505.126.505.844 0 .97l-1.26.315-.314 1.26c-.127.505-.845.505-.971 0l-.314-1.26-1.26-.315c-.505-.126-.505-.844 0-.97l1.26-.315zM16.999 7a2 2 0 0 1 2 2v6a2 2 0 0 1-1.796 1.99L17 17H9.5a.5.5 0 0 1 0-1H17a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v3.5a.5.5 0 0 1-1 0V9a2 2 0 0 1 2-2zM11 10a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-1H9v1a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 1 0v1h1.5v-1a.5.5 0 0 1 .5-.5m3 0a2 2 0 0 1 0 4h-1a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5zm-.5 3h.5a1 1 0 0 0 0-2h-.5z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+      <span
+        class="_ToolbarButton__label_33ba33"
+      >
+        Boost resolution
+      </span>
+    </button>
+  </div>
+</DocumentFragment>
+`;

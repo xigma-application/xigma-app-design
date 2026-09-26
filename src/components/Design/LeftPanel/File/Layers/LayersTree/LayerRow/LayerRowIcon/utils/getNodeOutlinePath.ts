@@ -7,12 +7,14 @@ import { TNodeOutline } from '../types';
 import { buildVectorNetworkPathD } from './buildVectorNetworkPathD';
 import { convertNodeToVector } from 'utils/canvas/vectorNetwork/convertShapeToVector/convertNodeToVector';
 import { fitVectorNetworkToViewBox, TVectorNetwork } from './fitVectorNetworkToViewBox';
+import { getNodeMediaFillType } from 'utils/design/paint/getNodeMediaFillType';
 
 const getNodeVectorNetwork = (node: TSceneNode): TVectorNetwork | null => {
   switch (node.type) {
     case NodeType.vector:
       return { segments: node.segments, vertices: node.vertices };
     case NodeType.rectangle:
+      return getNodeMediaFillType(node) ? null : convertNodeToVector(node);
     case NodeType.ellipse:
     case NodeType.polygon:
     case NodeType.star:

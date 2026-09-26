@@ -50,6 +50,30 @@ describe('useImageEditToolbar', () => {
     expect(renderUseImageEditToolbar().result.current.isVisible).toBe(false);
   });
 
+  it('should stay hidden when the single selected layer cannot hold fills', () => {
+    // mock
+    store.dispatch(
+      addNode({ childIds: [], height: 10, name: 'Group', parentId: null, rotation: 0, type: NodeType.group, width: 10, x: 0, y: 0 }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+
+    store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+
+    // result
+    expect(renderUseImageEditToolbar().result.current.isVisible).toBe(false);
+  });
+
+  it('should stay hidden when several image layers are selected', () => {
+    // mock
+    const imageFill: TPaint = { opacity: 100, ref: '', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    store.dispatch(setSelection([addRectangle([imageFill]), addRectangle([imageFill])]));
+
+    // result
+    expect(renderUseImageEditToolbar().result.current.isVisible).toBe(false);
+  });
+
   it('should stay hidden when the selected node has no image fill', () => {
     const id = addRectangle([{ color: '#ff0000', opacity: 100, type: 'solid' }]);
 

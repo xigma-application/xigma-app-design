@@ -39,7 +39,7 @@ describe('armNextFile', () => {
     // mock
     const canvas = document.createElement('canvas');
     const canvasRef = { current: canvas };
-    const armedRef: { current: TArmedMedia | null } = { current: { naturalHeight: 10, naturalWidth: 10, src: 'blob:old' } };
+    const armedRef: { current: TArmedMedia | null } = { current: { kind: 'image', naturalHeight: 10, naturalWidth: 10, src: 'blob:old' } };
     const queueRef = { current: [] as File[] };
 
     canvas.style.cursor = 'previous-cursor';
@@ -103,7 +103,7 @@ describe('armNextFile', () => {
     sourceImage.onload?.();
 
     // result
-    expect(armedRef.current).toEqual({ naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' });
+    expect(armedRef.current).toEqual({ kind: 'image', naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' });
     expect(dispatch).toHaveBeenCalledWith(setMediaToolArmed(true));
 
     const [, crosshairImage, thumbnailImage] = getImages();

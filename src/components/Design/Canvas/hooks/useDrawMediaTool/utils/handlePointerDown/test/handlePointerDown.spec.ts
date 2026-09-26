@@ -29,7 +29,7 @@ const pointerEvent = (x: number, y: number, button = 0): PointerEvent =>
 const createArmedRef = (armed: TArmedMedia | null = null): RefObject<TArmedMedia | null> => ({ current: armed });
 const createStartRef = (): RefObject<TPoint | null> => ({ current: null });
 
-const armed: TArmedMedia = { naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' };
+const armed: TArmedMedia = { kind: 'image', naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' };
 
 describe('handlePointerDown', () => {
   beforeEach(() => {
@@ -119,11 +119,48 @@ describe('handlePointerDown', () => {
     const page = selectActivePage(store.getState());
 
     expect(nodeIdRef.current).not.toBeNull();
-    expect(page.nodes[nodeIdRef.current as string]).toMatchObject({ height: 100, src: 'blob:mock-url', type: NodeType.media, width: 200 });
+    expect(page.nodes[nodeIdRef.current as string]).toMatchObject({
+      fills: [expect.objectContaining({ ref: 'blob:mock-url', type: 'image' })],
+      height: 100,
+      name: 'Image',
+      type: NodeType.rectangle,
+      width: 200,
+    });
     expect(selectSelectedIds(store.getState())).toEqual(['already-placed', nodeIdRef.current]);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(startRef.current).toEqual({ x: 10, y: 10 });
     expect(refs.drawing.cancelDrawRef.current).not.toBeNull();
+  });
+
+  it('should remove the placed media and disarm the tool when the draw is cancelled', () => {
+    // mock
+    const canvas = createCanvas();
+    const refs = createCanvasRefs();
+    const armedRef = createArmedRef(armed);
+    const nodeIdRef: { current: string | null } = { current: null };
+
+    handlePointerDown(
+      canvas,
+      pointerEvent(10, 10),
+      store.dispatch,
+      store,
+      refs,
+      armedRef,
+      createStartRef(),
+      nodeIdRef,
+      { current: null },
+      { current: [] },
+      'Image',
+    );
+
+    const nodeId = nodeIdRef.current as string;
+
+    // action
+    refs.drawing.cancelDrawRef.current?.();
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toBeUndefined();
+    expect(armedRef.current).toBeNull();
   });
 
   it('should convert the pointer position through the current viewport, not a stale one', () => {
