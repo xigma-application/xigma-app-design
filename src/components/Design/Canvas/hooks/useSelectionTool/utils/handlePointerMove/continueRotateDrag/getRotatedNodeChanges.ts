@@ -4,6 +4,7 @@ import { TRotateNodeOrigin } from 'types/design/selectionTool/types';
 import { TSceneNodeChanges, TVectorNode, TVectorVertex } from 'types/design/types';
 
 // utils
+import { getBakedRotatedVectorChanges } from './getBakedRotatedVectorChanges';
 import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 import { rotateLineNodeOrigin } from './rotateLineNodeOrigin';
 import { rotateShapeNodeOrigin } from './rotateShapeNodeOrigin';
@@ -48,6 +49,8 @@ export const getRotatedNodeChanges = (
         segments: origin.segments,
         vertices: withVertexIds(origin.vertices),
       };
+    case 'vertices' in origin && origin.bakesRotation:
+      return getBakedRotatedVectorChanges(origin, pivot, deltaDegrees);
     case 'vertices' in origin:
       return getOrbitedVectorChanges(origin.rotation, origin.segments, withVertexIds(origin.vertices), pivot, deltaDegrees);
     default:

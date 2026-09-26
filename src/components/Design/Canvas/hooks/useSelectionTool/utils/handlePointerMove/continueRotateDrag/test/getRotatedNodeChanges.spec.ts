@@ -21,7 +21,7 @@ describe('getRotatedNodeChanges', () => {
   it('should leave a single-selected vector origin untouched and accumulate onto its live rotation field', () => {
     // mock — origin already carries a rotation from a previous gesture; a fresh rotate must add to it,
     // not replace it (replacing it is the bug that made the outline snap back on a second grab)
-    const origin = { rotation: 10, segments: {}, vertices: { v1: { id: 'v1', x: 100, y: 50 } } };
+    const origin = { bakesRotation: false, fillRotation: 0, rotation: 10, segments: {}, vertices: { v1: { id: 'v1', x: 100, y: 50 } } };
 
     // before
     const changes = getRotatedNodeChanges(origin, { x: 50, y: 50 }, 90, true);
@@ -32,7 +32,7 @@ describe('getRotatedNodeChanges', () => {
 
   it('should keep the turn of a group-selected vector in its rotation and move its vertices along the orbit around the group pivot', () => {
     // mock
-    const origin = { rotation: 0, segments: {}, vertices: { v1: { id: 'v1', x: 100, y: 50 } } };
+    const origin = { bakesRotation: false, fillRotation: 0, rotation: 0, segments: {}, vertices: { v1: { id: 'v1', x: 100, y: 50 } } };
 
     // before
     const changes = getRotatedNodeChanges(origin, { x: 50, y: 50 }, 90, false) as TVectorNode;
@@ -45,7 +45,13 @@ describe('getRotatedNodeChanges', () => {
 
   it('should draw a group-selected vector that is already tilted exactly where composing both turns by hand puts it', () => {
     // mock — the origin itself is already tilted 90deg; the result must keep that tilt and add the delta
-    const origin = { rotation: 90, segments: {}, vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } } };
+    const origin = {
+      bakesRotation: false,
+      fillRotation: 0,
+      rotation: 90,
+      segments: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+    };
 
     // before
     const changes = getRotatedNodeChanges(origin, { x: 0, y: 0 }, 45, false) as TVectorNode;
@@ -70,5 +76,19 @@ describe('getRotatedNodeChanges', () => {
 
     // result
     expect(changes).toEqual({ rotation: 90, x: 0, y: 0 });
+  });
+
+  it('should bake the turn of a vector rotated inside a boolean or group into its points and keep its fill turned', () => {
+    // mock
+    const origin = { bakesRotation: true, fillRotation: 5, rotation: 10, segments: {}, vertices: { v1: { id: 'v1', x: 100, y: 50 } } };
+
+    // before
+    const changes = getRotatedNodeChanges(origin, { x: 50, y: 50 }, 90, false) as TVectorNode;
+
+    // result
+    expect(changes.rotation).toBe(0);
+    expect(changes.fillRotation).toBe(105);
+    expect(changes.vertices.v1.x).toBeCloseTo(50);
+    expect(changes.vertices.v1.y).toBeCloseTo(100);
   });
 });

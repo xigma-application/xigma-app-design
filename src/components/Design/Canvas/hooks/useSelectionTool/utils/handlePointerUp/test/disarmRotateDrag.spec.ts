@@ -80,7 +80,7 @@ describe('disarmRotateDrag', () => {
     const canvasRefs = createCanvasRefs();
     const rotateDragRef = createRotateDragRef({
       cursorAngle: 0,
-      nodeOrigins: { 'vector-1': { rotation: 0, segments: {}, vertices: {} } },
+      nodeOrigins: { 'vector-1': { bakesRotation: false, fillRotation: 0, rotation: 0, segments: {}, vertices: {} } },
       pivot: { x: 50, y: 50 },
       startAngle: 0,
     });

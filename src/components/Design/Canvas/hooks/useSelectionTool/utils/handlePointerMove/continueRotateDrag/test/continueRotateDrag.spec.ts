@@ -323,7 +323,7 @@ describe('continueRotateDrag', () => {
       const canvas = createCanvas();
       const rotateDragRef = createRotateDragRef({
         cursorAngle: 0,
-        nodeOrigins: { [idA]: { rotation: 0, segments: {}, vertices: {} } },
+        nodeOrigins: { [idA]: { bakesRotation: false, fillRotation: 0, rotation: 0, segments: {}, vertices: {} } },
         pivot: { x: 50, y: 50 },
         startAngle: 0,
       });
@@ -349,7 +349,7 @@ describe('continueRotateDrag', () => {
       const canvas = createCanvas();
       const rotateDragRef = createRotateDragRef({
         cursorAngle: 0,
-        nodeOrigins: { [idA]: { rotation: 0, segments: {}, vertices: {} } },
+        nodeOrigins: { [idA]: { bakesRotation: false, fillRotation: 0, rotation: 0, segments: {}, vertices: {} } },
         pivot: { x: 50, y: 50 },
         startAngle: 0,
       });
@@ -377,7 +377,7 @@ describe('continueRotateDrag', () => {
         cursorAngle: 0,
         nodeOrigins: {
           [idFrame]: { height: 100, rotation: 0, width: 100, x: 200, y: 0 },
-          [idVector]: { rotation: 0, segments: {}, vertices: {} },
+          [idVector]: { bakesRotation: false, fillRotation: 0, rotation: 0, segments: {}, vertices: {} },
         },
         pivot: { x: 150, y: 50 },
         startAngle: 0,

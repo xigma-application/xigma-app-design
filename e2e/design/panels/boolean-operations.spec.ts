@@ -642,3 +642,82 @@ test('a dynamic or brush stroke on a Union is drawn as that stroke, not as a pla
     await expect.poll(async () => (await page.screenshot({ clip: edgeArea })).equals(plain)).toBe(false);
   }
 });
+
+test('a Union of a rectangle and a vector turns as one: the vector bakes the turn into its points and the Union keeps its size', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-rotate-vector');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — a rectangle and a stroked triangle joined in a Union
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { addNodes, booleanNodes, setSelection } = await import('/src/store/design/slice.ts');
+
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
+            height: 200,
+            id: 'union-rectangle',
+            name: 'Rectangle',
+            parentId: null,
+            rotation: 0,
+            type: 'rectangle',
+            width: 300,
+            x: 800,
+            y: 400,
+          },
+          {
+            defaultFill: null,
+            filledFaceKeys: [],
+            id: 'union-vector',
+            name: 'Vector',
+            parentId: null,
+            rotation: 0,
+            segments: {
+              s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+              s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+              s3: { endId: 'a', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+            },
+            strokeWidth: 4,
+            strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+            type: 'vector',
+            vertexHandleModes: {},
+            vertices: { a: { id: 'a', x: 850, y: 250 }, b: { id: 'b', x: 1000, y: 450 }, c: { id: 'c', x: 750, y: 380 } },
+          },
+        ] as never,
+        rootIds: ['union-rectangle', 'union-vector'],
+      }),
+    );
+    store.dispatch(setSelection(['union-rectangle', 'union-vector']));
+    store.dispatch(booleanNodes('union' as never));
+  });
+
+  const readUnion = async (): Promise<{ height: number; vectorRotation: number; width: number }> =>
+    page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const nodes = pages[activePageId].nodes as unknown as Record<
+        string,
+        { height: number; rotation: number; type: string; width: number }
+      >;
+      const union = Object.values(nodes).find((node) => node.type === 'boolean')!;
+
+      return { height: Math.round(union.height), vectorRotation: nodes['union-vector'].rotation, width: Math.round(union.width) };
+    });
+
+  const before = await readUnion();
+
+  // action
+  const rotation = page.getByRole('textbox', { name: 'Rotation' });
+
+  await rotation.fill('45');
+  await rotation.press('Enter');
+
+  // result
+  await expect.poll(readUnion).toEqual({ ...before, vectorRotation: 0 });
+});

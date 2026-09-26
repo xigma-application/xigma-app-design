@@ -48,28 +48,33 @@ const vector: TVectorNode = {
 describe('getRotateNodeOrigins', () => {
   it('should capture a box node’s height/rotation/width/x/y', () => {
     // result
-    expect(getRotateNodeOrigins([frame])).toEqual({
+    expect(getRotateNodeOrigins([frame], ['frame-1'])).toEqual({
       'frame-1': { height: 100, rotation: 30, width: 100, x: 0, y: 0 },
     });
   });
 
   it('should capture a line node’s endpoints', () => {
     // result
-    expect(getRotateNodeOrigins([line])).toEqual({
+    expect(getRotateNodeOrigins([line], ['line-1'])).toEqual({
       'line-1': { x1: 10, x2: 20, y1: 30, y2: 40 },
     });
   });
 
-  it('should capture a vector node’s rotation, segments and vertices', () => {
+  it('should capture a selected vector node’s rotation, fill turn, segments and vertices, keeping its rotation', () => {
     // result
-    expect(getRotateNodeOrigins([vector])).toEqual({
-      'vector-1': { rotation: 15, segments: vector.segments, vertices: vector.vertices },
+    expect(getRotateNodeOrigins([{ ...vector, fillRotation: 5 }], ['vector-1'])).toEqual({
+      'vector-1': { bakesRotation: false, fillRotation: 5, rotation: 15, segments: vector.segments, vertices: vector.vertices },
     });
+  });
+
+  it('should bake the rotation of a vector turned only as part of a selected group or boolean', () => {
+    // result
+    expect(getRotateNodeOrigins([vector], ['group-1'])['vector-1']).toMatchObject({ bakesRotation: true, fillRotation: 0 });
   });
 
   it('should capture origins for a mixed set of nodes, keyed by id', () => {
     // result
-    const origins = getRotateNodeOrigins([frame, line, vector]);
+    const origins = getRotateNodeOrigins([frame, line, vector], []);
 
     expect(Object.keys(origins)).toEqual(['frame-1', 'line-1', 'vector-1']);
   });

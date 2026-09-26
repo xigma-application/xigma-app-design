@@ -9,6 +9,7 @@ import { TPathOutlineStyle } from '../getPathOutlineStyles';
 import { drawBooleanEffects } from './drawBooleanEffects';
 import { drawBooleanStrokePaints } from './drawBooleanStrokePaints';
 import { drawBoxPaints } from '../drawBoxLeafNode/drawBoxPaints';
+import { getBooleanPaintBox } from './getBooleanPaintBox';
 import { getBooleanShape } from './getBooleanShape';
 import { getBooleanVectorNode } from 'utils/canvas/booleanOperation/getBooleanVectorNode';
 import { getFaceBufferCache } from 'utils/canvas/faceBufferCache/getFaceBufferCache';
@@ -31,7 +32,7 @@ export const drawBooleanLeafNode = (
     drawBooleanEffects(context, node, shape, opacity, refs, EffectType.dropShadow);
     drawBoxPaints(
       context,
-      { ...shape.bounds, rotation: 0 },
+      getBooleanPaintBox(node, shape),
       node.fills,
       shape.polygons,
       opacity,

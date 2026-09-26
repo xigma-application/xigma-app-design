@@ -6,6 +6,7 @@ import { TDrawSceneContext } from '../types';
 import { TPathOutlineStyle } from '../getPathOutlineStyles';
 
 // utils
+import { getBooleanPaintBox } from './getBooleanPaintBox';
 import { drawBoxPaints } from '../drawBoxLeafNode/drawBoxPaints';
 import { getBooleanStrokeModePolygons } from './getBooleanStrokeModePolygons';
 import { getBooleanStrokeRings } from './getBooleanStrokeRings';
@@ -30,7 +31,7 @@ export const drawBooleanStrokePaints = (
     if (modePolygons) {
       drawBoxPaints(
         context,
-        { ...shape.bounds, rotation: 0 },
+        getBooleanPaintBox(node, shape),
         strokes,
         modePolygons,
         opacity,
@@ -44,7 +45,7 @@ export const drawBooleanStrokePaints = (
       getBooleanStrokeRings(shape, strokeWidth).forEach((ring) => {
         drawBoxPaints(
           context,
-          { ...shape.bounds, rotation: 0 },
+          getBooleanPaintBox(node, shape),
           strokes,
           ring,
           opacity,

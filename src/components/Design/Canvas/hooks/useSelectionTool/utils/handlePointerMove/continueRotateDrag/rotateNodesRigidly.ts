@@ -58,7 +58,7 @@ export const rotateNodesRigidly = (dispatch: AppDispatch, node: TBoxSceneNode | 
     const bounds = getNodeBounds(node);
     const pivot = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
     const targetNodes = getRigidTransformNodes([node], nodes);
-    const nodeOrigins = getRotateNodeOrigins(targetNodes);
+    const nodeOrigins = getRotateNodeOrigins(targetNodes, [node.id]);
     const isSingleNodeRotate = targetNodes.length === 1;
 
     dispatchRigidRotationChanges(dispatch, nodes, nodeOrigins, pivot, deltaDegrees, isSingleNodeRotate);

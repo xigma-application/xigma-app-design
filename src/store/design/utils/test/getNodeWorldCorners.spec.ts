@@ -5,6 +5,7 @@ import { TLineNode, TRectangleNode } from 'types/design/types';
 // utils
 import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getNodeWorldCorners } from '../getNodeWorldCorners';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
   fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
@@ -58,5 +59,14 @@ describe('getNodeWorldCorners', () => {
     expect(corners[1]).toEqual({ x: expect.closeTo(10), y: expect.closeTo(10) });
     expect(corners[2]).toEqual({ x: expect.closeTo(10), y: expect.closeTo(10) });
     expect(corners[3]).toEqual({ x: expect.closeTo(0), y: expect.closeTo(0) });
+  });
+
+  it('should return the corners of the drawn shape of a rotated vector', () => {
+    // mock — a 100x100 square turned 45° spans about 141 around its own center (50,50)
+    const corners = getNodeWorldCorners(makeSquareVector({ rotation: 45 }));
+
+    // result
+    expect(corners[0].x).toBeCloseTo(50 - 50 * Math.SQRT2, 5);
+    expect(corners[2].y).toBeCloseTo(50 + 50 * Math.SQRT2, 5);
   });
 });

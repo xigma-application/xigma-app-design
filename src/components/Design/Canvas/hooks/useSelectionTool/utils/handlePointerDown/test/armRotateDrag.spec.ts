@@ -136,6 +136,8 @@ describe('armRotateDrag', () => {
     // result
     expect(rotateDragRef.current?.nodeOrigins).toEqual({
       'vector-1': {
+        bakesRotation: false,
+        fillRotation: 0,
         rotation: 0,
         segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
         vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
@@ -179,6 +181,8 @@ describe('armRotateDrag', () => {
     // result
     expect(rotateDragRef.current?.nodeOrigins).toEqual({
       'vector-1': {
+        bakesRotation: false,
+        fillRotation: 0,
         rotation: 90,
         segments: {},
         vertices: {

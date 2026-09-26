@@ -48,7 +48,10 @@ export const armRotateDrag = (
 ): void => {
   const pivot: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
   const targetNodes = getRigidTransformNodes(selectedNodes, selectActivePage(store.getState()).nodes);
-  const nodeOrigins = getRotateNodeOrigins(targetNodes);
+  const nodeOrigins = getRotateNodeOrigins(
+    targetNodes,
+    selectedNodes.map(({ id }) => id),
+  );
 
   commitRotateDragState(canvas, event, rotateDragRef, point, bounds, rotation, pivot, nodeOrigins);
   captureRotatedVectorNodeSnapshot(targetNodes, canvasRefs, selectActivePage(store.getState()).nodes);

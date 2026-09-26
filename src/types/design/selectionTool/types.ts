@@ -91,7 +91,7 @@ export type TStarRatioDragState = {
 export type TRotateNodeOrigin =
   | { x1: number; x2: number; y1: number; y2: number }
   | { height: number; rotation: number; width: number; x: number; y: number }
-  | (TVectorNodeOrigin & { rotation: number });
+  | (TVectorNodeOrigin & { bakesRotation: boolean; fillRotation: number; rotation: number });
 
 export type TRotateDragState = {
   cursorAngle: number;

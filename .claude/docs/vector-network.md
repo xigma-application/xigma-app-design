@@ -5629,6 +5629,17 @@ vertex (move, resize and rotate rebuild vertices as `{ id, x, y }`). A point's r
 baked node. Setting the radius without selected points (edit panel, or the Vector path panel through
 `commitShapeCornerRadius`) writes `cornerRadius` and clears the per-point radii; differing radii show Mixed.
 
+## 87. Vectors inside a turned Union or group bake the turn
+
+`getRotateNodeOrigins(targetNodes, selectedIds)` marks a vector origin with `bakesRotation` when the vector is only
+turned as part of a selected group or boolean (a rigid-transform descendant). `getRotatedNodeChanges` then uses
+`getBakedRotatedVectorChanges`: the old rotation and the delta are baked into the points around the pivot and added
+to `fillRotation`, so the fill stays turned. Directly selected vectors keep their turn in `rotation` (§85). Keeping
+`rotation` on a descendant broke its parent: `getNodeWorldCorners` read the unrotated vertex bounds, so a turned
+Union got a wrong frame; it now reads the drawn shape (`getRenderedVectorNode`). A turned boolean paints its fills
+and strokes over its own frame (`getBooleanPaintBox`: `x`, `y`, `width`, `height`, `rotation`) so an image, video
+or pattern turns with it; an unturned one keeps the shape bounds.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows
