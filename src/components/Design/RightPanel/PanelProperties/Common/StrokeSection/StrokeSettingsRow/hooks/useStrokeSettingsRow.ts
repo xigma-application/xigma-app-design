@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { StrokeAlign, StrokeMode, StrokeSides } from 'types/design/enums';
-import { TAppearanceNode, TStyledNode, isAppearanceNode } from '../../../AppearanceSection/types';
+import { TAppearanceNode, TStyledOrVectorNode, isAppearanceNode } from '../../../AppearanceSection/types';
 import { TSceneNodeChanges } from 'types/design/types';
 import { TStrokeSide } from 'utils/design/stroke/types';
 
@@ -24,7 +24,7 @@ import { getStrokeSideWidths } from 'utils/design/stroke/getStrokeSideWidths';
 import { getStrokeSidesChange } from 'utils/design/stroke/getStrokeSidesChange';
 import { getStrokeWeightChange } from 'utils/design/stroke/getStrokeWeightChange';
 import { getStrokeWeightDisplay } from 'utils/design/stroke/getStrokeWeightDisplay';
-import { isStyledNode } from '../../../AppearanceSection/utils/isStyledNode';
+import { isStyledOrVectorNode } from '../../../AppearanceSection/utils/isStyledOrVectorNode';
 import { parseStrokeWeight } from '../utils/parseStrokeWeight';
 
 export type TUseStrokeSettingsRowResult = {
@@ -48,7 +48,7 @@ export type TUseStrokeSettingsRowResult = {
 
 export const useStrokeSettingsRow = (): TUseStrokeSettingsRowResult => {
   const dispatch = useAppDispatch();
-  const styledNodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
+  const styledNodes = useAppSelector(selectAppearanceNodes).filter(isStyledOrVectorNode);
   const nodes = styledNodes.filter(isAppearanceNode);
   const [firstNode] = styledNodes;
   const weight = firstNode?.strokeWidth ?? 1;
@@ -72,7 +72,7 @@ export const useStrokeSettingsRow = (): TUseStrokeSettingsRowResult => {
     dispatch(endHistoryGesture());
   };
 
-  const commitWeight = (getChanges: TFunc<[TStyledNode], TSceneNodeChanges>): void => {
+  const commitWeight = (getChanges: TFunc<[TStyledOrVectorNode], TSceneNodeChanges>): void => {
     if (styledNodes.length > 0) {
       dispatch(updateNodes(styledNodes.map((node) => ({ changes: getChanges(node), id: node.id }))));
     }

@@ -11,7 +11,8 @@ export type TPanelNodeType =
   | NodeType.rectangle
   | NodeType.section
   | NodeType.slice
-  | NodeType.star;
+  | NodeType.star
+  | NodeType.vector;
 
 export type TPanelSection =
   | 'appearance'

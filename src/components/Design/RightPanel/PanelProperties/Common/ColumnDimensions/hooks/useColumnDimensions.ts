@@ -18,16 +18,18 @@ import { store, useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { NodeType, SizingMode } from 'types/design/enums';
-import { TBoxSceneNode } from 'types/design/types';
+import { TBoxSceneNode, TVectorNode } from 'types/design/types';
 import { TDimensionsScrubStart } from '../types';
 
 // utils
 import { commitColumnHeight } from './utils/commitColumnHeight';
 import { commitColumnWidth } from './utils/commitColumnWidth';
-import { commitNodeDimension } from './utils/commitNodeDimension';
+import { commitDimensionNodeSize } from './utils/commitDimensionNodeSize';
+import { getDimensionNodeSize } from './utils/getDimensionNodeSize';
 import { getMixedOrValue } from 'components/Design/RightPanel/PanelProperties/Common/utils/getMixedOrValue';
 import { isExistingBoxSceneNode } from 'components/Design/Canvas/utils/isExistingBoxSceneNode';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { isDimensionNode } from './utils/isDimensionNode';
 import { canFillAxis } from './utils/canFillAxis';
 import { isAutoLayoutFrame } from 'utils/canvas/signals/isAutoLayoutFrame';
 import { selectSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
@@ -79,17 +81,20 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
   const selectedNodes = useAppSelector(selectSelectedNodes);
   const [selectedNode] = selectedNodes;
   const boxNodes = selectedNodes.filter(isExistingBoxSceneNode);
+  const dimensionNodes = selectedNodes.filter(isDimensionNode);
+  const hasVectors = dimensionNodes.length > boxNodes.length;
+  const sizes = dimensionNodes.map(getDimensionNodeSize);
   const imageCrop = useAppSelector(selectSelectedImageCrop);
   const node = selectedNode && isBoxSceneNode(selectedNode) ? selectedNode : undefined;
   const id = node?.id ?? '';
-  const width = imageCrop ? imageCrop.crop.width : (node?.width ?? 0);
-  const height = imageCrop ? imageCrop.crop.height : (node?.height ?? 0);
+  const width = imageCrop ? imageCrop.crop.width : (node?.width ?? sizes[0]?.width ?? 0);
+  const height = imageCrop ? imageCrop.crop.height : (node?.height ?? sizes[0]?.height ?? 0);
   const sizingNodes = imageCrop ? [] : boxNodes;
   const hasSizingNodes = sizingNodes.length > 0;
   const locked = imageCrop ? true : hasSizingNodes && sizingNodes.every((boxNode) => boxNode.lockedAspectRatio ?? false);
-  const canHug = hasSizingNodes && sizingNodes.every(isAutoLayoutFrame);
-  const canFillWidth = hasSizingNodes && sizingNodes.every((boxNode) => canFillAxis(boxNode, nodes, 'width'));
-  const canFillHeight = hasSizingNodes && sizingNodes.every((boxNode) => canFillAxis(boxNode, nodes, 'height'));
+  const canHug = hasSizingNodes && !hasVectors && sizingNodes.every(isAutoLayoutFrame);
+  const canFillWidth = hasSizingNodes && !hasVectors && sizingNodes.every((boxNode) => canFillAxis(boxNode, nodes, 'width'));
+  const canFillHeight = hasSizingNodes && !hasVectors && sizingNodes.every((boxNode) => canFillAxis(boxNode, nodes, 'height'));
   const widthModes = sizingNodes.map((boxNode) => boxNode.widthSizingMode ?? SizingMode.fixed);
   const heightModes = sizingNodes.map((boxNode) => boxNode.heightSizingMode ?? SizingMode.fixed);
   const widthSizingMode = widthModes.every((mode) => mode === widthModes[0]) ? (widthModes[0] ?? SizingMode.fixed) : undefined;
@@ -97,11 +102,11 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
   const { commitHeight: _ch, commitWidth: _cW } = useCommitColumnDimensions(id, selectedNode, width, height, locked);
   const { selectHeightSizingMode, selectWidthSizingMode } = useSelectColumnSizingMode(sizingNodes, nodes);
   const toggleLock = useToggleColumnLock(sizingNodes, locked);
-  const isMultiSelection = !imageCrop && boxNodes.length > 1;
+  const isMultiSelection = !imageCrop && dimensionNodes.length > 1;
   const filteredBoxNodes = boxNodes.filter((boxNode) => boxNode.type === NodeType.frame);
   const minMax = useToggleColumnMinMax(filteredBoxNodes, MIXED_LABEL);
-  const mixedWidth = isMultiSelection ? getMixedOrValue(boxNodes.map((boxNode) => boxNode.width)) : width;
-  const mixedHeight = isMultiSelection ? getMixedOrValue(boxNodes.map((boxNode) => boxNode.height)) : height;
+  const mixedWidth = isMultiSelection ? getMixedOrValue(sizes.map((size) => size.width)) : width;
+  const mixedHeight = isMultiSelection ? getMixedOrValue(sizes.map((size) => size.height)) : height;
   const displayWidth = mixedWidth === 'mixed' ? MIXED_LABEL : mixedWidth;
   const displayHeight = mixedHeight === 'mixed' ? MIXED_LABEL : mixedHeight;
   const scrubStartRef = useRef<TDimensionsScrubStart>({ height: 0, sizes: {}, width: 0 });
@@ -109,33 +114,33 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
   const commitWidth = (nextWidth: number): void => commitColumnWidth(dispatch, imageCrop, height, _cW, nextWidth);
   const commitHeight = (nextHeight: number): void => commitColumnHeight(dispatch, imageCrop, width, _ch, nextHeight);
 
-  const getFreshBoxNodes = (): TBoxSceneNode[] =>
-    boxNodes.map((boxNode) => selectNodes(store.getState())[boxNode.id]).filter(isExistingBoxSceneNode);
+  const getFreshDimensionNodes = (): (TBoxSceneNode | TVectorNode)[] =>
+    dimensionNodes.map((dimensionNode) => selectNodes(store.getState())[dimensionNode.id]).filter(isDimensionNode);
 
   const getCommittedDisplayValue = (axis: 'height' | 'width'): number | string => {
-    const mixedOrValue = getMixedOrValue(getFreshBoxNodes().map((boxNode) => boxNode[axis]));
+    const mixedOrValue = getMixedOrValue(getFreshDimensionNodes().map((dimensionNode) => getDimensionNodeSize(dimensionNode)[axis]));
     return mixedOrValue === 'mixed' ? MIXED_LABEL : mixedOrValue;
   };
 
   const commitEachDimension = (axis: 'height' | 'width', value: number): void => {
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-    getFreshBoxNodes().forEach((boxNode) => commitNodeDimension(dispatch, boxNode, axis, value));
+    getFreshDimensionNodes().forEach((dimensionNode) => commitDimensionNodeSize(dispatch, dimensionNode, axis, value));
     dispatch(endHistoryGesture());
   };
 
   const scrubEachDimension = (axis: 'height' | 'width', value: number): void => {
     const start = scrubStartRef.current;
 
-    getFreshBoxNodes().forEach((boxNode) => {
-      const startSize = start.sizes[boxNode.id] ?? { height: boxNode.height, width: boxNode.width };
-      commitNodeDimension(dispatch, boxNode, axis, startSize[axis] + value - start[axis]);
+    getFreshDimensionNodes().forEach((dimensionNode) => {
+      const startSize = start.sizes[dimensionNode.id] ?? getDimensionNodeSize(dimensionNode);
+      commitDimensionNodeSize(dispatch, dimensionNode, axis, startSize[axis] + value - start[axis]);
     });
   };
 
   const startScrub = (): void => {
     scrubStartRef.current = {
       height,
-      sizes: Object.fromEntries(boxNodes.map((boxNode) => [boxNode.id, { height: boxNode.height, width: boxNode.width }])),
+      sizes: Object.fromEntries(dimensionNodes.map((dimensionNode, index) => [dimensionNode.id, sizes[index]])),
       width,
     };
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));

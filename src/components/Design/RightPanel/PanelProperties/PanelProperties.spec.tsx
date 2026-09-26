@@ -531,6 +531,21 @@ describe('PanelProperties behaviors', () => {
     });
   });
 
+  it('should show the mixed panel for a vector selected with another layer', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(addNodes({ nodes: [makeSquareVector({ id: 'routing-mixed-vector' })], rootIds: ['routing-mixed-vector'] }));
+    store.dispatch(setSelection([frameId, 'routing-mixed-vector']));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
+    expect(screen.queryByText('Vector path')).not.toBeInTheDocument();
+  });
+
   it('should show the Line panel with a stroke and no fill section while a line is selected', () => {
     // mock
     store.dispatch(

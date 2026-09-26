@@ -1,19 +1,23 @@
 import { Provider } from 'react-redux';
-import { ReactNode } from 'react';
+import { FocusEvent, ReactNode } from 'react';
 import { act, renderHook } from '@testing-library/react';
 
 // hooks
 import { useColumnDimensions } from '../useColumnDimensions';
 
 // store
-import { addNode, moveNodes, setImageEditor, setSelection, updateNode } from 'store/design/slice';
+import { addNode, addNodes, moveNodes, setImageEditor, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
 
 // types
 import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
-import { TFrameNode } from 'types/design/types';
+import { TFrameNode, TVectorNode } from 'types/design/types';
+
+// utils
+import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 import { TImagePaint } from 'types/design/paint/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -847,5 +851,104 @@ describe('useColumnDimensions', () => {
       // result
       expect(result.current.canHug).toBe(false);
     });
+  });
+
+  it('should include a selected vector next to a frame, without offering hug or fill, and resize both', () => {
+    // mock
+    const frameId = addFrameNode(40, 100);
+    const vector = makeSquareVector({ id: 'dimensions-vector' });
+
+    store.dispatch(addNodes({ nodes: [vector], rootIds: [vector.id] }));
+    store.dispatch(setSelection([vector.id, frameId]));
+
+    // before
+    const { result } = renderHook(() => useColumnDimensions(), { wrapper });
+
+    // result
+    expect(result.current).toMatchObject({ canFillWidth: false, canHug: false, displayHeight: 100, displayWidth: 'Mixed', width: 100 });
+
+    // action
+    act(() => {
+      result.current.onBlurWidth({ target: { value: '60' } } as FocusEvent<HTMLInputElement>);
+    });
+
+    // result
+    expect(getVectorNodeBounds(selectActivePage(store.getState()).nodes[vector.id] as TVectorNode).width).toBe(60);
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ width: 60 });
+
+    // action
+    act(() => {
+      result.current.onBlurHeight({ target: { value: '80' } } as FocusEvent<HTMLInputElement>);
+    });
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ height: 80 });
+
+    // action
+    act(() => {
+      result.current.onDragStart();
+      result.current.onScrubHeight(110);
+      result.current.onDragEnd();
+    });
+
+    // result
+    expect(getVectorNodeBounds(selectActivePage(store.getState()).nodes[vector.id] as TVectorNode).height).toBeCloseTo(110);
+  });
+
+  it('should scrub vectors and a box without a stored lock from their current sizes when no drag was started', () => {
+    // mock
+    const rectangle = {
+      fills: [],
+      height: 30,
+      id: 'dimensions-plain-rectangle',
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 30,
+      x: 0,
+      y: 0,
+    } as unknown as TFrameNode;
+    const first = makeSquareVector({ id: 'dimensions-first-vector' });
+    const second = makeSquareVector({ id: 'dimensions-second-vector' });
+
+    store.dispatch(addNodes({ nodes: [rectangle, first, second], rootIds: [rectangle.id, first.id, second.id] }));
+    store.dispatch(setSelection([first.id, second.id]));
+
+    // before
+    const vectorsOnly = renderHook(() => useColumnDimensions(), { wrapper });
+
+    // result
+    expect(vectorsOnly.result.current).toMatchObject({ heightSizingMode: SizingMode.fixed, locked: false });
+
+    // action
+    act(() => {
+      vectorsOnly.result.current.onScrubWidth(120);
+    });
+
+    // result — with no drag started the scrub adds to each current size
+    expect(getVectorNodeBounds(selectActivePage(store.getState()).nodes[first.id] as TVectorNode).width).toBeCloseTo(220);
+
+    // action
+    act(() => {
+      store.dispatch(setSelection([rectangle.id, first.id]));
+    });
+
+    // result
+    expect(vectorsOnly.result.current.locked).toBe(false);
+
+    // action
+    act(() => {
+      store.dispatch(
+        addNodes({
+          nodes: [{ ...rectangle, heightSizingMode: SizingMode.fill, id: 'dimensions-fill-rectangle' }],
+          rootIds: ['dimensions-fill-rectangle'],
+        }),
+      );
+      store.dispatch(setSelection([rectangle.id, 'dimensions-fill-rectangle']));
+    });
+
+    // result
+    expect(vectorsOnly.result.current.heightSizingMode).toBeUndefined();
   });
 });

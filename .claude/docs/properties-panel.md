@@ -1105,6 +1105,12 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
   `useShapeCornerRadius` (types `TShapeOrVectorNode(Type)`, renamed from `TShapeStrokeNode`); it writes
   `TVectorNode.cornerRadius` on every selected vector and shows Mixed when they differ. Rounding is described in
   `vector-network.md` §81.
+- Mixed selections: a vector outside vector edit mode is a `PANEL_SECTIONS` type (position, rotation, layout,
+  appearance, fill, stroke, effects, selection colors, export), so it joins the Mixed panel with other layers and a
+  group with vectors inside keeps its sections. `ColumnDimensions` sizes and resizes every `isDimensionNode` (box
+  nodes and vectors, `getDimensionNodeSize` / `commitDimensionNodeSize` through `resizeVectorToDimensions`) and
+  offers no hug or fill while a vector is selected; `useStrokeSettingsRow` writes the Weight to vectors too
+  (`isStyledOrVectorNode`). All-vector selections still get the Vector path panel.
 - Effects: `Common/EffectsSection` takes vectors (`useEffectsSection` filters with `isStyledOrVectorNode`, which
   also replaced the identical `isOpacityPanelNode` and `isStrokeSettingsNode`). Rendering is described in
   `canvas-rendering-pipeline.md` ("Vector effects").

@@ -6,14 +6,17 @@ import { FocusEvent, ReactNode } from 'react';
 import { useStrokeSettingsRow } from '../useStrokeSettingsRow';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, addNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
 
 // types
 import { NodeType, StrokeAlign, StrokeMode, StrokeSides } from 'types/design/enums';
-import { TLineNode, TRectangleNode } from 'types/design/types';
+import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
+
+// utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -434,5 +437,25 @@ describe('useStrokeSettingsRow', () => {
 
     // result
     expect(readNode(id).strokeLeftWidth).toBe(7);
+  });
+
+  it('should set the stroke weight of a selected vector next to a rectangle', () => {
+    // mock
+    const rectangleId = addAndSelect({ strokeWidth: 2 });
+    const vector = makeSquareVector({ id: 'stroke-row-vector', strokeWidth: 2 });
+
+    store.dispatch(addNodes({ nodes: [vector], rootIds: [vector.id] }));
+    store.dispatch(setSelection([rectangleId, vector.id]));
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsRow(), { wrapper });
+
+    // action
+    act(() => {
+      result.current.onWeightBlur({ target: { defaultValue: '2', value: '6' } } as FocusEvent<HTMLInputElement>);
+    });
+
+    // result
+    expect((selectActivePage(store.getState()).nodes[vector.id] as TVectorNode).strokeWidth).toBe(6);
   });
 });

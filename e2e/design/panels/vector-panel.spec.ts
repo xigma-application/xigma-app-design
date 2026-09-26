@@ -815,3 +815,43 @@ test('several vectors in vector edit mode show N selected, Layout with spacing a
     )
     .toEqual([800, 10, 10]);
 });
+
+test('a vector selected together with a frame shows the mixed panel, whose width resizes both', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-panel-mixed');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — a 200x150 triangle and a frame, the triangle shift-selected with the frame
+  await drawSelectedTriangle(designPage, page);
+  await designPage.drawFrame(1200, 300, 1300, 400);
+  await page.keyboard.down('Shift');
+  await designPage.click(900, 300);
+  await page.keyboard.up('Shift');
+
+  // result
+  await expect(page.getByText('2 selected', { exact: true })).toBeVisible();
+  await expect(page.locator('[data-test-section="fill"]')).toBeVisible();
+
+  // action
+  const width = page.locator('[data-test-section="layout"]').getByLabel('Width');
+
+  await width.fill('50');
+  await width.press('Enter');
+
+  // result
+  await expect
+    .poll(async () =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { getVectorNodeBounds } = await import('/src/utils/canvas/vectorNetwork/getVectorNodeBounds.ts');
+        const { activePageId, pages } = store.getState().design;
+        const nodes = Object.values(pages[activePageId].nodes);
+        const frame = nodes.find((node) => node.type === 'frame') as { width: number };
+        const vector = nodes.find((node) => node.type === 'vector') as Parameters<typeof getVectorNodeBounds>[0];
+
+        return [Math.round(getVectorNodeBounds(vector).width), frame.width];
+      }),
+    )
+    .toEqual([50, 50]);
+});

@@ -13,6 +13,9 @@ import { store } from 'store';
 import { BooleanOperation, NodeType } from 'types/design/enums';
 import { TBooleanNode, TFrameNode, TGroupNode, TRectangleNode, TTextNode } from 'types/design/types';
 
+// utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
+
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
 const baseNode = { height: 20, parentId: null, rotation: 0, width: 20, x: 0, y: 0 };
@@ -121,5 +124,31 @@ describe('useMixedPanel', () => {
 
     // result
     expect(result.current.sections).toEqual(['position', 'rotation', 'layout', 'selectionColors', 'export']);
+  });
+
+  it('should give a vector selected with a rectangle their shared sections', () => {
+    // mock
+    const rectangle = {
+      fills: [],
+      height: 10,
+      id: 'mixed-rectangle',
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 10,
+      x: 0,
+      y: 0,
+    } as unknown as TRectangleNode;
+    const vector = makeSquareVector({ id: 'mixed-vector' });
+
+    store.dispatch(addNodes({ nodes: [rectangle, vector], rootIds: [rectangle.id, vector.id] }));
+    store.dispatch(setSelection([rectangle.id, vector.id]));
+
+    // before
+    const { result } = renderHook(() => useMixedPanel(), { wrapper });
+
+    // result
+    expect(result.current.sections).toEqual(['position', 'rotation', 'layout', 'appearance', 'fill', 'stroke', 'effects', 'export']);
   });
 });

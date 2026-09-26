@@ -41,6 +41,7 @@ export const PANEL_SECTIONS: Record<TPanelNodeType, TPanelSection[]> = {
   [NodeType.section]: ['position', 'layout', 'appearance', 'cornerRadius', 'fill', 'stroke', 'selectionColors', 'export'],
   [NodeType.slice]: ['position', 'rotation', 'layout', 'export'],
   [NodeType.star]: ['position', 'rotation', 'layout', 'appearance', 'fill', 'stroke', 'effects', 'export'],
+  [NodeType.vector]: ['position', 'rotation', 'layout', 'appearance', 'fill', 'stroke', 'effects', 'selectionColors', 'export'],
 };
 
 export const CHILD_PANEL_SECTIONS: TPanelSection[] = ['appearance', 'cornerRadius', 'fill', 'stroke', 'effects'];
