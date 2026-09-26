@@ -4,6 +4,8 @@ import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 
 // utils
 import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
+import { getVectorFillRotation } from './getVectorFillRotation';
+import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
 import { getDrawnVectorNode } from '../render/getDrawnVectorNode';
 import { getThickVectorPathVertices } from '../vectorNetwork/getThickVectorPathVertices/getThickVectorPathVertices';
 import { getVectorStrokeShapeFaces } from '../vector/stroke/getVectorStrokeShapeFaces';
@@ -35,6 +37,8 @@ export const captureVectorNodeDragSnapshot = (node: TVectorNode): TVectorNodeDra
     deltaY: 0,
     effectLayers: getVectorSnapshotEffectLayers(renderedNode),
     facesByPaint,
+    fillBounds: getVectorNodeBounds(renderedNode),
+    fillRotation: getVectorFillRotation(node),
     strokeVertices,
     strokes: getVisibleSolidStrokePaints(renderedNode.strokes),
   };

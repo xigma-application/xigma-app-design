@@ -36,6 +36,7 @@ export const captureVectorNodeResizeSnapshot = (node: TVectorNode, rotation: num
     anchorY: null,
     effectLayers: getVectorSnapshotEffectLayers(roundedNode),
     facesByPaint,
+    fillBounds: getVectorNodeBounds(roundedNode),
     flattenedSegments: getFlattenedSegments(roundedNode, strokeFaces),
     pivot: center,
     rotation,

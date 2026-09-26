@@ -5556,6 +5556,35 @@ in the picker) clears `paintFill`, so the mode ends for the rest of the session;
 The Paint button shows the fill's thumbnail (`usePaintFillThumbnail`: the image or video `ref`, or the rendered
 pattern source) and the picker opens on `ColorPickerTab.none`, a tab missing from the header whose body is empty.
 
+## 83. Snapshot fills span the whole vector
+
+The drag, resize and rotate snapshots draw each paint group (`groupFilledFacesForRendering`) on its own. Areas with
+the same image but a different blend mode are separate groups, and with `nodeBounds: null` each group laid its image
+or gradient over its own bounds, so the image restarted in every area while transforming. The snapshots now keep
+`fillBounds` (the vector bounds in the same space as their faces: the drawn node for drag and rotate, the rounded
+unrotated node for resize) and pass it as the node bounds (drag) or the local bounds (resize, rotate), like
+`drawVectorNode` does outside a transform.
+
+They also dropped a group's own blend mode, since they called `drawVectorFillPaints` directly. Resize and rotate
+faces now go through `drawVectorFillGroup` (which isolates and composites a group with a real blend mode); the drag
+snapshot keeps its translate-uniform fast path only for solid and gradient groups without a blend mode (their
+programs read `u_translate`). A blended group, or one with an image, video or pattern (the image program has no
+translate, so the image stayed behind while its area moved), goes through `drawVectorFillGroup` with its points
+and `fillBounds` moved by the drag delta on the CPU.
+
+## 84. Image, video and pattern fills turn with a rotated vector
+
+A single rotated vector keeps unrotated vertices plus `rotation`; `getDrawnVectorNode` bakes the turn for drawing, but
+the fills were laid over the baked shape's axis-aligned bounds without the angle, so an image, video or pattern stayed
+upright and "jumped back" when a rotate drag (whose snapshot did turn it) ended. `getVectorFillRotation(node)`
+returns the `TBoxFillRotation` a rotated vector's fills need — the unrotated rounded bounds turned by `rotation`
+around the middle of the unrotated vertex bounds (the bake pivot) — and `drawVectorNode` passes it to every fill
+and stroke group (gradients ignore it, as for boxes). The drag and rotate snapshots store it as `fillRotation`: drag
+moves it by the delta, rotate adds its own turn with `composeVectorFillRotation` (the local rect's centre is carried
+around both pivots and the angles add up). The resize snapshot already turned fills by the node rotation. Still
+open: a multi-selection rotate bakes the turn into the vertices (rotation 0), so there the fill ends upright, and
+SVG/PDF export does not turn the fill of a rotated vector.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

@@ -824,3 +824,6 @@ same dashed black trail while the drag is in progress (`drawVectorPaintPath.ts`,
 | # | Scenario | Unit | E2E |
 |---|---|---|---|
 | 678 | On a vector whose filled areas all share one fill with an image, video or pattern, the Paint tool paints and clears areas with that whole fill (the image still spans the vector), shows its thumbnail on the Paint button and no active color tab; picking Solid or Gradient leaves the mode for the rest of the Paint session |  ✅  |   ✅ `vector-paint-image-fill.spec.ts`    |
+| 679 | While a vector is dragged, resized or rotated, an image or gradient fill shared by areas drawn separately (e.g. one area with its own blend mode) stays one continuous fill across the whole vector instead of restarting in every area, and every area keeps its own blend mode |  ✅  |   ✅ `vector-snapshot-image-fill.spec.ts`    |
+| 680 | While a vector with an image fill is dragged, its image moves with it instead of staying where it was until the mouse is released |  ✅  |   ✅ `vector-snapshot-image-fill.spec.ts`    |
+| 681 | An image, video or pattern fill turns with a rotated vector (from the panel or by the rotate handle), also after the rotate drag ends and while it is dragged or resized |  ✅  |   ✅ `vector-snapshot-image-fill.spec.ts`    |

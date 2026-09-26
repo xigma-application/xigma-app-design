@@ -66,6 +66,7 @@ describe('captureVectorNodeResizeSnapshot', () => {
       anchorY: null,
       effectLayers: [],
       facesByPaint: [{ paint, points }],
+      fillBounds: { height: 0, width: 0, x: 0, y: 0 },
       flattenedSegments: flattened,
       pivot: { x: 0, y: 0 },
       rotation: 0,

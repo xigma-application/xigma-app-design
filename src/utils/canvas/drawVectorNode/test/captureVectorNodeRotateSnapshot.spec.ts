@@ -86,6 +86,8 @@ describe('captureVectorNodeRotateSnapshot', () => {
       deltaDegrees: 0,
       effectLayers: [],
       facesByPaint: [{ paint, points }],
+      fillBounds: { height: 20, width: 40, x: 10, y: 10 },
+      fillRotation: expect.any(Object),
       pivot: { x: 30, y: 20 },
       strokeVertices: [0, 0, 10, 0, 10, 1],
       strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],

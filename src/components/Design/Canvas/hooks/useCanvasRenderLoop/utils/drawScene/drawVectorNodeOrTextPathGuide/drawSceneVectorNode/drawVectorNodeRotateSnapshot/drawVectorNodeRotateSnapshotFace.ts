@@ -3,7 +3,8 @@ import { TDrawSceneContext } from '../../../types';
 import { TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
 // utils
-import { drawVectorFillPaints } from 'utils/canvas/drawVectorNode/drawVectorFillPaints';
+import { composeVectorFillRotation } from 'utils/canvas/drawVectorNode/composeVectorFillRotation';
+import { drawVectorFillGroup } from '../drawVectorFillGroup';
 import { getVectorFillBounds } from 'utils/canvas/drawVectorNode/getVectorFillBounds';
 import { rotateFillsCrop } from 'components/Design/Canvas/utils/rotateFillsCrop';
 import { rotateSnapshotPoint } from './rotateSnapshotPoint';
@@ -13,39 +14,20 @@ export const drawVectorNodeRotateSnapshotFace = (
   snapshot: TVectorNodeRotateSnapshot,
   face: TVectorNodeRotateSnapshot['facesByPaint'][number],
 ): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, imageContext, imageFilterQuality, program, viewport } = context;
-  const {
-    cache: imageTextureCache,
-    gradientProgram,
-    imagePaintTextureSizeCache,
-    isAlphaWriteEnabled,
-    patternTileProgram,
-    program: imageProgram,
-  } = imageContext;
   const { paint, points } = face;
   const rotatedFaces = points.map((facePoints) => facePoints.map((point) => rotateSnapshotPoint(point, snapshot)));
-  const localBounds = getVectorFillBounds(points, null);
+  const localBounds = getVectorFillBounds(points, snapshot.fillBounds ?? null);
+  const localCenter = { x: localBounds.x + localBounds.width / 2, y: localBounds.y + localBounds.height / 2 };
+  const baseRotation = snapshot.fillRotation ?? { center: localCenter, degrees: 0, localBounds };
   const rotatedPaint = rotateFillsCrop(paint, snapshot.pivot, snapshot.deltaDegrees) ?? paint;
 
-  drawVectorFillPaints(
-    gl,
-    program,
-    gradientProgram,
-    patternTileProgram,
-    imageProgram,
-    imageTextureCache,
-    imagePaintTextureSizeCache,
-    buffer,
+  drawVectorFillGroup(
+    context,
     null,
     null,
     rotatedFaces,
     rotatedPaint,
     [],
-    canvasWidth,
-    canvasHeight,
-    viewport,
-    isAlphaWriteEnabled,
-    imageFilterQuality,
-    { center: snapshot.pivot, degrees: snapshot.deltaDegrees, localBounds },
+    composeVectorFillRotation(baseRotation, snapshot.pivot, snapshot.deltaDegrees),
   );
 };

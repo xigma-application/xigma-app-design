@@ -78,6 +78,7 @@ describe('captureVectorNodeDragSnapshot', () => {
       deltaY: 0,
       effectLayers: [],
       facesByPaint: [{ paint, points }],
+      fillBounds: { height: 0, width: 0, x: 0, y: 0 },
       strokeVertices: [0, 0, 10, 0, 10, 1],
       strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
     });

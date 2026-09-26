@@ -5,10 +5,10 @@ import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 // utils
 import { drawVectorNodeResizeSnapshotFace } from '../drawVectorNodeResizeSnapshotFace';
 
-const drawVectorFillPaintsMock = vi.fn();
+const drawVectorFillGroupMock = vi.fn();
 
-vi.mock('utils/canvas/drawVectorNode/drawVectorFillPaints', () => ({
-  drawVectorFillPaints: (...args: unknown[]): void => drawVectorFillPaintsMock(...args),
+vi.mock('../../drawVectorFillGroup', () => ({
+  drawVectorFillGroup: (...args: unknown[]): void => drawVectorFillGroupMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -54,7 +54,7 @@ const snapshot: TVectorNodeResizeSnapshot = {
 
 describe('drawVectorNodeResizeSnapshotFace', () => {
   beforeEach(() => {
-    drawVectorFillPaintsMock.mockClear();
+    drawVectorFillGroupMock.mockClear();
   });
 
   it('should scale the face points and the local bounds, then draw with the unmodified paint and new center', () => {
@@ -73,15 +73,8 @@ describe('drawVectorNodeResizeSnapshotFace', () => {
     drawVectorNodeResizeSnapshotFace(context, snapshot, { paint, points });
 
     // result
-    expect(drawVectorFillPaintsMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      gradientProgram,
-      patternTileProgram,
-      imageProgram,
-      imageTextureCache,
-      imagePaintTextureSizeCache,
-      buffer,
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
       null,
       null,
       [
@@ -94,11 +87,6 @@ describe('drawVectorNodeResizeSnapshotFace', () => {
       ],
       paint,
       [],
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-      false,
-      undefined,
       { center: { x: 10, y: 5 }, degrees: 0, localBounds: { height: 10, width: 20, x: 0, y: 0 } },
     );
   });
@@ -128,8 +116,27 @@ describe('drawVectorNodeResizeSnapshotFace', () => {
     drawVectorNodeResizeSnapshotFace(context, snapshot, { paint, points });
 
     // result — crop width scales by scaleX (2x), height by scaleY (1x)
-    const [, , , , , , , , , , , scaledPaint] = drawVectorFillPaintsMock.mock.calls[0] as unknown[];
+    const [, , , , scaledPaint] = drawVectorFillGroupMock.mock.calls[0] as unknown[];
 
     expect((scaledPaint as typeof paint)[0].crop).toMatchObject({ height: 4, width: 8 });
+  });
+
+  it('should lay an image or gradient over the whole vector bounds, not only this group of areas', () => {
+    // mock
+    const paint = [{ color: '#ff0000', opacity: 100, type: 'solid' as const }];
+    const points = [
+      [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ],
+    ];
+    const fillBounds = { height: 100, width: 200, x: -50, y: -20 };
+
+    // before
+    drawVectorNodeResizeSnapshotFace(context, { ...snapshot, fillBounds }, { paint, points });
+
+    // result
+    expect(drawVectorFillGroupMock.mock.calls[0][6]).toMatchObject({ localBounds: { height: 100, width: 400 } });
   });
 });

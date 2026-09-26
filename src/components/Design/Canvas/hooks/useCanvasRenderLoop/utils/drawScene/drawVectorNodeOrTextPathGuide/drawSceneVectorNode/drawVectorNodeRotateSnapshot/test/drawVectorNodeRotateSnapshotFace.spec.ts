@@ -5,10 +5,10 @@ import { TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 // utils
 import { drawVectorNodeRotateSnapshotFace } from '../drawVectorNodeRotateSnapshotFace';
 
-const drawVectorFillPaintsMock = vi.fn();
+const drawVectorFillGroupMock = vi.fn();
 
-vi.mock('utils/canvas/drawVectorNode/drawVectorFillPaints', () => ({
-  drawVectorFillPaints: (...args: unknown[]): void => drawVectorFillPaintsMock(...args),
+vi.mock('../../drawVectorFillGroup', () => ({
+  drawVectorFillGroup: (...args: unknown[]): void => drawVectorFillGroupMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -48,7 +48,7 @@ const snapshot: TVectorNodeRotateSnapshot = {
 
 describe('drawVectorNodeRotateSnapshotFace', () => {
   beforeEach(() => {
-    drawVectorFillPaintsMock.mockClear();
+    drawVectorFillGroupMock.mockClear();
   });
 
   it('should rotate the face points around the pivot and draw with the unrotated local bounds and unmodified paint', () => {
@@ -67,29 +67,13 @@ describe('drawVectorNodeRotateSnapshotFace', () => {
     drawVectorNodeRotateSnapshotFace(context, snapshot, { paint, points });
 
     // result
-    expect(drawVectorFillPaintsMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      gradientProgram,
-      patternTileProgram,
-      imageProgram,
-      imageTextureCache,
-      imagePaintTextureSizeCache,
-      buffer,
-      null,
-      null,
-      expect.anything(),
-      paint,
-      [],
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-      false,
-      undefined,
-      { center: { x: 0, y: 0 }, degrees: 90, localBounds: { height: 10, width: 10, x: 0, y: 0 } },
-    );
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(context, null, null, expect.anything(), paint, [], {
+      center: { x: -5, y: 5 },
+      degrees: 90,
+      localBounds: { height: 10, width: 10, x: -10, y: 0 },
+    });
 
-    const [rotatedFaces] = drawVectorFillPaintsMock.mock.calls[0][10] as { x: number; y: number }[][];
+    const [rotatedFaces] = drawVectorFillGroupMock.mock.calls[0][3] as { x: number; y: number }[][];
     const expected = [
       { x: 0, y: 0 },
       { x: 0, y: 10 },
@@ -121,8 +105,43 @@ describe('drawVectorNodeRotateSnapshotFace', () => {
     drawVectorNodeRotateSnapshotFace(context, snapshot, { paint, points });
 
     // result — crop.rotation absorbs the applied deltaDegrees
-    const [, , , , , , , , , , , rotatedPaint] = drawVectorFillPaintsMock.mock.calls[0] as unknown[];
+    const [, , , , rotatedPaint] = drawVectorFillGroupMock.mock.calls[0] as unknown[];
 
     expect((rotatedPaint as typeof paint)[0].crop).toMatchObject({ rotation: 90 });
+  });
+
+  it('should lay an image or gradient over the whole vector bounds, not only this group of areas', () => {
+    // mock
+    const paint = [{ color: '#ff0000', opacity: 100, type: 'solid' as const }];
+    const points = [
+      [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ],
+    ];
+    const fillBounds = { height: 100, width: 200, x: -50, y: -20 };
+
+    // before
+    drawVectorNodeRotateSnapshotFace(context, { ...snapshot, fillBounds }, { paint, points });
+
+    // result
+    expect(drawVectorFillGroupMock.mock.calls[0][6]).toMatchObject({ localBounds: { height: 100, width: 200 } });
+  });
+
+  it('should add the turn to the fill rotation a rotated vector already has', () => {
+    // mock
+    const paint = [{ opacity: 100, ref: 'photo.png', rotation: 0, scaleMode: 'fill' as const, type: 'image' as const }];
+    const fillRotation = { center: { x: 5, y: 5 }, degrees: 30, localBounds: { height: 10, width: 10, x: 0, y: 0 } };
+
+    // before
+    drawVectorNodeRotateSnapshotFace(
+      context,
+      { ...snapshot, deltaDegrees: 60, fillRotation, pivot: { x: 5, y: 5 } },
+      { paint, points: [[{ x: 0, y: 0 }]] },
+    );
+
+    // result
+    expect(drawVectorFillGroupMock.mock.calls[0][6]).toEqual({ ...fillRotation, degrees: 90 });
   });
 });
