@@ -103,4 +103,37 @@ describe('selectSelectedImageCrop', () => {
     // result
     expect(selectSelectedImageCrop(store.getState())).not.toBe(first);
   });
+
+  it('should return the crop of an ellipse video fill and nothing for a missing node or a paint without an image', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        fills: [
+          { opacity: 100, ref: 'video-1', rotation: 0, scaleMode: 'fill', type: 'video' },
+          { color: '#000000', opacity: 100, type: 'solid' },
+        ],
+        height: 40,
+        name: 'Ellipse',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.ellipse,
+        width: 40,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const id = rootOrder[rootOrder.length - 1];
+    const read = (nodeId: string, paintIndex: number): unknown => {
+      store.dispatch(setImageEditor({ mode: 'crop', nodeId, paintIndex, selectedTarget: 'image' }));
+
+      return selectSelectedImageCrop(store.getState());
+    };
+
+    // result
+    expect(read(id, 0)).toMatchObject({ paintIndex: 0 });
+    expect(read(id, 1)).toBeUndefined();
+    expect(read('missing', 0)).toBeUndefined();
+  });
 });

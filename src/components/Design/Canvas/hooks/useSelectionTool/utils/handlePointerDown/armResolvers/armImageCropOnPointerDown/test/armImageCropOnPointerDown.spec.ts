@@ -413,4 +413,34 @@ describe('armImageCropOnPointerDown', () => {
     expect(result).toBeUndefined();
     expect(dispatch).not.toHaveBeenCalled();
   });
+
+  it('should arm a video fill in crop and tile mode, also on an ellipse, and ignore a paint without an image', () => {
+    // mock
+    const video = { opacity: 100, ref: 'video-1', rotation: 0, scaleMode: 'fill' as const, type: 'video' as const };
+    const ellipse = { ...rectangle, fills: [video], id: 'ellipse-1', type: NodeType.ellipse } as unknown as TRectangleNode;
+    const solid = { ...rectangle, fills: [{ color: '#000000', opacity: 100, type: 'solid' as const }] };
+    const arm = (node: TRectangleNode, mode: 'crop' | 'tile'): unknown => {
+      store.dispatch(setImageEditor({ mode, nodeId: node.id, paintIndex: 0 }));
+
+      return armImageCropOnPointerDown({
+        canvas,
+        canvasRefs: createCanvasRefs(),
+        dispatch: vi.fn(),
+        event,
+        hit: node,
+        point: { x: 20, y: 20 },
+        selectedNodes: [node],
+        viewport,
+      } as never);
+    };
+
+    armImageTileScaleOnPointerDownMock.mockReturnValue(true);
+
+    // result
+    expect(arm(ellipse, 'crop')).toBe(true);
+    expect(armImageCropMoveOnPointerDownMock).toHaveBeenCalled();
+    expect(arm(ellipse, 'tile')).toBe(true);
+    expect(arm(solid, 'crop')).toBeUndefined();
+    expect(arm(solid, 'tile')).toBeUndefined();
+  });
 });

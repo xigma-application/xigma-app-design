@@ -13,12 +13,12 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
-import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
-import { getRotatedNodeChanges } from './getRotatedNodeChanges';
-import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getOriginalCropPaintChanges } from 'components/Design/Canvas/utils/getOriginalCropPaintChanges';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
+import { getRotatedNodeChanges } from './getRotatedNodeChanges';
 import { getRotateOriginalFills } from './rotateOriginalFillsCache';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { pinRotatedGroupBounds } from './pinRotatedGroupBounds';
 import { rotateFillsCrop } from 'components/Design/Canvas/utils/rotateFillsCrop';
 import { screenToWorld } from 'utils/transform/screenToWorld';
@@ -43,7 +43,7 @@ const updateRotatedNodeOrigin = (
   const imageEditor = selectImageEditor(store.getState());
   const editedImageEditor = imageEditor?.mode === 'crop' && imageEditor.nodeId === id ? imageEditor : null;
   const cropChanges =
-    node && isAppearanceNode(node)
+    node && isImageFrameNode(node)
       ? getOriginalCropPaintChanges(node, getRotateOriginalFills, editedImageEditor, (paints, skipIndex) =>
           rotateFillsCrop(paints, pivot, deltaDegrees, skipIndex),
         )

@@ -220,7 +220,10 @@ describe('dispatchDraggedNodeUpdates', () => {
     const id = addRect(100, 100);
     const state = dragState({ [id]: { x: 100, y: 100 } });
     const snapshots = new Map<string, TVectorNodeDragSnapshot>([
-      [id, { deltaX: 0, deltaY: 0, facesByPaint: [], strokeVertices: [], strokes: [{ color: '#000', opacity: 100, type: 'solid' as const }] }],
+      [
+        id,
+        { deltaX: 0, deltaY: 0, facesByPaint: [], strokeVertices: [], strokes: [{ color: '#000', opacity: 100, type: 'solid' as const }] },
+      ],
     ]);
 
     // action
@@ -249,5 +252,18 @@ describe('dispatchDraggedNodeUpdates', () => {
 
     expect(nodes[moved]).toMatchObject({ x: 15, y: 15 });
     expect(nodes[deferred]).toMatchObject({ x: 50, y: 50 });
+  });
+
+  it('should move a dragged node that has no image frame without touching any crop', () => {
+    // mock
+    const id = addGroup();
+    const state = dragState({ [id]: { x: 0, y: 0 } });
+
+    // action
+    dispatchDraggedNodeUpdates(store.dispatch, state, null, 5, 5);
+    flushThrottledDispatch(state.dispatchThrottle);
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[id]).toMatchObject({ x: 5, y: 5 });
   });
 });

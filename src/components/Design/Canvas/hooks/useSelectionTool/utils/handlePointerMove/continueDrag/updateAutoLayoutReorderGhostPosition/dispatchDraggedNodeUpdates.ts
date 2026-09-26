@@ -10,10 +10,10 @@ import { TUpdateNodesPayload } from 'store/design/types';
 import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 
 // utils
-import { getOriginalCropPaintChanges } from 'components/Design/Canvas/utils/getOriginalCropPaintChanges';
 import { getDragOriginalFills } from '../dragOriginalFillsCache';
 import { getGeometryDeltaChanges } from '../../../../../../utils/getGeometryDeltaChanges';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { getOriginalCropPaintChanges } from 'components/Design/Canvas/utils/getOriginalCropPaintChanges';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { resyncGroupAutoLayoutAncestors } from '../../../handlePointerUp/resyncGroupAutoLayoutAncestors';
 import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
 import { translateFillsCrop } from 'components/Design/Canvas/utils/translateFillsCrop';
@@ -30,7 +30,7 @@ const getDraggedNodeUpdate = (
   const imageEditor = selectImageEditor(store.getState());
   const editedImageEditor = imageEditor?.nodeId === id ? imageEditor : null;
   const cropChanges =
-    node && isAppearanceNode(node)
+    node && isImageFrameNode(node)
       ? getOriginalCropPaintChanges(node, getDragOriginalFills, editedImageEditor, (paints, skipIndex) =>
           translateFillsCrop(paints, deltaX, deltaY, skipIndex),
         )

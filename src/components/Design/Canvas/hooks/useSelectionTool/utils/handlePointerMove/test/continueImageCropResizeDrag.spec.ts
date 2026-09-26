@@ -209,4 +209,16 @@ describe('continueImageCropResizeDrag', () => {
       fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
     });
   });
+
+  it('should resize a crop with no height as a square and still produce a crop rect', () => {
+    // mock
+    const nodeId = addImageRectangle();
+    const dragRef = createRef({ handle: 'se', nodeId, origin: { height: 0, rotation: 0, width: 40, x: 0, y: 0 }, paintIndex: 0 });
+
+    // before
+    continueImageCropResizeDrag(createCanvas(), pointerEvent(60, 50), store.dispatch, dragRef);
+
+    // result
+    expect(getCropRect(nodeId)).toMatchObject({ rotation: 0, x: 0, y: 0 });
+  });
 });

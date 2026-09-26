@@ -6,12 +6,12 @@ import { TDraftRect } from 'types/canvas';
 
 // utils
 import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 import { scaleFillsCrop } from 'components/Design/Canvas/utils/scaleFillsCrop';
 
 const scaleChildFillsCrop = (child: TBoxSceneNode, target: TAutoLayoutChildPosition): void => {
-  if (isAppearanceNode(child)) {
+  if (isImageFrameNode(child)) {
     const scale = {
       newCenterX: child.x + target.width / 2,
       newCenterY: child.y + target.height / 2,

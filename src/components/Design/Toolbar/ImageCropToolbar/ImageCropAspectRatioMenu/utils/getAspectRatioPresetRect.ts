@@ -1,7 +1,7 @@
 // types
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TAspectRatioTarget } from '../types';
 import { TDraftRect } from 'types/canvas';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
@@ -10,7 +10,7 @@ import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRec
 import { getImageFillContainRect } from 'utils/canvas/drawVectorNode/getImageFillContainRect';
 
 export const getAspectRatioPresetRect = (
-  node: TAppearanceNode,
+  node: TImageFrameNode,
   paint: TImagePaint | TVideoPaint,
   target: TAspectRatioTarget,
 ): TDraftRect | undefined => {

@@ -602,4 +602,36 @@ describe('resizeBoxNode', () => {
       ),
     ).not.toThrow();
   });
+
+  it('should carry the crop of an ellipse image stroke along, leaving its solid fill alone, also from a zero-size origin', () => {
+    // mock
+    const crop = { height: 20, rotation: 0, width: 20, x: 0, y: 0 };
+
+    store.dispatch(
+      addNode({
+        fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
+        height: 100,
+        name: 'Ellipse',
+        parentId: null,
+        rotation: 0,
+        strokes: [{ crop, opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' }],
+        type: NodeType.ellipse,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const id = rootOrder[rootOrder.length - 1];
+
+    // before
+    resizeBoxNode(id, { flip: null, height: 0, rotation: 0, width: 0, x: 0, y: 0 }, store.dispatch, { x: 0, y: 0 }, 2, 2, true, null);
+
+    // result — a zero-size origin scales the crop by 1, so it only follows the moved centre
+    const node = selectActivePage(store.getState()).nodes[id] as TRectangleNode;
+
+    expect(node.fills[0]).toEqual({ color: '#000000', opacity: 100, type: 'solid' });
+    expect(node.strokes?.[0]).toMatchObject({ crop: { height: 20, width: 20 } });
+  });
 });

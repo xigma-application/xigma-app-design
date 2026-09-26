@@ -8,12 +8,12 @@ import { TArmContext } from '../../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { armImageCropPaintOnPointerDown } from './armImageCropPaintOnPointerDown';
 import { armImageTileScaleOnPointerDown } from './armImageTileScaleOnPointerDown';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getResizeHandleAtPoint } from 'components/Design/Canvas/utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
 import { getRotateHandleAtPoint } from 'components/Design/Canvas/utils/getRotateHandleAtPoint';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 
 const isOwnHandleAtPoint = (point: TArmContext['point'], node: TSceneNode, viewport: TArmContext['viewport']): boolean =>
   Boolean(getResizeHandleAtPoint(point, [node], viewport) || getRotateHandleAtPoint(point, [node], viewport));
@@ -42,7 +42,7 @@ export const armImageCropOnPointerDown = ({
     return true;
   }
 
-  if (imageEditor?.mode === 'crop' && editorNode && isAppearanceNode(editorNode)) {
+  if (imageEditor?.mode === 'crop' && editorNode && isImageFrameNode(editorNode)) {
     const paint = getNodePaints(editorNode, imageEditor.property)[imageEditor.paintIndex];
 
     if (paint?.type === 'image' || paint?.type === 'video') {
@@ -50,7 +50,7 @@ export const armImageCropOnPointerDown = ({
     }
   }
 
-  if (imageEditor?.mode === 'tile' && editorNode && isAppearanceNode(editorNode)) {
+  if (imageEditor?.mode === 'tile' && editorNode && isImageFrameNode(editorNode)) {
     const paint = getNodePaints(editorNode, imageEditor.property)[imageEditor.paintIndex];
 
     if (paint?.type === 'image' || paint?.type === 'video') {

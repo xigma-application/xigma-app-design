@@ -7,9 +7,9 @@ import { setImageEditor } from 'store/design/slice';
 import { TImageEditorState } from 'store/design/types';
 
 // types
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TImageCrop, TImagePaint, TVideoPaint } from 'types/design/paint/types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TPoint, TResizeHandle } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
@@ -53,7 +53,7 @@ export const armImageTileScaleOnPointerDown = (
   point: TPoint,
   viewport: TViewport,
   imageEditor: TImageEditorState,
-  node: TAppearanceNode,
+  node: TImageFrameNode,
   paint: TImagePaint | TVideoPaint,
 ): true | undefined => {
   const tileRect = node.rotation === 0 ? getImageTileRect(node, paint) : undefined;

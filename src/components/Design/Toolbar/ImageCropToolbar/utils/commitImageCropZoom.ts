@@ -3,7 +3,7 @@ import { AppDispatch } from 'store';
 import { updateNode } from 'store/design/slice';
 
 // types
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
@@ -11,7 +11,7 @@ import { computeImageCropZoomRect } from './computeImageCropZoomRect';
 
 export const commitImageCropZoom = (
   dispatch: AppDispatch,
-  node: TAppearanceNode,
+  node: TImageFrameNode,
   paint: TImagePaint | TVideoPaint,
   paintIndex: number,
   targetPercent: number,
@@ -20,7 +20,6 @@ export const commitImageCropZoom = (
 
   if (crop) {
     const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paint, crop } : fill));
-
     dispatch(updateNode({ changes: { fills }, id: node.id }));
   }
 };

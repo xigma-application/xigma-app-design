@@ -5,10 +5,10 @@ import { TImageEditorState } from 'store/design/types';
 import { TBoxSceneNode, TPathNode, TViewport } from 'types/design/types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { drawImageEditorImageOutline } from './drawImageEditorImageOutline';
 import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRect';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 
 export const drawImageEditorCropImageOutline = (
   gl: WebGL2RenderingContext,
@@ -21,7 +21,7 @@ export const drawImageEditorCropImageOutline = (
   imageEditor: TImageEditorState,
   isImageSelected: boolean,
 ): void => {
-  if (imageEditor.mode === 'crop' && isAppearanceNode(node)) {
+  if (imageEditor.mode === 'crop' && isImageFrameNode(node)) {
     const paint = getNodePaints(node, imageEditor.property)[imageEditor.paintIndex];
 
     if (paint?.type === 'image' || paint?.type === 'video') {

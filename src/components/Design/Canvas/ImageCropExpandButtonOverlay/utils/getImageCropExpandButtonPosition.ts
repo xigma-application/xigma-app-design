@@ -7,7 +7,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { getNodeBounds } from '../../utils/getNodeBounds';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { worldToScreen } from '../../utils/worldToScreen';
 
@@ -22,7 +22,7 @@ export const getImageCropExpandButtonPosition = (
   if (imageEditor?.mode === 'crop') {
     const node = nodes[imageEditor.nodeId];
 
-    if (isAppearanceNode(node)) {
+    if (isImageFrameNode(node)) {
       const bounds = getNodeBounds(node);
       const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
       const inset = (BUTTON_SIZE_PX / 2 + EDGE_OFFSET_PX) / viewport.zoom;

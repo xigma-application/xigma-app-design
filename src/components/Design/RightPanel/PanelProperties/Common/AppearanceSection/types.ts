@@ -17,6 +17,8 @@ export type TAppearanceNode = TBooleanNode | TFrameNode | TRectangleNode | TSect
 
 export type TStyledNode = TAppearanceNode | TEllipseNode | TLineNode | TPolygonNode | TStarNode;
 
+export type TImageFrameNode = TAppearanceNode | TEllipseNode | TPolygonNode | TStarNode;
+
 export type TStyledOrVectorNode = TStyledNode | TVectorNode;
 
 export const isAppearanceNode = (node: TSceneNode | undefined): node is TAppearanceNode =>

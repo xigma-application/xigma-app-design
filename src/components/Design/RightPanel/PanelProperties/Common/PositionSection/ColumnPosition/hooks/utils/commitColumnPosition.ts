@@ -8,9 +8,9 @@ import { NodeType } from 'types/design/enums';
 
 // utils
 import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
-import { getNodeBounds } from 'components/Design/Canvas/utils/getNodeBounds';
 import { getNodeAbsoluteFromParentPosition } from 'store/design/utils/getNodeAbsoluteFromParentPosition';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { getNodeBounds } from 'components/Design/Canvas/utils/getNodeBounds';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { isGroupLikeNode } from 'store/design/utils/nodeHierarchy/isGroupLikeNode';
 import { translateFillsCrop } from 'components/Design/Canvas/utils/translateFillsCrop';
 import { translateNodeSubtree } from '../../../ColumnAlignment/hooks/utils/translateNodeSubtree';
@@ -35,7 +35,7 @@ export const commitColumnPosition = (
     translateNodeSubtree(dispatch, nodes, node, x - bounds.x, y - bounds.y);
   } else {
     const cropChanges =
-      node && isAppearanceNode(node) ? getCropPaintChanges(node, (paints) => translateFillsCrop(paints, x - node.x, y - node.y)) : {};
+      node && isImageFrameNode(node) ? getCropPaintChanges(node, (paints) => translateFillsCrop(paints, x - node.x, y - node.y)) : {};
 
     dispatch(updateNode({ changes: { ...cropChanges, x, y }, id }));
   }

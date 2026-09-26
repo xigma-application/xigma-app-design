@@ -5,15 +5,16 @@ import { selectImageEditor, selectNodes } from 'store/design/selectors';
 
 // types
 import { TImageCrop, TImagePaint, TPaintProperty, TVideoPaint } from 'types/design/paint/types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRect';
-import { isAppearanceNode, TAppearanceNode } from '../AppearanceSection/types';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 
 export type TSelectedImageCrop = {
   crop: TImageCrop;
-  node: TAppearanceNode;
+  node: TImageFrameNode;
   paint: TImagePaint | TVideoPaint;
   paintIndex: number;
   property?: TPaintProperty;
@@ -25,7 +26,7 @@ export const selectSelectedImageCrop = createSelector(
     if (imageEditor?.selectedTarget === 'image') {
       const node = nodes[imageEditor.nodeId];
 
-      if (isAppearanceNode(node)) {
+      if (isImageFrameNode(node)) {
         const paint = getNodePaints(node, imageEditor.property)[imageEditor.paintIndex];
 
         if (paint?.type === 'image' || paint?.type === 'video') {

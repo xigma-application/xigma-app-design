@@ -4,6 +4,7 @@ import { THoverResolverContext } from '../../types';
 import { TRectangleNode } from 'types/design/types';
 
 // utils
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { resolveImageCropRotateHover } from '../resolveImageCropRotateHover';
 
@@ -91,5 +92,58 @@ describe('resolveImageCropRotateHover', () => {
     );
 
     expect(result).toBeUndefined();
+  });
+
+  it('should also work for an ellipse, whose image is placed in its own box', () => {
+    // mock
+    const ellipse = { ...rectangle, id: 'ellipse-1', type: NodeType.ellipse } as unknown as TRectangleNode;
+
+    // before
+    const result = resolveImageCropRotateHover(
+      createContext({
+        imageEditor: { mode: 'crop' as const, nodeId: 'ellipse-1', paintIndex: 0, selectedTarget: 'image' as const },
+        point: { x: -10, y: -10 },
+        selectedNodes: [ellipse],
+      }),
+    );
+
+    // result
+    expect(result).toBeDefined();
+  });
+
+  it('should return undefined without an image paint or a node that frames its image', () => {
+    // mock
+    const solid = { ...rectangle, fills: [{ color: '#000000', opacity: 100, type: 'solid' as const }] };
+    const line = { ...rectangle, type: NodeType.line } as unknown as TRectangleNode;
+    const editor = { mode: 'crop' as const, nodeId: 'rect-1', paintIndex: 0, selectedTarget: 'image' as const };
+
+    // result
+    [
+      createContext({ imageEditor: editor, point: { x: -10, y: -10 }, selectedNodes: [] }),
+      createContext({ imageEditor: editor, point: { x: -10, y: -10 }, selectedNodes: [line] }),
+      createContext({ imageEditor: editor, point: { x: -10, y: -10 }, selectedNodes: [solid] }),
+      createContext({
+        imageEditor: { mode: 'crop', nodeId: 'rect-1', paintIndex: 0 },
+        point: { x: -10, y: -10 },
+        selectedNodes: [rectangle],
+      }),
+    ].forEach((context) => expect(resolveImageCropRotateHover(context)).toBeUndefined());
+  });
+
+  it('should fall back to no cursor image when none can be drawn', () => {
+    // spy
+    vi.mocked(getRotatedCursorUrl).mockReturnValueOnce(null);
+
+    // before
+    const result = resolveImageCropRotateHover(
+      createContext({
+        imageEditor: { mode: 'crop', nodeId: 'rect-1', paintIndex: 0, selectedTarget: 'image' },
+        point: { x: -10, y: -10 },
+        selectedNodes: [rectangle],
+      }),
+    );
+
+    // result
+    expect(result?.cursor).toBe('');
   });
 });

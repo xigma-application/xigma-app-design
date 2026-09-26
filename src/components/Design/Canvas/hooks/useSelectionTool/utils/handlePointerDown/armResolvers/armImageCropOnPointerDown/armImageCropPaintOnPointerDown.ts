@@ -4,8 +4,8 @@ import { setImageEditor } from 'store/design/slice';
 import { TImageEditorState } from 'store/design/types';
 
 // types
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
@@ -27,14 +27,14 @@ export const armImageCropPaintOnPointerDown = (
   point: TPoint,
   viewport: TViewport,
   imageEditor: TImageEditorState,
-  node: TAppearanceNode,
+  node: TImageFrameNode,
   paint: TImagePaint | TVideoPaint,
 ): true | undefined => {
   const crop = getImageCropRect(node, paint);
   const selectedTarget = imageEditor.selectedTarget ?? 'frame';
-
-  if (selectedTarget === 'image') {
-    const handled = armImageCropHandleOnPointerDown(
+  const isHandleArmed =
+    selectedTarget === 'image' &&
+    armImageCropHandleOnPointerDown(
       canvas,
       canvasRefs,
       event,
@@ -47,29 +47,20 @@ export const armImageCropPaintOnPointerDown = (
       paint.flipY,
     );
 
-    if (handled) {
+  switch (true) {
+    case isHandleArmed:
       return true;
-    }
-  }
-
-  if (isPointInImageCropRect(point, crop)) {
-    armImageCropMoveOnPointerDown(canvas, canvasRefs, dispatch, event, node.id, imageEditor, crop, point, selectedTarget);
-    return true;
-  }
-
-  if (hit?.id === node.id) {
-    if (selectedTarget === 'image') {
+    case isPointInImageCropRect(point, crop):
+      armImageCropMoveOnPointerDown(canvas, canvasRefs, dispatch, event, node.id, imageEditor, crop, point, selectedTarget);
+      return true;
+    case hit?.id === node.id && selectedTarget === 'image':
       dispatch(setImageEditor({ ...imageEditor, selectedTarget: 'frame' }));
-    }
-
-    return;
+      return;
+    case hit?.id === node.id:
+    case Boolean(getResizeHandleAtPoint(point, [node], viewport) || getRotateHandleAtPoint(point, [node], viewport)):
+      return;
+    default:
+      dispatch(setImageEditor(null));
+      return true;
   }
-
-  if (getResizeHandleAtPoint(point, [node], viewport) || getRotateHandleAtPoint(point, [node], viewport)) {
-    return;
-  }
-
-  dispatch(setImageEditor(null));
-
-  return true;
 };

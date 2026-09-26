@@ -10,7 +10,7 @@ import { TSceneNode } from 'types/design/types';
 import { getImageCropRect } from './getImageCropRect';
 import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getPaintReplaceChange } from 'utils/design/paint/getPaintReplaceChange';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 
 export const seedImageCropIfNeeded = (
   dispatch: AppDispatch,
@@ -18,7 +18,7 @@ export const seedImageCropIfNeeded = (
   paintIndex: number,
   property: TPaintProperty = 'fills',
 ): void => {
-  if (node && isAppearanceNode(node)) {
+  if (node && isImageFrameNode(node)) {
     const paint = getNodePaints(node, property)[paintIndex];
 
     if ((paint?.type === 'image' || paint?.type === 'video') && !paint.crop) {

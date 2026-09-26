@@ -117,4 +117,30 @@ describe('drawImageEditorSelectionOutline', () => {
     expect(trianglesDraws).toHaveLength(12);
     expect(lineLoopDraws).toHaveLength(0);
   });
+
+  it('should draw the tile outline for a video fill and skip it without a sized image, an image paint or a node that frames its image', () => {
+    // mock
+    imagePaintTextureSizeCache.set('video-1', { height: 20, width: 20 });
+
+    const editor: TImageEditorState = { mode: 'tile', nodeId: 'frame-1', paintIndex: 0 };
+    const variants = [
+      { ...node, fills: [{ opacity: 100, ref: 'video-1', rotation: 0, scaleMode: 'tile' as const, type: 'video' as const }] },
+      { ...node, fills: [{ opacity: 100, ref: 'unsized', rotation: 0, scaleMode: 'tile' as const, type: 'image' as const }] },
+      { ...node, fills: [{ color: '#000000', opacity: 100, type: 'solid' as const }] },
+      { ...node, type: NodeType.text } as unknown as TFrameNode,
+    ];
+
+    // before
+    const handleCounts = variants.map((variant) => {
+      const gl = createGlMock();
+
+      drawImageEditorSelectionOutline(gl, {} as WebGLProgram, {} as WebGLBuffer, variant, 100, 100, IDENTITY_VIEWPORT, editor);
+
+      return (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES).length;
+    });
+
+    // result — only the sized video adds the tile rect's handles on top of the frame
+    expect(handleCounts[0]).toBeGreaterThan(handleCounts[1]);
+    expect(handleCounts.slice(1).every((count) => count === handleCounts[1])).toBe(true);
+  });
 });

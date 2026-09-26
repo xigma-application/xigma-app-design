@@ -7,7 +7,7 @@ import { getImageTileRect } from 'components/Design/Canvas/utils/getImageTileRec
 import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 
 export const resolveImageTileScaleHover = ({
   imageEditor,
@@ -18,7 +18,7 @@ export const resolveImageTileScaleHover = ({
   if (imageEditor?.mode === 'tile') {
     const node = selectedNodes.find((selectedNode) => selectedNode.id === imageEditor.nodeId);
 
-    if (node && isAppearanceNode(node) && node.rotation === 0) {
+    if (node && isImageFrameNode(node) && node.rotation === 0) {
       const paint = getNodePaints(node, imageEditor.property)[imageEditor.paintIndex];
 
       if (paint?.type === 'image' || paint?.type === 'video') {

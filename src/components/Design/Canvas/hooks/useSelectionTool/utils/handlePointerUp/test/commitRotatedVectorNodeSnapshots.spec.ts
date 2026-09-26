@@ -64,7 +64,16 @@ describe('commitRotatedVectorNodeSnapshots', () => {
     const dragState = buildRotateDragState({ [id]: { height: 20, rotation: 0, width: 20, x: 40, y: 40 } });
 
     canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([
-      [id, { deltaDegrees: 90, facesByPaint: [], pivot: { x: 50, y: 50 }, strokeVertices: [], strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }] }],
+      [
+        id,
+        {
+          deltaDegrees: 90,
+          facesByPaint: [],
+          pivot: { x: 50, y: 50 },
+          strokeVertices: [],
+          strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }],
+        },
+      ],
     ]);
 
     // before
@@ -104,7 +113,16 @@ describe('commitRotatedVectorNodeSnapshots', () => {
     const dragState = buildRotateDragState({ [id]: { height: 20, rotation: 0, width: 20, x: 40, y: 40 } });
 
     canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([
-      [id, { deltaDegrees: 90, facesByPaint: [], pivot: { x: 50, y: 50 }, strokeVertices: [], strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }] }],
+      [
+        id,
+        {
+          deltaDegrees: 90,
+          facesByPaint: [],
+          pivot: { x: 50, y: 50 },
+          strokeVertices: [],
+          strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }],
+        },
+      ],
     ]);
 
     // before
@@ -123,7 +141,16 @@ describe('commitRotatedVectorNodeSnapshots', () => {
     const dragState = buildRotateDragState({});
 
     canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([
-      ['missing-id', { deltaDegrees: 45, facesByPaint: [], pivot: { x: 0, y: 0 }, strokeVertices: [], strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }] }],
+      [
+        'missing-id',
+        {
+          deltaDegrees: 45,
+          facesByPaint: [],
+          pivot: { x: 0, y: 0 },
+          strokeVertices: [],
+          strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }],
+        },
+      ],
     ]);
 
     // before
@@ -132,5 +159,31 @@ describe('commitRotatedVectorNodeSnapshots', () => {
     // result
     expect(dispatch).not.toHaveBeenCalled();
     expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
+  });
+
+  it('should rotate a node without an image frame without touching any crop', () => {
+    // mock
+    store.dispatch(
+      addNode({ childIds: [], height: 20, name: 'Group', parentId: null, rotation: 0, type: NodeType.group, width: 20, x: 40, y: 40 }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const id = rootOrder[rootOrder.length - 1];
+    const canvasRefs = buildCanvasRefs();
+    const dispatch = vi.fn();
+
+    canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([
+      [id, { deltaDegrees: 90, facesByPaint: [], pivot: { x: 50, y: 50 }, strokeVertices: [], strokes: [] }],
+    ]);
+
+    // before
+    commitRotatedVectorNodeSnapshots(
+      dispatch,
+      buildRotateDragState({ [id]: { height: 20, rotation: 0, width: 20, x: 40, y: 40 } }),
+      canvasRefs,
+    );
+
+    // result
+    expect(dispatch.mock.calls[0][0].payload.changes).not.toHaveProperty('fills');
   });
 });

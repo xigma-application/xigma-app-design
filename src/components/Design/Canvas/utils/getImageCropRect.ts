@@ -1,14 +1,14 @@
 // types
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TDraftRect } from 'types/canvas';
 import { TImageCrop, TImagePaint, TVideoPaint } from 'types/design/paint/types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 
 // utils
 import { getEffectiveImageSize } from './getEffectiveImageSize';
 import { getImageFillContainRect } from 'utils/canvas/drawVectorNode/getImageFillContainRect';
 import { getImageFillCoverRect } from 'utils/canvas/drawVectorNode/getImageFillCoverRect';
 
-const seedFromNaturalSize = (bounds: TDraftRect, node: TAppearanceNode, paint: TImagePaint | TVideoPaint): TImageCrop | undefined => {
+const seedFromNaturalSize = (bounds: TDraftRect, node: TImageFrameNode, paint: TImagePaint | TVideoPaint): TImageCrop | undefined => {
   const effectiveSize = getEffectiveImageSize(paint);
 
   if (effectiveSize) {
@@ -23,7 +23,7 @@ const seedFromNaturalSize = (bounds: TDraftRect, node: TAppearanceNode, paint: T
   return undefined;
 };
 
-export const getImageCropRect = (node: TAppearanceNode, paint: TImagePaint | TVideoPaint): TImageCrop => {
+export const getImageCropRect = (node: TImageFrameNode, paint: TImagePaint | TVideoPaint): TImageCrop => {
   if (!paint.crop) {
     const bounds = { height: node.height, width: node.width, x: node.x, y: node.y };
 

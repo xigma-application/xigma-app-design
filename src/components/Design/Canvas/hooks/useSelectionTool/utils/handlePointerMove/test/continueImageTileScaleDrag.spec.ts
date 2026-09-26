@@ -121,4 +121,42 @@ describe('continueImageTileScaleDrag', () => {
     // result
     expect(getPaint(nodeId).scale).toBe(0.01);
   });
+
+  it('should scale the tiles of an ellipse and a video fill, and leave other paints, other nodes and a zero start distance alone', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        fills: [{ opacity: 100, ref: 'video-1', rotation: 0, scale: 1, scaleMode: 'tile', type: 'video' }],
+        height: 100,
+        name: 'Ellipse',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.ellipse,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const ellipseId = rootOrder[rootOrder.length - 1];
+    const rectangleId = addImageRectangle();
+    const drag = (nodeId: string, paintIndex = 0, startDistance = 100): void =>
+      continueImageTileScaleDrag(
+        createCanvas(),
+        pointerEvent(200, 0),
+        store.dispatch,
+        createRef({ anchor: { x: 0, y: 0 }, nodeId, paintIndex, startDistance, startScale: 1 }),
+      );
+
+    // action
+    drag(ellipseId);
+    drag(rectangleId, 5);
+    drag(rectangleId, 0, 0);
+    drag('missing');
+
+    // result
+    expect((selectActivePage(store.getState()).nodes[ellipseId] as TRectangleNode).fills[0]).toMatchObject({ scale: 2 });
+    expect(getPaint(rectangleId).scale).toBe(1);
+  });
 });

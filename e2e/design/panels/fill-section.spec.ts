@@ -6432,3 +6432,42 @@ test.describe('Design panels — Fill section', () => {
     await expect(page.getByLabel('Hex color')).toHaveCount(1);
   });
 });
+
+test('an ellipse image fill can be cropped on the canvas: Crop enters crop mode and dragging the image moves its crop', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-fill-section-ellipse-crop');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — an ellipse with an image fill
+  await designPage.drawEllipse(700, 200, 900, 400);
+
+  const id = await readFirstNodeId(page);
+
+  await page.getByLabel('Hex color').click();
+  await page.getByLabel('Image').click();
+  await page.locator('input[type="file"]').setInputFiles({
+    buffer: await createSolidColorPngBuffer(200, 200, [255, 0, 0]),
+    mimeType: 'image/png',
+    name: 'source.png',
+  });
+  await expect.poll(async () => readPixelColor(page, 800, 300)).toEqual([255, 0, 0]);
+
+  // action — enter crop mode
+  await page.getByRole('button', { name: 'Crop' }).click();
+
+  // result
+  await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+  const seededCrop = (await readNode(page, id)).fills![0].crop!;
+
+  // action — drag the image 30px right, away from the arc handle in the ellipse's centre
+  await designPage.pointerDown(760, 260);
+  await page.mouse.move(790, 260, { steps: 5 });
+  await designPage.pointerUp();
+
+  // result — the crop follows the drag
+  await expect.poll(async () => (await readNode(page, id)).fills![0].crop!.x).toBe(seededCrop.x + 30);
+});

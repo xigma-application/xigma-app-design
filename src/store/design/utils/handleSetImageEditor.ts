@@ -3,7 +3,7 @@ import { TDesignState, TImageEditorState } from '../types';
 
 // utils
 import { getActivePage } from './getActivePage';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 
 export const handleSetImageEditor = (state: TDesignState, payload: TImageEditorState | null): void => {
   if (!payload) {
@@ -28,7 +28,7 @@ export const handleSetImageEditor = (state: TDesignState, payload: TImageEditorS
 
         state.imageEditor = {
           ...payload,
-          cropCancelSnapshot: isAppearanceNode(node)
+          cropCancelSnapshot: isImageFrameNode(node)
             ? {
                 cornerRadius: node.cornerRadius,
                 fills: node.fills,

@@ -168,4 +168,45 @@ describe('useHandleCropClick', () => {
 
     expect(selectImageEditor(store.getState())).toBeNull();
   });
+
+  it('should not enter crop mode when the shape has no image fill, and should enter it for an ellipse', () => {
+    // mock
+    addRectangle([solid]);
+
+    const { result } = renderUseHandleCropClick();
+
+    // action
+    act(() => result.current());
+
+    // result
+    expect(selectImageEditor(store.getState())).toBeNull();
+
+    // mock
+    store.dispatch(
+      addNode({
+        fills: [imageWithoutCrop],
+        height: 50,
+        name: 'Ellipse',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.ellipse,
+        width: 50,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const ellipseId = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(setSelection([ellipseId]));
+
+    const ellipse = renderUseHandleCropClick();
+
+    // action
+    act(() => ellipse.result.current());
+
+    // result
+    expect(selectImageEditor(store.getState())).toMatchObject({ mode: 'crop', nodeId: ellipseId, paintIndex: 0 });
+  });
 });

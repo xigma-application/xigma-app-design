@@ -1,6 +1,6 @@
 // types
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TAspectRatioTarget } from '../types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
@@ -16,7 +16,7 @@ const isClose = (a: number, b: number): boolean => Math.abs(a - b) < CLOSE_ENOUG
 const doesNodeMatchRect = (node: TRectLike, rect: TRectLike): boolean =>
   isClose(node.x, rect.x) && isClose(node.y, rect.y) && isClose(node.width, rect.width) && isClose(node.height, rect.height);
 
-export const isAspectRatioPresetActive = (node: TAppearanceNode, paint: TImagePaint | TVideoPaint, target: TAspectRatioTarget): boolean => {
+export const isAspectRatioPresetActive = (node: TImageFrameNode, paint: TImagePaint | TVideoPaint, target: TAspectRatioTarget): boolean => {
   const rect = getAspectRatioPresetRect(node, paint, target);
 
   if (rect) {

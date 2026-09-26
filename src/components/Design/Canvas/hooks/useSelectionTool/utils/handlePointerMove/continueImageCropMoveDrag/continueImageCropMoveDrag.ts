@@ -12,12 +12,12 @@ import { AppDispatch, store } from 'store';
 import { TCanvasRefs, TImageCropMoveDragState } from 'types/design/canvas/types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
-import { getPaintReplaceChange } from 'utils/design/paint/getPaintReplaceChange';
 import { getImageCropMoveAlignmentSnap } from './getImageCropMoveAlignmentSnap';
 import { getNodeBounds } from 'components/Design/Canvas/utils/getNodeBounds';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPaintReplaceChange } from 'utils/design/paint/getPaintReplaceChange';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const continueImageCropMoveDrag = (
@@ -34,7 +34,7 @@ export const continueImageCropMoveDrag = (
     const state = store.getState();
     const node = selectNodes(state)[nodeId];
 
-    if (isAppearanceNode(node)) {
+    if (isImageFrameNode(node)) {
       const property = selectImageEditor(state)?.property;
       const paint = getNodePaints(node, property)[paintIndex];
 
@@ -51,7 +51,6 @@ export const continueImageCropMoveDrag = (
         const change = getPaintReplaceChange(node, property, paintIndex, { ...paint, crop });
 
         canvasRefs.transform.alignmentGuideRef.current = guide;
-
         dispatch(updateNode({ changes: change, id: nodeId }));
       }
     }

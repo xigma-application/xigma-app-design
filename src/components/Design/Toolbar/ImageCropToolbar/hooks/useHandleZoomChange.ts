@@ -4,14 +4,14 @@ import { useCallback } from 'react';
 import { useAppDispatch } from 'store';
 
 // types
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
 import { commitImageCropZoom } from '../utils/commitImageCropZoom';
 
 export const useHandleZoomChange = (
-  node: TAppearanceNode | undefined,
+  node: TImageFrameNode | undefined,
   paint: TImagePaint | TVideoPaint | undefined,
   paintIndex: number | undefined,
 ): TFunc<[number]> => {

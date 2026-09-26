@@ -4,15 +4,15 @@ import { useCallback } from 'react';
 import { useAppDispatch } from 'store';
 
 // types
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TAspectRatioTarget } from '../types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
 import { commitAspectRatioPreset } from '../utils/commitAspectRatioPreset';
 
 export const useHandleSelectAspectRatioPreset = (
-  node: TAppearanceNode | undefined,
+  node: TImageFrameNode | undefined,
   paint: TImagePaint | TVideoPaint | undefined,
 ): TFunc<[TAspectRatioTarget]> => {
   const dispatch = useAppDispatch();

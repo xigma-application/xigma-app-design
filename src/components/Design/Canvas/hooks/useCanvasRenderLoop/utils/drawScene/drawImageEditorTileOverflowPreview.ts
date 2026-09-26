@@ -8,11 +8,11 @@ import { TImageRenderContext } from '../../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { drawImageEditorOverflowQuad } from './drawImageEditorOverflowQuad';
 import { getImageTileRect } from 'components/Design/Canvas/utils/getImageTileRect';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 
 const getImageEditorPreviewTexture = (
   gl: WebGL2RenderingContext,
@@ -29,7 +29,7 @@ export const drawImageEditorTileOverflowPreview = (
   imageEditor: TImageEditorState | null,
 ): void => {
   const node = imageEditor?.mode === 'tile' ? nodesById[imageEditor.nodeId] : undefined;
-  const appearanceNode = node && isAppearanceNode(node) && node.rotation === 0 ? node : undefined;
+  const appearanceNode = node && isImageFrameNode(node) && node.rotation === 0 ? node : undefined;
   const paint = appearanceNode && imageEditor ? getNodePaints(appearanceNode, imageEditor.property)[imageEditor.paintIndex] : undefined;
   const texture = getImageEditorPreviewTexture(context.gl, context.imageContext, paint);
   const tileRect = appearanceNode && paint?.type === 'image' ? getImageTileRect(appearanceNode, paint) : undefined;

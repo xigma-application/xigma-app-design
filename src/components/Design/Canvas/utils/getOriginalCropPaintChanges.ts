@@ -2,7 +2,7 @@
 import { TImageEditorState } from 'store/design/types';
 
 // types
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TPaint } from 'types/design/paint/types';
 
 // utils
@@ -10,7 +10,7 @@ import { getEditedPaintIndex } from './getEditedPaintIndex';
 import { getStrokesCacheKey } from './getStrokesCacheKey';
 
 export const getOriginalCropPaintChanges = (
-  node: TAppearanceNode,
+  node: TImageFrameNode,
   getOriginal: (cacheKey: string, currentPaints: TPaint[]) => TPaint[],
   editedImageEditor: TImageEditorState | null,
   transform: (paints: TPaint[], skipPaintIndex: number | null) => TPaint[] | undefined,

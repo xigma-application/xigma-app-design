@@ -12,9 +12,9 @@ import { TRotateNodeOrigin } from 'types/design/selectionTool/types';
 import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
 import { getNodeBounds } from 'components/Design/Canvas/utils/getNodeBounds';
 import { getRigidTransformNodes } from 'store/design/utils/nodeHierarchy/getRigidTransformNodes';
-import { getRotateNodeOrigins } from '../../handlePointerDown/getRotateNodeOrigins';
 import { getRotatedNodeChanges } from './getRotatedNodeChanges';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { getRotateNodeOrigins } from '../../handlePointerDown/getRotateNodeOrigins';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { pinRotatedGroupBounds } from './pinRotatedGroupBounds';
 import { rotateFillsCrop } from 'components/Design/Canvas/utils/rotateFillsCrop';
 
@@ -30,7 +30,7 @@ const dispatchRigidlyRotatedNodeChanges = (
   const currentNode = nodes[id];
   const geometryChanges = getRotatedNodeChanges(origin, pivot, deltaDegrees, isSingleNodeRotate);
   const cropChanges =
-    currentNode && isAppearanceNode(currentNode)
+    currentNode && isImageFrameNode(currentNode)
       ? getCropPaintChanges(currentNode, (paints) => rotateFillsCrop(paints, pivot, deltaDegrees))
       : {};
 

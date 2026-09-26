@@ -4,7 +4,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { scaleFillsCrop } from 'components/Design/Canvas/utils/scaleFillsCrop';
 
 export const getDimensionChangeCropFills = (
@@ -14,7 +14,7 @@ export const getDimensionChangeCropFills = (
   nextWidth: number,
   nextHeight: number,
 ): { fills?: TPaint[]; strokes?: TPaint[] } =>
-  selectedNode && isAppearanceNode(selectedNode)
+  selectedNode && isImageFrameNode(selectedNode)
     ? getCropPaintChanges(selectedNode, (paints) =>
         scaleFillsCrop(paints, {
           newCenterX: selectedNode.x + nextWidth / 2,

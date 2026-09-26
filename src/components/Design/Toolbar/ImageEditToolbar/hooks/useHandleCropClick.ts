@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // utils
 import { getCropTargetPaintIndex } from '../utils/getCropTargetPaintIndex';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { seedImageCropIfNeeded } from 'components/Design/Canvas/utils/seedImageCropIfNeeded';
 
 export const useHandleCropClick = (): TFunc => {
@@ -13,7 +13,7 @@ export const useHandleCropClick = (): TFunc => {
   const [selectedNode] = useAppSelector(selectSelectedNodes);
   const selectedFillIndices = useAppSelector(selectSelectedFillIndices);
   const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
-  const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
+  const node = isImageFrameNode(selectedNode) ? selectedNode : undefined;
 
   return (): void => {
     if (node) {

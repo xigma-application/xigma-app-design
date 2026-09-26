@@ -5,11 +5,11 @@ import { TImageEditorState } from 'store/design/types';
 import { TBoxSceneNode, TPathNode, TViewport } from 'types/design/types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { drawImageEditorCropImageOutline } from './drawImageEditorCropImageOutline';
 import { drawImageEditorFrameOutline } from './drawImageEditorFrameOutline';
 import { getImageTileRect } from 'components/Design/Canvas/utils/getImageTileRect';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 
 const drawImageEditorTileOutline = (
   gl: WebGL2RenderingContext,
@@ -23,7 +23,7 @@ const drawImageEditorTileOutline = (
 ): void => {
   drawImageEditorFrameOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, false);
 
-  if (isAppearanceNode(node)) {
+  if (isImageFrameNode(node)) {
     const paint = getNodePaints(node, imageEditor.property)[imageEditor.paintIndex];
 
     if (paint?.type === 'image' || paint?.type === 'video') {

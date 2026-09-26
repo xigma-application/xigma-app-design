@@ -284,4 +284,28 @@ describe('armImageTileScaleOnPointerDown', () => {
     expect(result).toBe(true);
     expect(dispatch).toHaveBeenCalledWith(setImageEditor(null));
   });
+
+  it('should anchor every other tile handle to the opposite corner or edge midpoint', () => {
+    // mock — an 80x80 tile at the frame's own (0,0)
+    imagePaintTextureSizeCache.set('image-1', { height: 80, width: 80 });
+
+    const node = createNode();
+    const cases = [
+      { anchor: { x: 0, y: 80 }, point: { x: 80, y: 0 } },
+      { anchor: { x: 80, y: 80 }, point: { x: 0, y: 0 } },
+      { anchor: { x: 80, y: 0 }, point: { x: 0, y: 80 } },
+      { anchor: { x: 40, y: 80 }, point: { x: 40, y: 0 } },
+      { anchor: { x: 40, y: 0 }, point: { x: 40, y: 80 } },
+      { anchor: { x: 80, y: 40 }, point: { x: 0, y: 40 } },
+    ];
+
+    // result
+    cases.forEach(({ anchor, point }) => {
+      const canvasRefs = createCanvasRefs();
+
+      armImageTileScaleOnPointerDown(canvas, canvasRefs, vi.fn(), event, node, point, viewport, imageEditor, node, { ...paint, scale: 1 });
+
+      expect(canvasRefs.imageCrop.imageTileScaleDragRef.current?.anchor).toEqual(anchor);
+    });
+  });
 });

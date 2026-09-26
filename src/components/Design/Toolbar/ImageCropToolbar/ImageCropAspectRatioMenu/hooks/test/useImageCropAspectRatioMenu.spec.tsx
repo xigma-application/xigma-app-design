@@ -11,7 +11,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TImagePaint } from 'types/design/paint/types';
 
 const renderUseImageCropAspectRatioMenu = (): ReturnType<typeof renderHook<ReturnType<typeof useImageCropAspectRatioMenu>, unknown>> =>
@@ -37,7 +37,7 @@ const addImageRectNode = (paint: TImagePaint): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
-const readNode = (id: string): TAppearanceNode => selectActivePage(store.getState()).nodes[id] as TAppearanceNode;
+const readNode = (id: string): TImageFrameNode => selectActivePage(store.getState()).nodes[id] as TImageFrameNode;
 
 describe('useImageCropAspectRatioMenu', () => {
   afterEach(() => {

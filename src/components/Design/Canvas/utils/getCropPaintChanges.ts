@@ -1,9 +1,9 @@
 // types
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TPaint } from 'types/design/paint/types';
 
 export const getCropPaintChanges = (
-  node: TAppearanceNode,
+  node: TImageFrameNode,
   transform: (paints: TPaint[]) => TPaint[] | undefined,
 ): { fills?: TPaint[]; strokes?: TPaint[] } => {
   const fills = transform(node.fills);

@@ -13,12 +13,12 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { clampAutoLayoutSize } from 'store/design/utils/autoLayout/clampAutoLayoutSize';
 import { getEditedPaintIndex } from 'components/Design/Canvas/utils/getEditedPaintIndex';
-import { getStrokesCacheKey } from 'components/Design/Canvas/utils/getStrokesCacheKey';
 import { getResizeAxisScale } from './getResizeAxisScale';
 import { getResizeChanges } from './getResizeChanges';
 import { getResizedPosition } from './getResizedPosition';
 import { getResizeOriginalFills } from './resizeOriginalFillsCache';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { getStrokesCacheKey } from 'components/Design/Canvas/utils/getStrokesCacheKey';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 import { scaleFillsCrop } from 'components/Design/Canvas/utils/scaleFillsCrop';
 
@@ -71,7 +71,7 @@ const getResizedBoxPaintChanges = (
   id: string,
   geometry: TResizedGeometry,
 ): { fills?: TPaint[]; strokes?: TPaint[] } => {
-  if (node && isAppearanceNode(node)) {
+  if (node && isImageFrameNode(node)) {
     const imageEditor = selectImageEditor(store.getState());
     const editedImageEditor = imageEditor?.mode === 'crop' && imageEditor.nodeId === id ? imageEditor : null;
     const fills = getResizedPaints(node.fills, id, getEditedPaintIndex(editedImageEditor, 'fills'), geometry);

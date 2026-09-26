@@ -122,4 +122,24 @@ describe('isAspectRatioPresetActive', () => {
     // result — once the corner radius is also maxed out, the circle target reads as active
     expect(isAspectRatioPresetActive(circleNode, { ...paint, crop }, { cornerRadius: 'max', ratioHeight: 1, ratioWidth: 1 })).toBe(true);
   });
+
+  it('should read a shape without a stored corner radius as 0 for a "circle" target', () => {
+    // mock
+    const crop = { height: 100, rotation: 0, width: 200, x: 0, y: 50 };
+    const node = {
+      fills: [],
+      height: 100,
+      id: 'ellipse-1',
+      name: 'Ellipse',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.ellipse,
+      width: 100,
+      x: 50,
+      y: 50,
+    } as unknown as TRectangleNode;
+
+    // result
+    expect(isAspectRatioPresetActive(node, { ...paint, crop }, { cornerRadius: 'max', ratioHeight: 1, ratioWidth: 1 })).toBe(false);
+  });
 });

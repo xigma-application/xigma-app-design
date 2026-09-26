@@ -3,8 +3,8 @@ import { AppDispatch } from 'store';
 import { updateNode } from 'store/design/slice';
 
 // types
-import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TAspectRatioTarget } from '../types';
+import { TImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
@@ -13,7 +13,7 @@ import { getMaxCornerRadius } from 'utils/canvas/cornerRadius/getMaxCornerRadius
 
 export const commitAspectRatioPreset = (
   dispatch: AppDispatch,
-  node: TAppearanceNode,
+  node: TImageFrameNode,
   paint: TImagePaint | TVideoPaint,
   target: TAspectRatioTarget,
 ): void => {

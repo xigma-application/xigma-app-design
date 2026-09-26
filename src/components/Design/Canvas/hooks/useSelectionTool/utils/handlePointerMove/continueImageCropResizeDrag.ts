@@ -14,10 +14,10 @@ import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getPaintReplaceChange } from 'utils/design/paint/getPaintReplaceChange';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getResizeAnchorSolver } from './continueResizeDrag/getResizeAnchorSolver';
+import { getResizedPosition } from './continueResizeDrag/resizeNode/getResizedPosition';
 import { getResizeQueryPoint } from './continueResizeDrag/getResizeQueryPoint';
 import { getScaleFactors } from './continueResizeDrag/getScaleFactors';
-import { getResizedPosition } from './continueResizeDrag/resizeNode/getResizedPosition';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const continueImageCropResizeDrag = (
@@ -33,7 +33,7 @@ export const continueImageCropResizeDrag = (
     const state = store.getState();
     const node = selectNodes(state)[nodeId];
 
-    if (isAppearanceNode(node)) {
+    if (isImageFrameNode(node)) {
       const property = selectImageEditor(state)?.property;
       const paint = getNodePaints(node, property)[paintIndex];
 

@@ -69,4 +69,27 @@ describe('moveConstrainedChildSubtree', () => {
     expect(leaf.x).toBe(440);
     expect(leaf.fills[0]).toMatchObject({ crop: { height: 10, rotation: 0, width: 10, x: 100, y: 0 } });
   });
+
+  it('should move a node without an image frame without adding any paints', () => {
+    // mock
+    const group = {
+      childIds: [],
+      height: 20,
+      id: 'group-1',
+      name: 'Group',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.group,
+      width: 20,
+      x: 0,
+      y: 0,
+    } as unknown as TSceneNode;
+
+    // before
+    moveConstrainedChildSubtree({ [group.id]: group }, group, 3, 4);
+
+    // result
+    expect(group).toMatchObject({ x: 3, y: 4 });
+    expect(group).not.toHaveProperty('fills');
+  });
 });

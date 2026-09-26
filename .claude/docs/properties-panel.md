@@ -1152,6 +1152,12 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
 
 ## `ImageCrop/`
 
+**Which nodes the image editor serves.** Crop and tile editing on the canvas (arming, hover handles, overflow
+previews, the crop toolbar) and carrying `paint.crop` along when a node moves, resizes or rotates gate on
+`AppearanceSection/utils/isImageFrameNode` (type `TImageFrameNode`): the `isAppearanceNode` boxes plus ellipse,
+polygon and star, which paint through `drawBoxPaints` with their own box too. Vectors come next, with their own
+fill frame.
+
 **Routed ahead of every node-type panel, not by node type at all.** `PanelProperties.tsx`'s switch
 checks `useIsEditingImageCrop()` (`Boolean(selectSelectedImageCrop(state))`, i.e.
 `imageEditor?.selectedTarget === 'image'`) before its `NodeType.frame`/`NodeType.rectangle` cases, so

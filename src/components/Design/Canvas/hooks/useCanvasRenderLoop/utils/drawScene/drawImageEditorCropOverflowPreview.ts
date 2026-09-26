@@ -8,11 +8,11 @@ import { TImageRenderContext } from '../../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { drawImageEditorOverflowQuad } from './drawImageEditorOverflowQuad';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getOrCreateImagePlaceholderTexture } from 'utils/canvas/drawVectorNode/drawVectorImageFill/getOrCreateImagePlaceholderTexture';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 
 const getImageEditorPreviewTexture = (
   gl: WebGL2RenderingContext,
@@ -34,7 +34,7 @@ export const drawImageEditorCropOverflowPreview = (
   imageEditor: TImageEditorState | null,
 ): void => {
   const node = imageEditor?.mode === 'crop' ? nodesById[imageEditor.nodeId] : undefined;
-  const appearanceNode = node && isAppearanceNode(node) ? node : undefined;
+  const appearanceNode = node && isImageFrameNode(node) ? node : undefined;
   const paint = appearanceNode && imageEditor ? getNodePaints(appearanceNode, imageEditor.property)[imageEditor.paintIndex] : undefined;
   const texture = getImageEditorPreviewTexture(context.gl, context.imageContext, paint);
 

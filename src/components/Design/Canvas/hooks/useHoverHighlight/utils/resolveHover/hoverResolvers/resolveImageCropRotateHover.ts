@@ -6,7 +6,7 @@ import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRec
 import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { isImageCropRotateHandleAtPoint } from 'components/Design/Canvas/utils/isImageCropRotateHandleAtPoint';
 
 export const resolveImageCropRotateHover = ({
@@ -18,7 +18,7 @@ export const resolveImageCropRotateHover = ({
   if (imageEditor?.mode === 'crop' && (imageEditor.selectedTarget ?? 'frame') === 'image') {
     const node = selectedNodes.find((selectedNode) => selectedNode.id === imageEditor.nodeId);
 
-    if (node && isAppearanceNode(node)) {
+    if (node && isImageFrameNode(node)) {
       const paint = getNodePaints(node, imageEditor.property)[imageEditor.paintIndex];
 
       if (paint?.type === 'image' || paint?.type === 'video') {

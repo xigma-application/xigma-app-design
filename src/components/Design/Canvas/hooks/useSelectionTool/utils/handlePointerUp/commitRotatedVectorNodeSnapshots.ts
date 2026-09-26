@@ -12,7 +12,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
 import { getRotatedNodeChanges } from '../handlePointerMove/continueRotateDrag/getRotatedNodeChanges';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { rotateFillsCrop } from 'components/Design/Canvas/utils/rotateFillsCrop';
 
 const commitRotatedVectorNodeSnapshot = (
@@ -27,7 +27,7 @@ const commitRotatedVectorNodeSnapshot = (
   const node = nodes[id];
   const nodeChanges = getRotatedNodeChanges(origin, pivot, deltaDegrees, isSingleNodeRotate);
   const cropChanges =
-    node && isAppearanceNode(node) ? getCropPaintChanges(node, (paints) => rotateFillsCrop(paints, pivot, deltaDegrees)) : {};
+    node && isImageFrameNode(node) ? getCropPaintChanges(node, (paints) => rotateFillsCrop(paints, pivot, deltaDegrees)) : {};
 
   dispatch(updateNode({ changes: { ...nodeChanges, ...cropChanges }, id }));
 };

@@ -4,6 +4,7 @@ import { THoverResolverContext } from '../../types';
 import { TRectangleNode } from 'types/design/types';
 
 // utils
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { imagePaintTextureSizeCache } from 'utils/canvas/getOrLoadTexture';
 import { resolveImageTileScaleHover } from '../resolveImageTileScaleHover';
@@ -127,5 +128,58 @@ describe('resolveImageTileScaleHover', () => {
     );
 
     expect(result).toBeUndefined();
+  });
+
+  it('should also work for an ellipse, whose tiles are placed in its own box', () => {
+    // mock
+    const ellipse = { ...createNode(), id: 'ellipse-1', type: NodeType.ellipse } as unknown as TRectangleNode;
+
+    // before
+    const result = resolveImageTileScaleHover(
+      createContext({
+        imageEditor: { mode: 'tile', nodeId: 'ellipse-1', paintIndex: 0 },
+        point: { x: 10, y: 10 },
+        selectedNodes: [ellipse],
+      }),
+    );
+
+    // result
+    expect(result).toEqual({ className: null, cursor: 'resize:45', nodeId: null });
+  });
+
+  it('should return undefined without an image paint, its size, or a node that frames its image', () => {
+    // mock
+    const editor = { mode: 'tile' as const, nodeId: 'rect-1', paintIndex: 0 };
+    const solid = { ...createNode(), fills: [{ color: '#000000', opacity: 100, type: 'solid' as const }] };
+    const line = { ...createNode(), type: NodeType.line } as unknown as TRectangleNode;
+    const unsized = {
+      ...createNode(),
+      fills: [{ opacity: 100, ref: 'unknown', rotation: 0, scaleMode: 'tile' as const, type: 'image' as const }],
+    };
+
+    // result
+    [
+      createContext({ imageEditor: editor, point: { x: 10, y: 10 }, selectedNodes: [] }),
+      createContext({ imageEditor: editor, point: { x: 10, y: 10 }, selectedNodes: [line] }),
+      createContext({ imageEditor: editor, point: { x: 10, y: 10 }, selectedNodes: [solid] }),
+      createContext({ imageEditor: editor, point: { x: 10, y: 10 }, selectedNodes: [unsized] }),
+    ].forEach((context) => expect(resolveImageTileScaleHover(context)).toBeUndefined());
+  });
+
+  it('should fall back to no cursor image when none can be drawn', () => {
+    // spy
+    vi.mocked(getRotatedCursorUrl).mockReturnValueOnce(null);
+
+    // before
+    const result = resolveImageTileScaleHover(
+      createContext({
+        imageEditor: { mode: 'tile', nodeId: 'rect-1', paintIndex: 0 },
+        point: { x: 10, y: 10 },
+        selectedNodes: [createNode()],
+      }),
+    );
+
+    // result
+    expect(result?.cursor).toBe('');
   });
 });

@@ -10,11 +10,11 @@ import { TImageCropRotateDragState } from 'types/design/canvas/types';
 import { TImageCrop } from 'types/design/paint/types';
 
 // utils
+import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getPaintReplaceChange } from 'utils/design/paint/getPaintReplaceChange';
-import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
-import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isImageFrameNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/utils/isImageFrameNode';
 import { rotateShapeNodeOrigin } from './continueRotateDrag/rotateShapeNodeOrigin';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 
@@ -31,7 +31,7 @@ export const continueImageCropRotateDrag = (
     const state = store.getState();
     const node = selectNodes(state)[nodeId];
 
-    if (isAppearanceNode(node)) {
+    if (isImageFrameNode(node)) {
       const property = selectImageEditor(state)?.property;
       const paint = getNodePaints(node, property)[paintIndex];
 
