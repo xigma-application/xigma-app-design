@@ -1,0 +1,29 @@
+import { FC, Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
+
+// components
+import Export from '../Export/Export';
+import PositionSection from '../Common/PositionSection/PositionSection';
+import VectorDimensions from './VectorDimensions/VectorDimensions';
+import VectorHeader from './VectorHeader/VectorHeader';
+import { UITools } from 'shared';
+
+// others
+import { translationNameSpace } from '../Common/constants';
+
+const Vector: FC = () => {
+  const { t } = useTranslation();
+
+  return (
+    <Fragment>
+      <VectorHeader />
+      <PositionSection />
+      <UITools.Section e2eValue="layout" label={t(`${translationNameSpace}.layoutSection.label`)}>
+        <VectorDimensions />
+      </UITools.Section>
+      <Export />
+    </Fragment>
+  );
+};
+
+export default Vector;

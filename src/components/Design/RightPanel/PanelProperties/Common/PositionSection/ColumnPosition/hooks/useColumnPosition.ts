@@ -21,7 +21,8 @@ import { commitColumnX } from './utils/commitColumnX';
 import { commitColumnY } from './utils/commitColumnY';
 import { getMixedOrValue } from 'components/Design/RightPanel/PanelProperties/Common/utils/getMixedOrValue';
 import { getPositionEntry } from './utils/getPositionEntry';
-import { isExistingBoxSceneNode } from 'components/Design/Canvas/utils/isExistingBoxSceneNode';
+import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { isExistingTransformPanelNode } from 'components/Design/RightPanel/PanelProperties/Common/utils/isExistingTransformPanelNode';
 import { isManagedLayoutFrame } from 'utils/canvas/signals/isManagedLayoutFrame';
 import { selectSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
@@ -46,7 +47,7 @@ export type TUseColumnPositionResult = {
 export const useColumnPosition = (): TUseColumnPositionResult => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
-  const boxNodes = useAppSelector(selectSelectedNodes).filter(isExistingBoxSceneNode);
+  const boxNodes = useAppSelector(selectSelectedNodes).filter(isExistingTransformPanelNode);
   const imageCrop = useAppSelector(selectSelectedImageCrop);
   const entries = (imageCrop ? boxNodes.slice(0, 1) : boxNodes).map((boxNode) => getPositionEntry(boxNode, nodes, imageCrop));
   const [node] = boxNodes;
@@ -57,7 +58,7 @@ export const useColumnPosition = (): TUseColumnPositionResult => {
   const mixedX = entries.length > 1 ? getMixedOrValue(entries.map((item) => item.x)) : x;
   const mixedY = entries.length > 1 ? getMixedOrValue(entries.map((item) => item.y)) : y;
   const managed = isManagedLayoutFrame(node?.parentId ? nodes[node.parentId] : undefined);
-  const ignoresAutoLayout = Boolean(node?.ignoreAutoLayout);
+  const ignoresAutoLayout = Boolean(node && isBoxSceneNode(node) && node.ignoreAutoLayout);
   const displayX = mixedX === 'mixed' ? MIXED_LABEL : mixedX;
   const displayY = mixedY === 'mixed' ? MIXED_LABEL : mixedY;
   const scrubStartRef = useRef<TPositionScrubStart>({ entries: [], x: 0, y: 0 });
@@ -101,7 +102,7 @@ export const useColumnPosition = (): TUseColumnPositionResult => {
     const freshNodes = selectNodes(store.getState());
     const freshEntries = boxNodes
       .map((boxNode) => freshNodes[boxNode.id])
-      .filter(isExistingBoxSceneNode)
+      .filter(isExistingTransformPanelNode)
       .map((boxNode) => getPositionEntry(boxNode, freshNodes, imageCrop));
     const mixedOrValue = getMixedOrValue(freshEntries.map((item) => item[axis]));
 
@@ -137,7 +138,7 @@ export const useColumnPosition = (): TUseColumnPositionResult => {
     onScrubX: scrubX,
     onScrubY: scrubY,
     onToggleIgnoreAutoLayout: () => dispatch(updateNode({ changes: { ignoreAutoLayout: ignoresAutoLayout ? undefined : true }, id })),
-    showIgnoreAutoLayoutToggle: managed && !imageCrop,
+    showIgnoreAutoLayoutToggle: managed && !imageCrop && node !== undefined && isBoxSceneNode(node),
     x,
     y,
   };

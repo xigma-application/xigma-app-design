@@ -23,7 +23,7 @@ import { TButtonGroup } from 'shared/UITools/ButtonGroup/types';
 // utils
 import { buildRotationButtons } from '../utils/buildRotationButtons';
 import { getMixedOrValue } from 'components/Design/RightPanel/PanelProperties/Common/utils/getMixedOrValue';
-import { isExistingBoxSceneNode } from 'components/Design/Canvas/utils/isExistingBoxSceneNode';
+import { isExistingTransformPanelNode } from 'components/Design/RightPanel/PanelProperties/Common/utils/isExistingTransformPanelNode';
 import { rotateImageCropRigidly } from 'components/Design/Canvas/hooks/useSelectionTool/utils/handlePointerMove/continueRotateDrag/rotateImageCropRigidly';
 import { selectSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
@@ -40,7 +40,7 @@ export type TUseColumnRotationResult = {
 export const useColumnRotation = (): TUseColumnRotationResult => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const boxNodes = useAppSelector(selectSelectedNodes).filter(isExistingBoxSceneNode);
+  const boxNodes = useAppSelector(selectSelectedNodes).filter(isExistingTransformPanelNode);
   const imageCrop = useAppSelector(selectSelectedImageCrop);
   const [node] = boxNodes;
   const rotation = imageCrop ? imageCrop.crop.rotation : (node?.rotation ?? 0);

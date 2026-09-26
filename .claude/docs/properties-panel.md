@@ -1054,6 +1054,24 @@ for different ratios, scrubbed by the same amount through `useStarRatio`; stored
 Stroke with `ShapeStrokeSettings type={NodeType.star}`, Effects and Export. `CountRow` takes the shape type;
 `getShapeCount` / `commitShapeCount` read and write `sides` or `points`.
 
+## `Vector/`
+
+`Vector.tsx` (shown while every selected layer is a vector) is being built in stages (A: header, position,
+layout, export; then fill, appearance, stroke, effects, corner radius). A vector has no stored box: its X/Y/W/H
+are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
+
+- `VectorHeader`: "Vector path" with matching layers, create component (single selection), mask and boolean;
+  the "…" menu comes later.
+- `Common/PositionSection` is shared: `Common/utils/isExistingTransformPanelNode` lets `useColumnPosition` and
+  `useColumnRotation` take vectors next to box nodes. `getPositionEntry` reads the position from the bounds and
+  never disables it for a vector (vectors do not take part in auto layout, so there is no ignore toggle either);
+  `commitColumnPosition` moves a vector like a group, through `translateNodeSubtree`; `rotateNodesRigidly` uses
+  the bounds centre as the pivot. A single vector keeps the alignment row disabled (no box to align to its parent).
+- `VectorDimensions` replaces `ColumnDimensions` (no sizing modes or min/max): W/H rounded to two decimals,
+  Mixed across vectors, and an aspect-ratio lock stored as `TVectorNode.lockedAspectRatio`.
+  `resizeVectorToDimensions` scales through the canvas `resizeNode` around the top-left of the bounds, leaving an
+  axis with no extent (a straight line) unscaled.
+
 ## `ImageCrop/`
 
 **Routed ahead of every node-type panel, not by node type at all.** `PanelProperties.tsx`'s switch

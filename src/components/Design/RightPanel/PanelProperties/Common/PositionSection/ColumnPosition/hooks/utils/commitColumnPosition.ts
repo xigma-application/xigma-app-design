@@ -3,8 +3,12 @@ import { AppDispatch, store } from 'store';
 import { selectNodes } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 
+// types
+import { NodeType } from 'types/design/enums';
+
 // utils
 import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
+import { getNodeBounds } from 'components/Design/Canvas/utils/getNodeBounds';
 import { getNodeAbsoluteFromParentPosition } from 'store/design/utils/getNodeAbsoluteFromParentPosition';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isGroupLikeNode } from 'store/design/utils/nodeHierarchy/isGroupLikeNode';
@@ -26,8 +30,9 @@ export const commitColumnPosition = (
   const nodes = selectNodes(store.getState());
   const node = nodes[id];
 
-  if (node && isGroupLikeNode(node)) {
-    translateNodeSubtree(dispatch, nodes, node, x - node.x, y - node.y);
+  if (node && (isGroupLikeNode(node) || node.type === NodeType.vector)) {
+    const bounds = getNodeBounds(node);
+    translateNodeSubtree(dispatch, nodes, node, x - bounds.x, y - bounds.y);
   } else {
     const cropChanges =
       node && isAppearanceNode(node) ? getCropPaintChanges(node, (paints) => translateFillsCrop(paints, x - node.x, y - node.y)) : {};

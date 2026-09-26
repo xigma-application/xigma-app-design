@@ -271,6 +271,23 @@ describe('useColumnRotation', () => {
       expect(readRotation(secondId)).toBe(45);
     });
 
+    it('should rotate a layer from its current angle when the scrub started without a drag start', () => {
+      // mock
+      const firstId = addFrameNode(10);
+      const secondId = addFrameNode(30);
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnRotation();
+
+      // action
+      act(() => result.current.onScrub(5));
+
+      // result
+      expect(readRotation(firstId)).toBe(15);
+      expect(readRotation(secondId)).toBe(35);
+    });
+
     it('should turn every selected layer 90 degrees on its own with the rotate button', () => {
       // mock
       const firstId = addFrameNode(10);

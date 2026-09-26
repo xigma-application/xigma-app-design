@@ -1099,6 +1099,7 @@
   "design.rightPanel.panelProperties.rectangle.header.mixedMediaLabel": "Zaznaczono: {{count}}",
   "design.rightPanel.panelProperties.rectangle.header.videoLabel": "Wideo",
   "design.rightPanel.panelProperties.star.header.label": "Gwiazda",
+  "design.rightPanel.panelProperties.vector.header.label": "Ścieżka wektorowa",
   "design.rightPanel.panelProperties.styles.addAriaLabel": "Dodaj styl",
   "design.rightPanel.panelProperties.styles.addTooltip": "Utwórz styl",
   "design.rightPanel.panelProperties.styles.section.label": "Style",

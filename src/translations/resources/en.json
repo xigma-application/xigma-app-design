@@ -1079,6 +1079,7 @@
   "design.rightPanel.panelProperties.rectangle.header.mixedMediaLabel": "{{count}} selected",
   "design.rightPanel.panelProperties.rectangle.header.videoLabel": "Video",
   "design.rightPanel.panelProperties.star.header.label": "Star",
+  "design.rightPanel.panelProperties.vector.header.label": "Vector path",
   "design.rightPanel.panelProperties.styles.addAriaLabel": "Add style",
   "design.rightPanel.panelProperties.styles.addTooltip": "Create style",
   "design.rightPanel.panelProperties.styles.section.label": "Styles",

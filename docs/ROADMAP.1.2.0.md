@@ -149,3 +149,15 @@ Position, Layout, Appearance, Fill, Stroke, Effects and Export. The panel header
 - [x] placing an image or video from the toolbar or File → Place image adds such a rectangle
 - [x] the layer shows an image or video icon in Layers
 - [x] several selected images show a toolbar with Remove background and Boost resolution; videos show none
+
+## Stage 18 — Vector path
+
+A vector gets its own panel like in Figma: Position, Layout, Appearance, Fill, Stroke, Effects, Selection colors
+and Export. The Paint tool keeps painting single areas; the Fill section changes the fill of the whole vector.
+
+- [x] the header says Vector path, and position, rotation, flips, width and height (with a ratio lock) work
+- [ ] Fill for the whole vector, "Click + to replace mixed content" when areas differ
+- [ ] opacity, blend mode and selection colors
+- [ ] strokes with colors, gradients and images, position and weight
+- [ ] effects
+- [ ] corner radius

@@ -1,15 +1,16 @@
 // store
-import { addNode, deleteNode, moveNodes, setImageEditor } from 'store/design/slice';
+import { addNode, addNodes, deleteNode, moveNodes, setImageEditor } from 'store/design/slice';
 import { selectActivePage, selectNodes } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TVectorNode } from 'types/design/types';
 import { TImagePaint } from 'types/design/paint/types';
 
 // utils
 import { getLastAddedNodeId } from 'test/getLastAddedNodeId';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 import { rotateNodesRigidly } from '../rotateNodesRigidly';
 
 const addFrameNode = (): TFrameNode => {
@@ -56,6 +57,22 @@ describe('rotateNodesRigidly', () => {
   beforeEach(() => {
     selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
     store.dispatch(setImageEditor(null));
+  });
+
+  it('should rotate a vector around the center of its bounds, keeping its vertices', () => {
+    // mock
+    const vector = makeSquareVector({ id: 'rotate-vector' });
+
+    store.dispatch(addNodes({ nodes: [vector], rootIds: [vector.id] }));
+
+    // action
+    rotateNodesRigidly(store.dispatch, vector, 45);
+
+    // result
+    const rotated = selectNodes(store.getState())[vector.id] as TVectorNode;
+
+    expect(rotated.rotation).toBe(45);
+    expect(rotated.vertices).toEqual(vector.vertices);
   });
 
   it('should do nothing when the target rotation matches the frame’s current one', () => {

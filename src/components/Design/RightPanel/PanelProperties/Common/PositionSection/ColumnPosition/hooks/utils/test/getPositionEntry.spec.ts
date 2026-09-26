@@ -5,6 +5,7 @@ import { TSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties
 
 // utils
 import { getPositionEntry } from '../getPositionEntry';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const child = (patch: object = {}): TBoxSceneNode => ({ id: 'c', parentId: 'p', x: 110.4, y: 220.6, ...patch }) as TBoxSceneNode;
 
@@ -39,6 +40,18 @@ describe('getPositionEntry', () => {
       disabledX: false,
       disabledY: true,
     });
+  });
+
+  it('should show a vector at the top-left of its bounds and keep it editable inside an auto layout parent', () => {
+    // mock
+    const vector = makeSquareVector({ id: 'c', parentId: 'p' });
+    const flow = { p: parent({ layoutMode: LayoutMode.horizontal, x: 0, y: 0 }) };
+
+    // before
+    const entry = getPositionEntry(vector, flow, undefined);
+
+    // result
+    expect(entry).toEqual({ disabledX: false, disabledY: false, id: 'c', parent: flow.p, x: 0, y: 0 });
   });
 
   it('should show the absolute position of a top-level node or one inside a parent without a box', () => {

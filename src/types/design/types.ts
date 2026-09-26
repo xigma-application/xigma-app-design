@@ -454,6 +454,7 @@ export type TVectorNode = {
   holeParentByKey?: Record<string, string>;
   id: string;
   locked?: boolean;
+  lockedAspectRatio?: boolean;
   name: string;
   parentId: string | null;
   rotation: number;

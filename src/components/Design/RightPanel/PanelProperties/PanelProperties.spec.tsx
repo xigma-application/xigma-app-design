@@ -9,7 +9,7 @@ import { TooltipProvider } from 'shared';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
-import { addNode, groupNodes, setActiveTool, setGridSettingsPanelOpen, setImageEditor, setSelection, updateNode } from 'store/design/slice';
+import { addNode, addNodes, groupNodes, setActiveTool, setGridSettingsPanelOpen, setImageEditor, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage, selectIsGridSettingsPanelOpen } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -18,6 +18,7 @@ import { BooleanOperation, LayoutMode, LineEndpoint, NodeType, ToolName } from '
 
 // utils
 import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const renderPanelProperties = (): ReturnType<typeof render> =>
   render(
@@ -459,6 +460,19 @@ describe('PanelProperties behaviors', () => {
     expect(screen.getByText('Star')).toBeInTheDocument();
     expect(screen.getByText('Count')).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Ratio' })).toHaveValue('38.2%');
+  });
+
+  it('should show the Vector path panel while a vector is selected', () => {
+    // mock
+    store.dispatch(addNodes({ nodes: [makeSquareVector({ id: 'routing-vector' })], rootIds: ['routing-vector'] }));
+    store.dispatch(setSelection(['routing-vector']));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Vector path')).toBeInTheDocument();
+    expect(screen.getByLabelText('Width')).toHaveValue(100);
   });
 
   it('should show the Line panel with a stroke and no fill section while a line is selected', () => {

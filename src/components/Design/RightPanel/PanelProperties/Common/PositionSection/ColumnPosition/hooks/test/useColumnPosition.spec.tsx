@@ -6,7 +6,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useColumnPosition } from '../useColumnPosition';
 
 // store
-import { addNode, moveNodes, setImageEditor, setSelection, updateNode } from 'store/design/slice';
+import { addNode, addNodes, moveNodes, setImageEditor, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
@@ -14,6 +14,9 @@ import { undo } from 'store/history/actions';
 // types
 import { AlignmentHorizontal, LayoutMode, NodeType } from 'types/design/enums';
 import { TImagePaint } from 'types/design/paint/types';
+
+// utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -232,6 +235,24 @@ describe('useColumnPosition', () => {
     expect(result.current.disabledX).toBe(true);
     expect(result.current.disabledY).toBe(true);
     expect(result.current.showIgnoreAutoLayoutToggle).toBe(true);
+  });
+
+  it('should keep a vector inside an auto layout parent editable, without the ignore-auto-layout toggle', () => {
+    // mock
+    const parentId = addFrameNode(0, 0);
+
+    store.dispatch(updateNode({ changes: { height: 300, layoutMode: LayoutMode.horizontal, width: 400 }, id: parentId }));
+    store.dispatch(addNodes({ nodes: [makeSquareVector({ id: 'position-hook-vector' })], rootIds: ['position-hook-vector'] }));
+    nestFrame('position-hook-vector', parentId);
+    store.dispatch(setSelection(['position-hook-vector']));
+
+    // before
+    const { result } = renderUseColumnPosition();
+
+    // result
+    expect(result.current.disabledX).toBe(false);
+    expect(result.current.ignoresAutoLayout).toBe(false);
+    expect(result.current.showIgnoreAutoLayoutToggle).toBe(false);
   });
 
   it('should not show the ignore-auto-layout toggle for a freeform parent', () => {
@@ -460,6 +481,32 @@ describe('useColumnPosition', () => {
       expect(readNode(firstId).x).toBe(20);
       expect(readNode(secondId).x).toBe(50);
       expect(result.current.displayX).toBe('Mixed');
+    });
+
+    it('should set a typed Y and move by a scrubbed Y delta on every selected layer', () => {
+      // mock
+      const firstId = addFrameNode(10, 5);
+      const secondId = addFrameNode(40, 50);
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnPosition();
+
+      // action
+      act(() => result.current.onBlurY(blurWith('100')));
+
+      // result
+      expect(readNode(firstId).y).toBe(100);
+      expect(readNode(secondId).y).toBe(100);
+
+      // action
+      act(() => result.current.onDragStart());
+      act(() => result.current.onScrubY(110));
+      act(() => result.current.onDragEnd());
+
+      // result
+      expect(readNode(firstId).y).toBe(110);
+      expect(readNode(secondId).y).toBe(110);
     });
 
     it('should skip a layer whose X is pinned by a constraint', () => {

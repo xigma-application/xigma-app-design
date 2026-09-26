@@ -6,9 +6,12 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TImagePaint } from 'types/design/paint/types';
+import { TVectorNode } from 'types/design/types';
 
 // utils
 import { commitColumnPosition } from '../commitColumnPosition';
+import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const addFrame = (x: number, y: number): string => {
   store.dispatch(
@@ -131,6 +134,49 @@ describe('commitColumnPosition', () => {
 
     expect(node).toMatchObject({ x: 30, y: 40 });
     expect(node.fills[0].crop).toEqual({ height: 20, rotation: 0, width: 20, x: 30, y: 40 });
+  });
+
+  it('should move a layer without paints and ignore an id that no longer exists', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        fills: [],
+        flipX: false,
+        flipY: false,
+        height: 20,
+        name: 'Ellipse',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.ellipse,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const id = rootOrder[rootOrder.length - 1];
+
+    // action
+    commitColumnPosition(store.dispatch, id, undefined, 70, 80);
+    commitColumnPosition(store.dispatch, 'missing-node', undefined, 70, 80);
+
+    // result
+    expect(readNode(id)).toEqual({ x: 70, y: 80 });
+    expect(selectActivePage(store.getState()).nodes['missing-node']).toBeUndefined();
+  });
+
+  it('should move a vector by translating its vertices so its bounds start at the new position', () => {
+    // mock
+    store.dispatch(addNodes({ nodes: [makeSquareVector({ id: 'position-vector' })], rootIds: ['position-vector'] }));
+
+    // action
+    commitColumnPosition(store.dispatch, 'position-vector', undefined, 250, 300);
+
+    // result
+    const vector = selectActivePage(store.getState()).nodes['position-vector'] as TVectorNode;
+
+    expect(getVectorNodeBounds(vector)).toEqual({ height: 100, width: 100, x: 250, y: 300 });
   });
 
   it('should move the children of a group along with it, since a group box follows its children', () => {

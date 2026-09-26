@@ -23,13 +23,13 @@ import styles from '../column-rotation.module.scss';
 // types
 import { TButtonGroup } from 'shared/UITools/ButtonGroup/types';
 import { NodeType } from 'types/design/enums';
-import { TBoxSceneNode } from 'types/design/types';
+import { TBoxSceneNode, TVectorNode } from 'types/design/types';
 import { TSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
 const normalizeRotation = (rotation: number): number => Math.round(((((rotation + 90) % 360) + 360) % 360) * 1e4) / 1e4;
 
 export const buildRotationButtons = (
-  nodes: TBoxSceneNode[],
+  nodes: (TBoxSceneNode | TVectorNode)[],
   dispatch: AppDispatch,
   t: TFunction,
   imageCrop?: TSelectedImageCrop,

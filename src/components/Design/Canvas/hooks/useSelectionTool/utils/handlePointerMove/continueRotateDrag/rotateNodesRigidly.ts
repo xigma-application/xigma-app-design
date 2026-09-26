@@ -4,12 +4,13 @@ import { selectNodes } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
-import { TBoxSceneNode, TSceneNode } from 'types/design/types';
+import { TBoxSceneNode, TSceneNode, TVectorNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 import { TRotateNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
 import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
+import { getNodeBounds } from 'components/Design/Canvas/utils/getNodeBounds';
 import { getRigidTransformNodes } from 'store/design/utils/nodeHierarchy/getRigidTransformNodes';
 import { getRotateNodeOrigins } from '../../handlePointerDown/getRotateNodeOrigins';
 import { getRotatedNodeChanges } from './getRotatedNodeChanges';
@@ -49,12 +50,13 @@ const dispatchRigidRotationChanges = (
   );
 };
 
-export const rotateNodesRigidly = (dispatch: AppDispatch, node: TBoxSceneNode, nextRotation: number): void => {
+export const rotateNodesRigidly = (dispatch: AppDispatch, node: TBoxSceneNode | TVectorNode, nextRotation: number): void => {
   const deltaDegrees = nextRotation - node.rotation;
 
   if (deltaDegrees !== 0) {
     const nodes = selectNodes(store.getState());
-    const pivot = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
+    const bounds = getNodeBounds(node);
+    const pivot = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
     const targetNodes = getRigidTransformNodes([node], nodes);
     const nodeOrigins = getRotateNodeOrigins(targetNodes);
     const isSingleNodeRotate = targetNodes.length === 1;
