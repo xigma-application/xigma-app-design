@@ -76,7 +76,7 @@ import { handleReorderPages } from './utils/handleReorderPages';
 import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot';
 import { handleReplaceNode } from './utils/handleReplaceNode';
 import { handleSendSelectionToBack } from './utils/handleSendSelectionToBack';
-import { handleSetActiveTool } from './utils/handleSetActiveTool';
+import { handleSetActiveTool } from './utils/handleSetActiveTool/handleSetActiveTool';
 import { handleSetGridSettingsPanelOpen } from './utils/handleSetGridSettingsPanelOpen';
 import { handleSetImageEditor } from './utils/handleSetImageEditor';
 import { handleSetSelection } from './utils/handleSetSelection/handleSetSelection';
@@ -281,6 +281,7 @@ const designSlice = createSlice({
     },
     setPaint: (state, action: PayloadAction<TPaint>) => {
       getActivePage(state).paint = action.payload;
+      getActivePage(state).paintFill = null;
     },
     setPaintBlendMode: (state, action: PayloadAction<BlendMode>) => {
       getActivePage(state).paint.blendMode = action.payload;

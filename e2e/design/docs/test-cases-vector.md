@@ -818,3 +818,9 @@ same dashed black trail while the drag is in progress (`drawVectorPaintPath.ts`,
 | 329 | A freeform drag across two faces (a rectangle split by a divider segment) fills both from one gesture, not just the one under the pointer at release                               |  ✅  | ✅ `vector-edit.spec.ts` |
 | 330 | The dashed black trail (same stroke as Shape Builder's own drag) is actually visible on the WebGL canvas while the drag is still in progress — a real repaint only e2e can observe |  ✅  | ✅ `vector-edit.spec.ts` |
 | 331 | A drag starting on an already-filled face arms remove mode for the whole gesture, destroying that face's fill along with every other already-filled face the stroke crosses        |  ✅  | ✅ `vector-edit.spec.ts` |
+
+## Paint tool — image fill mode
+
+| # | Scenario | Unit | E2E |
+|---|---|---|---|
+| 678 | On a vector whose filled areas all share one fill with an image, video or pattern, the Paint tool paints and clears areas with that whole fill (the image still spans the vector), shows its thumbnail on the Paint button and no active color tab; picking Solid or Gradient leaves the mode for the rest of the Paint session |  ✅  |   ✅ `vector-paint-image-fill.spec.ts`    |

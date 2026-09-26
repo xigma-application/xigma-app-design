@@ -43,6 +43,7 @@ import { expandGroupNodes } from './utils/nodeHierarchy/expandGroupNodes';
 import { getAllGuideLines } from './utils/getAllGuideLines';
 import { getFrameGuideLines } from './utils/getFrameGuideLines';
 import { getIncrementalRenderOrderedNodes } from './utils/getIncrementalRenderOrderedNodes';
+import { getPaintToolStack } from './utils/getPaintToolStack';
 import { getSelectedParentNode } from './utils/getSelectedParentNode';
 import { getSmartSelectionNodes } from './utils/nodeHierarchy/getSmartSelectionNodes';
 import { getTransformTargetNodes } from './utils/nodeHierarchy/getTransformTargetNodes';
@@ -157,6 +158,10 @@ export const selectAllGuideLines = createSelector([selectPageGuides, selectFrame
 );
 
 export const selectPaint = createSelector([selectActivePage], (page): TPaint => page.paint);
+
+export const selectPaintFill = createSelector([selectActivePage], (page): TPaint[] | null => page.paintFill ?? null);
+
+export const selectPaintStack = createSelector([selectActivePage], (page): TPaint[] => getPaintToolStack(page.paint, page.paintFill));
 
 export const selectResolvedTheme = (state: RootState): TResolvedTheme => state.design.preferences.resolvedTheme;
 

@@ -20,6 +20,7 @@ export type TDesignPage = {
   name: string;
   nodes: Record<string, TSceneNode>;
   paint: TPaint;
+  paintFill?: TPaint[] | null;
   rootOrder: string[];
   selectedFillIndices?: number[];
   selectedStrokeIndices?: number[];

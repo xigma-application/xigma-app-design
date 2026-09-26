@@ -1,6 +1,9 @@
 // types
-import { TDesignState } from '../types';
+import { TDesignState } from '../../types';
 import { ToolName } from 'types/design/enums';
+
+// utils
+import { setPaintToolFill } from './setPaintToolFill';
 
 export const handleSetActiveTool = (state: TDesignState, tool: ToolName): void => {
   state.activeTool = tool;
@@ -32,6 +35,9 @@ export const handleSetActiveTool = (state: TDesignState, tool: ToolName): void =
     case ToolName.text:
     case ToolName.textOnPath:
       state.lastTextTool = tool;
+      break;
+    case ToolName.paint:
+      setPaintToolFill(state);
       break;
     case ToolName.shapeBuilder:
     case ToolName.variableWidth:

@@ -61,6 +61,8 @@ import {
   selectPageGuides,
   selectPages,
   selectPaint,
+  selectPaintFill,
+  selectPaintStack,
   selectPanelGridTrackSelection,
   selectPatternSourcePickTarget,
   selectPenActiveVertexId,
@@ -336,6 +338,12 @@ describe('design selectors', () => {
   it('should select the paint', () => {
     // result
     expect(selectPaint(state)).toEqual({ color: '#d9d9d9', opacity: 100, type: 'solid' });
+  });
+
+  it('should paint with the plain paint while there is no image fill Paint mode', () => {
+    // result
+    expect(selectPaintFill(state)).toBeNull();
+    expect(selectPaintStack(state)).toEqual([{ color: '#d9d9d9', opacity: 100, type: 'solid' }]);
   });
 
   it('should select the background paint, independent of the vector paint tool paint', () => {

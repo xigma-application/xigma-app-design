@@ -9,10 +9,16 @@ import { UITools } from 'shared';
 
 // hooks
 import { usePaintColorPickerValue } from './hooks/usePaintColorPickerValue';
+import { usePaintFillThumbnail } from './hooks/usePaintFillThumbnail';
 import { useSelectVectorEditTool } from '../VectorEditToolButton/hooks/useSelectVectorEditTool';
 
 // others
+import { ColorPickerTab } from 'shared/UITools/ColorPicker/enums';
 import { TVectorEditTool } from '../constants';
+
+// store
+import { selectPaintFill } from 'store/design/selectors';
+import { useAppSelector } from 'store';
 
 // styles
 import toolbarButtonStyles from '../../ToolbarButton/toolbar-button.module.scss';
@@ -28,24 +34,34 @@ const VectorEditPaintTool: FC<TVectorEditPaintToolProps> = ({ isActive, tool }) 
   const handleSelect = useSelectVectorEditTool(tool.toolName);
   const { onChange: handleChange, onDragEnd, onDragStart, onGradientChange, value } = usePaintColorPickerValue();
   const label = t(tool.labelKey);
+  const paintFill = useAppSelector(selectPaintFill);
+  const thumbnailUrl = usePaintFillThumbnail(paintFill);
 
   if (isActive) {
     return (
       <UITools.ColorPicker
+        align="center"
         freezePositionOnGrow
         headerExtra={<FaceBlendModeButton />}
+        initialActiveTab={paintFill ? ColorPickerTab.none : undefined}
         moveable
         onChange={handleChange}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
         onGradientChange={onGradientChange}
+        side="top"
         trigger={(preview): ReactNode => (
           <>
             <div className={styles['VectorEditPaintTool__swatch-wrapper']}>
               {preview.type === 'gradient' ? (
                 <div className={styles.VectorEditPaintTool__swatch} style={preview.style} />
               ) : (
-                <UITools.Color alpha={preview.value.alpha} className={styles.VectorEditPaintTool__swatch} color={preview.value.hex} />
+                <UITools.Color
+                  alpha={preview.value.alpha}
+                  className={styles.VectorEditPaintTool__swatch}
+                  color={preview.value.hex}
+                  thumbnailUrl={paintFill ? thumbnailUrl : null}
+                />
               )}
             </div>
             <span className={cx(toolbarButtonStyles.ToolbarButton__label, toolbarButtonStyles['ToolbarButton__label--active'])}>

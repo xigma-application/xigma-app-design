@@ -1,10 +1,11 @@
 // store
-import { selectPaint, selectVectorEditingNodeIds } from 'store/design/selectors';
+import { selectPaintStack, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
 import { TArmContext } from '../types';
+import { TPaint } from 'types/design/paint/types';
 import { TVectorNode } from 'types/design/types';
 import { TVectorPaintTouchedLoopKeys } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
@@ -20,6 +21,45 @@ import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLo
 import { getVectorFillLoopKeyAtPoint } from 'utils/canvas/vectorNetwork/getVectorFillLoopKeyAtPoint';
 import { getVectorFillLoopPoints } from 'utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints';
 import { persistVectorNetworkCrossings } from 'utils/canvas/vectorNetwork/planarizeVectorNetwork/persistVectorNetworkCrossings';
+
+const getPaintChanges = (
+  fillChanges: Pick<TVectorNode, 'fillByKey' | 'filledFaceKeys' | 'holeParentByKey'>,
+  geometryChanged: boolean,
+  segments: TVectorNode['segments'],
+  vertices: TVectorNode['vertices'],
+): Partial<TVectorNode> => (geometryChanged ? { ...fillChanges, segments, vertices } : fillChanges);
+
+const getPaintedFilledFaceKeys = (
+  node: TVectorNode,
+  existingLoopKey: string | null,
+  inheritingLoopKeys: string[],
+  newLoopKey: string,
+  paintingLoopKeys: string[],
+): string[] =>
+  existingLoopKey
+    ? [...node.filledFaceKeys.filter((key) => key !== existingLoopKey), ...inheritingLoopKeys]
+    : [...node.filledFaceKeys, newLoopKey, ...paintingLoopKeys];
+
+const getPaintedFillByKey = (
+  node: TVectorNode,
+  existingLoopKey: string | null,
+  inheritingLoopKeys: string[],
+  newLoopKey: string,
+  paintingLoopKeys: string[],
+  paint: TPaint[],
+): TVectorNode['fillByKey'] =>
+  existingLoopKey
+    ? inheritingLoopKeys.length > 0
+      ? {
+          ...node.fillByKey,
+          ...Object.fromEntries(inheritingLoopKeys.map((key) => [key, getEffectiveVectorFill(node, existingLoopKey)])),
+        }
+      : node.fillByKey
+    : {
+        ...node.fillByKey,
+        [newLoopKey]: paint,
+        ...Object.fromEntries(paintingLoopKeys.map((key) => [key, paint])),
+      };
 
 export const armVectorPaintOnPointerDown = ({
   activeTool,
@@ -49,26 +89,11 @@ export const armVectorPaintOnPointerDown = ({
       const inheritingLoopKeys = removedFacePoints ? getNestedUnfilledLoopKeys(node, removedFacePoints) : [];
       const paintingLoopKeys = existingLoopKey ? [] : getNestedUnfilledLoopKeys(node, face.points);
       const holeParentKey = existingLoopKey ? null : getContainingFilledLoopKey(node, face.points);
-      const paint = holeParentKey ? getEffectiveVectorFill(node, holeParentKey) : [selectPaint(state)];
-      const filledFaceKeys = existingLoopKey
-        ? [...node.filledFaceKeys.filter((key) => key !== existingLoopKey), ...inheritingLoopKeys]
-        : [...node.filledFaceKeys, newLoopKey, ...paintingLoopKeys];
-      const fillByKey = existingLoopKey
-        ? inheritingLoopKeys.length > 0
-          ? {
-              ...node.fillByKey,
-              ...Object.fromEntries(inheritingLoopKeys.map((key) => [key, getEffectiveVectorFill(node, existingLoopKey)])),
-            }
-          : node.fillByKey
-        : {
-            ...node.fillByKey,
-            [newLoopKey]: paint,
-            ...Object.fromEntries(paintingLoopKeys.map((key) => [key, paint])),
-          };
+      const paint = holeParentKey ? getEffectiveVectorFill(node, holeParentKey) : selectPaintStack(state);
+      const filledFaceKeys = getPaintedFilledFaceKeys(node, existingLoopKey, inheritingLoopKeys, newLoopKey, paintingLoopKeys);
+      const fillByKey = getPaintedFillByKey(node, existingLoopKey, inheritingLoopKeys, newLoopKey, paintingLoopKeys, paint);
       const holeParentByKey = holeParentKey ? { ...node.holeParentByKey, [newLoopKey]: holeParentKey } : node.holeParentByKey;
-      const changes: Partial<TVectorNode> = geometryChanged
-        ? { fillByKey, filledFaceKeys, holeParentByKey, segments, vertices }
-        : { fillByKey, filledFaceKeys, holeParentByKey };
+      const changes = getPaintChanges({ fillByKey, filledFaceKeys, holeParentByKey }, geometryChanged, segments, vertices);
 
       dispatch(updateNode({ changes, id: node.id }));
       touchedLoopKeys[node.id] = existingLoopKey ? new Set() : new Set([newLoopKey]);

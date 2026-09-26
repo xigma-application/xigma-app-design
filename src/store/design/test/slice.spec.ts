@@ -584,6 +584,25 @@ describe('design slice', () => {
     expect(state.pages[state.activePageId].paint).toEqual({ color: '#ff0000', opacity: 50, type: 'solid' });
   });
 
+  it('should leave the image fill Paint mode when a color or gradient is picked', () => {
+    // mock
+    const base = slice(undefined, setPaint({ color: '#ff0000', opacity: 50, type: 'solid' }));
+    const page = base.pages[base.activePageId];
+    const initial = {
+      ...base,
+      pages: {
+        ...base.pages,
+        [page.id]: { ...page, paintFill: [{ opacity: 100, ref: 'r', rotation: 0, scaleMode: 'fill' as const, type: 'image' as const }] },
+      },
+    };
+
+    // before
+    const state = slice(initial, setPaint({ color: '#00ff00', opacity: 100, type: 'solid' }));
+
+    // result
+    expect(state.pages[state.activePageId].paintFill).toBeNull();
+  });
+
   it('should set the paint blend mode', () => {
     // before
     const state = slice(undefined, setPaintBlendMode(BlendMode.multiply));

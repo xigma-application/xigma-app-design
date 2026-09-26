@@ -1,5 +1,5 @@
 // store
-import { selectPaint, selectVectorEditingNodeIds, selectViewport } from 'store/design/selectors';
+import { selectPaintStack, selectVectorEditingNodeIds, selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -36,7 +36,7 @@ export const continueVectorPaintDrag = (
 
     if (hasDragged) {
       const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
-      const paint = selectPaint(state);
+      const paints = selectPaintStack(state);
       const isRemoveMode = canvasRefs.vectorPaint.isVectorPaintRemoveRef.current;
       const touchedLoopKeys = canvasRefs.vectorPaint.touchedVectorPaintLoopKeysRef.current;
       const touchedFaces: TVectorDraggedFillFaces = {};
@@ -45,7 +45,7 @@ export const continueVectorPaintDrag = (
         .map((nodeId) => getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, nodeId))
         .filter((node): node is TVectorNode => node !== null)
         .forEach((node) => {
-          touchedFaces[node.id] = paintNodeAlongPath(dispatch, node, nextPath, paint, isRemoveMode, touchedLoopKeys);
+          touchedFaces[node.id] = paintNodeAlongPath(dispatch, node, nextPath, paints, isRemoveMode, touchedLoopKeys);
         });
 
       canvasRefs.vectorPaint.vectorPaintTouchedFacesRef.current = touchedFaces;

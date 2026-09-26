@@ -38,4 +38,12 @@ describe('renderBody', () => {
     // result
     expect(screen.getByTestId('body')).toBeEmptyDOMElement();
   });
+
+  it('should render nothing when no tab is active', () => {
+    // before
+    renderTab(ColorPickerTab.none);
+
+    // result
+    expect(screen.getByTestId('body')).toBeEmptyDOMElement();
+  });
 });

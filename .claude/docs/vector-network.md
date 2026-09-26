@@ -5543,6 +5543,19 @@ and mask outlines, and outline stroke (`getVectorStrokeOutlineLoops`). Edit tool
 handles, face selection, Paint, cut and width points work on the real sharp vertices, so in edit mode the points sit
 at the sharp corners while the shape is drawn rounded. Bounds stay the vertex bounds.
 
+## 82. Paint tool with an image fill
+
+When the Paint tool is picked (`handleSetActiveTool` → `setPaintToolFill`), `getVectorPaintToolFill` looks at the
+edited vectors: if every filled area of all of them shares one stack (`getVectorPanelFills`, not mixed) and that
+stack has a paint that is not solid or gradient (`isColorPaint`), the stack is stored as `TDesignPage.paintFill`.
+`selectPaintStack` (`getPaintToolStack`) is then what a click (`armVectorPaintOnPointerDown`) and a drag
+(`paintNodeAlongPath` / `addNodeAlongPath`, now taking a paint list) write into an area; outside the mode it is
+`[paint]` as before. A blend mode picked in the Paint picker goes onto every layer of the stack. The image keeps
+spanning the whole vector, so a repainted area shows its own part of the same image. `setPaint` (Solid or Gradient
+in the picker) clears `paintFill`, so the mode ends for the rest of the session; entering Paint again recomputes it.
+The Paint button shows the fill's thumbnail (`usePaintFillThumbnail`: the image or video `ref`, or the rendered
+pattern source) and the picker opens on `ColorPickerTab.none`, a tab missing from the header whose body is empty.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

@@ -19,7 +19,7 @@ export const paintNodeAlongPath = (
   dispatch: AppDispatch,
   node: TVectorNode,
   path: TPoint[],
-  paint: TPaint,
+  paints: TPaint[],
   isRemoveMode: boolean,
   touchedLoopKeys: TVectorPaintTouchedLoopKeys,
 ): string[] => {
@@ -37,7 +37,7 @@ export const paintNodeAlongPath = (
   if (isRemoveMode) {
     removeNodeAlongPath(dispatch, persistedNode, loopKeysOnPath, geometryChanged, segments, vertices);
   } else {
-    addNodeAlongPath(dispatch, persistedNode, loopKeysOnPath, paint, geometryChanged, segments, vertices);
+    addNodeAlongPath(dispatch, persistedNode, loopKeysOnPath, paints, geometryChanged, segments, vertices);
   }
 
   return facesOnPath.map((face) => face.key);

@@ -7,11 +7,14 @@ import { TooltipProvider } from 'shared';
 
 // store
 import { DEFAULT_PAINT } from 'store/design/constants';
-import { setPaint } from 'store/design/slice';
+import { addNodes, setActiveTool, setPaint, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
+
+// utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const tool = {
   icon: 'PaintTool' as const,
@@ -147,5 +150,31 @@ describe('VectorEditPaintTool', () => {
       opacity: 100,
       type: 'solid',
     });
+  });
+
+  it('should paint with the image fill of the vector, showing its thumbnail and no color tab until Solid is picked', () => {
+    // mock
+    const image = [{ opacity: 100, ref: 'https://example.com/photo.png', rotation: 0, scaleMode: 'fill' as const, type: 'image' as const }];
+    const vector = makeSquareVector({ fillByKey: { a: image }, filledFaceKeys: ['a'], id: 'paintToolImageVector' });
+
+    store.dispatch(addNodes({ nodes: [vector], rootIds: [vector.id] }));
+    store.dispatch(setVectorEditingNodeIds([vector.id]));
+    store.dispatch(setActiveTool(ToolName.paint));
+
+    // before
+    renderVectorEditPaintTool(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Paint' }));
+
+    // result
+    expect((document.querySelector('[class*="Color__thumbnail"]') as HTMLElement).style.backgroundImage).toContain('photo.png');
+    expect(screen.queryByRole('textbox', { name: 'Hex color' })).not.toBeInTheDocument();
+
+    // action
+    fireEvent.click(screen.getByText('Solid'));
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].paintFill).toBeNull();
+
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 });

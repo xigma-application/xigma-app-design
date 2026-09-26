@@ -1,9 +1,10 @@
 // types
 import { ToolName } from 'types/design/enums';
-import { TDesignState } from '../../types';
+import { TDesignState } from '../../../types';
 
 // utils
 import { handleSetActiveTool } from '../handleSetActiveTool';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   activePageId: 'page-1',
@@ -343,5 +344,33 @@ describe('handleSetActiveTool', () => {
 
     // result
     expect(state.lastMoreTool).toBe(ToolName.shapeBuilder);
+  });
+
+  it('should paint with the image fill every area of the edited vector shares when switching to the Paint tool', () => {
+    // mock
+    const image = [{ opacity: 100, ref: 'r', rotation: 0, scaleMode: 'fill' as const, type: 'image' as const }];
+    const vector = makeSquareVector({ fillByKey: { a: image }, filledFaceKeys: ['a'] });
+    const state = buildState({ vectorEditingNodeIds: [vector.id, 'missing'] });
+
+    state.pages['page-1'].nodes = { [vector.id]: vector };
+
+    // before
+    handleSetActiveTool(state, ToolName.paint);
+
+    // result
+    expect(state.pages['page-1'].paintFill).toEqual(image);
+  });
+
+  it('should keep the plain Paint color for a vector without an image fill', () => {
+    // mock
+    const state = buildState({ vectorEditingNodeIds: ['vector'] });
+
+    state.pages['page-1'].nodes = { vector: makeSquareVector() };
+
+    // before
+    handleSetActiveTool(state, ToolName.paint);
+
+    // result
+    expect(state.pages['page-1'].paintFill).toBeNull();
   });
 });
