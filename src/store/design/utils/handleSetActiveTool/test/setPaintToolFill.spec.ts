@@ -1,9 +1,9 @@
 // types
-import { TDesignState } from '../../../../types';
+import { TDesignState } from '../../../types';
 
 // utils
 import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
-import { setPaintToolFill } from '../../setPaintToolFill';
+import { setPaintToolFill } from '../setPaintToolFill';
 
 const image = [{ opacity: 100, ref: 'r', rotation: 0, scaleMode: 'fill' as const, type: 'image' as const }];
 
