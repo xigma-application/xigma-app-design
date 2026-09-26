@@ -54,7 +54,7 @@ export const drawLeafNode = (
       drawPathOutline(context, node, pathOutlineStyles.get(node.id));
       break;
     case NodeType.vector:
-      drawVectorNodeOrTextPathGuide(context, node, refs.vectorSnapshots, pathOutlineStyles, nodesById, editingPathId);
+      drawVectorNodeOrTextPathGuide(context, node, refs.vectorSnapshots, pathOutlineStyles, nodesById, editingPathId, opacity);
       break;
     case NodeType.group:
     case NodeType.mask:

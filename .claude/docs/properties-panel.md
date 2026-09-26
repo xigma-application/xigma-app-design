@@ -1080,6 +1080,10 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
   empty stack clears every area. Image fills cover the whole vector's bounds; Crop is disabled for a vector
   (`getDisabledFillModes`). The Paint tool is separate: it fills or clears one area with its own Solid/Gradient
   paint, which is what makes the areas differ. A group's Fill now also includes its vectors.
+- Appearance: `AppearanceSection withCornerRadius={false}` (corner radius comes later). `TVectorNode` now has
+  `opacity` and `blendMode`; `Common/AppearanceSection/utils/isOpacityPanelNode` (type `TOpacityPanelNode`) lets
+  `useOpacity`, `useBlendModeRow` and `useBlendModeButton` take vectors. Visibility already worked through
+  `hidden`. Selection colors wait for vector strokes to become paints.
 
 ## `ImageCrop/`
 

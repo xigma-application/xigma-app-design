@@ -446,6 +446,7 @@ export type TVectorWidthProfile = {
 };
 
 export type TVectorNode = {
+  blendMode?: BlendMode;
   capStyle?: 'round';
   defaultFill: TPaint[] | null;
   fillByKey?: Record<string, TPaint[]>;
@@ -456,6 +457,7 @@ export type TVectorNode = {
   locked?: boolean;
   lockedAspectRatio?: boolean;
   name: string;
+  opacity?: number;
   parentId: string | null;
   rotation: number;
   segments: Record<string, TVectorSegment>;

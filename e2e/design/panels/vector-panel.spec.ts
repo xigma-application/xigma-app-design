@@ -180,3 +180,36 @@ test('the vector Fill section fills every area with +, empties them with −, an
 
   expect(fillByKey.first).toEqual(fillByKey.second);
 });
+
+test('the vector Appearance opacity fades its fill on the canvas', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-panel-opacity');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — a filled triangle
+  await drawSelectedTriangle(designPage, page);
+
+  const fillSection = page.locator('[data-test-section="fill"]');
+  const background = await readPixelColor(page, 900, 340);
+
+  await fillSection.getByLabel('Add fill').click();
+  await fillSection.getByText('Fill', { exact: true }).click();
+  await expect.poll(async () => readPixelColor(page, 900, 340)).not.toEqual(background);
+
+  const opaque = await readPixelColor(page, 900, 340);
+  const opacity = page.locator('[data-test-section="appearance"]').getByRole('textbox', { name: 'Opacity' });
+
+  // action
+  await opacity.fill('50');
+  await opacity.press('Tab');
+
+  // result — halfway between the opaque fill and the background
+  await expect
+    .poll(async () => {
+      const [red] = await readPixelColor(page, 900, 340);
+
+      return Math.abs(red - Math.round((opaque[0] + background[0]) / 2)) <= 3;
+    })
+    .toBe(true);
+});

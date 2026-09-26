@@ -2,6 +2,7 @@ import { FC, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import AppearanceSection from '../Common/AppearanceSection/AppearanceSection';
 import Export from '../Export/Export';
 import FillSection from '../Common/FillSection/FillSection';
 import PositionSection from '../Common/PositionSection/PositionSection';
@@ -22,6 +23,7 @@ const Vector: FC = () => {
       <UITools.Section e2eValue="layout" label={t(`${translationNameSpace}.layoutSection.label`)}>
         <VectorDimensions />
       </UITools.Section>
+      <AppearanceSection withCornerRadius={false} />
       <FillSection />
       <Export />
     </Fragment>

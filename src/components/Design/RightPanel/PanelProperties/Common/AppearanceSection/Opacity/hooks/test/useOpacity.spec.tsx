@@ -6,14 +6,17 @@ import { act, renderHook } from '@testing-library/react';
 import { useOpacity } from '../useOpacity';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, addNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TRectangleNode } from 'types/design/types';
+import { TRectangleNode, TVectorNode } from 'types/design/types';
+
+// utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -156,5 +159,23 @@ describe('useOpacity', () => {
 
     // result
     expect([read(firstId).opacity, read(secondId).opacity]).toEqual([0.5, 0.9]);
+  });
+
+  it('should read and set the opacity of a selected vector', () => {
+    // mock
+    store.dispatch(addNodes({ nodes: [makeSquareVector({ id: 'opacity-vector', opacity: 0.5 })], rootIds: ['opacity-vector'] }));
+    store.dispatch(setSelection(['opacity-vector']));
+
+    // before
+    const { result } = renderUseOpacity();
+
+    // result
+    expect(result.current.value).toBe(50);
+
+    // action
+    act(() => result.current.onBlur(focusEventFor('30')));
+
+    // result
+    expect((selectActivePage(store.getState()).nodes['opacity-vector'] as TVectorNode).opacity).toBe(0.3);
   });
 });

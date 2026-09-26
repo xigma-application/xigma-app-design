@@ -11,10 +11,21 @@ import { scalePoint } from './scalePoint';
 const scaleFlattenedSegments = (segments: TFlattenedVectorSegment[], snapshot: TVectorNodeResizeSnapshot): TFlattenedVectorSegment[] =>
   segments.map((segment) => ({ ...segment, points: segment.points.map((point) => scalePoint(point, snapshot)) }));
 
-export const drawVectorNodeResizeSnapshotStroke = (context: TDrawSceneContext, snapshot: TVectorNodeResizeSnapshot): void => {
+export const drawVectorNodeResizeSnapshotStroke = (context: TDrawSceneContext, snapshot: TVectorNodeResizeSnapshot, opacity = 1): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const scaledSegments = scaleFlattenedSegments(snapshot.flattenedSegments, snapshot);
   const strokeVertices = getThickVectorPathVertices(scaledSegments, snapshot.strokeWidth / 2);
 
-  drawVectorThickStrokeVertices(gl, program, buffer, null, strokeVertices, snapshot.strokeColor, canvasWidth, canvasHeight, viewport);
+  drawVectorThickStrokeVertices(
+    gl,
+    program,
+    buffer,
+    null,
+    strokeVertices,
+    snapshot.strokeColor,
+    canvasWidth,
+    canvasHeight,
+    viewport,
+    opacity,
+  );
 };

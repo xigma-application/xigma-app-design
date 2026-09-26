@@ -20,6 +20,7 @@ export const drawVectorNodeOrTextPathGuide = (
   pathOutlineStyles: Map<string, TPathOutlineStyle>,
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
+  opacity = 1,
 ): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const outlineStyle = pathOutlineStyles.get(node.id);
@@ -31,7 +32,7 @@ export const drawVectorNodeOrTextPathGuide = (
     if (isBoundAsTextPath) {
       drawDashedVectorPathOutline(gl, program, buffer, renderNode, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
     } else {
-      drawSceneVectorNode(context, renderNode, vectorSnapshots);
+      drawSceneVectorNode(context, renderNode, vectorSnapshots, opacity);
     }
   }
 };

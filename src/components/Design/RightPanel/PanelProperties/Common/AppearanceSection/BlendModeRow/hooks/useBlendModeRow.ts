@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 import { BlendMode } from 'types/design/enums';
 
 // utils
-import { isStyledNode } from '../../utils/isStyledNode';
+import { isOpacityPanelNode } from '../../utils/isOpacityPanelNode';
 import { commitBlendModeToNodes } from '../../AppearanceHeaderButtons/BlendModeButton/hooks/utils/commitBlendModeToNodes';
 import { getSharedBlendMode } from '../../AppearanceHeaderButtons/BlendModeButton/hooks/utils/getSharedBlendMode';
 
@@ -24,7 +24,7 @@ export type TUseBlendModeRowResult = {
 export const useBlendModeRow = (): TUseBlendModeRowResult => {
   const dispatch = useAppDispatch();
   const { blendMode: blendModeRefs } = useCanvasRefsContext();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isOpacityPanelNode);
   const nodeIds = nodes.map((node) => node.id);
   const value = getSharedBlendMode(nodes);
 

@@ -1866,3 +1866,14 @@ zoom 16.7 ms, edit 79 ms. 10000 nodes in 100 clipping frames: edit and move-fram
 - What is left in the profile is Immer copying the 25000-key dictionary (~29%), the reference diff itself (~9%) and
   React rendering of the layers tree.
 
+## Vector opacity and blend mode
+
+`TVectorNode.opacity` joins `getEffectiveOpacityFromLookup` (so a vector also fades inside a translucent frame, which
+it did not before) and `drawLeafNode` passes the result down `drawVectorNodeOrTextPathGuide` → `drawSceneVectorNode`
+to all four vector drawers. Fills get it by scaling each paint's opacity (`utils/design/paint/withPaintsOpacity`;
+`withSnapshotFacesOpacity` for the drag/resize/rotate snapshots), strokes, width-profile strokes and round caps
+through their existing `alpha` parameter. Fill and stroke fade separately, like every other shape here (an overlap
+is not flattened first). `TVectorNode.blendMode` needs no render change: `getNodeBlendMode` already reads
+`blendMode` from any node, so a vector with a real blend mode goes through the isolated blend path. SVG/PDF export
+already used `getEffectiveOpacity`, so it picks up the vector opacity too.
+

@@ -92,6 +92,7 @@ describe('drawVectorNodeResizeSnapshotStroke', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
   });
 });

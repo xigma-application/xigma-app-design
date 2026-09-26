@@ -54,7 +54,7 @@ describe('drawVectorRoundedCaps', () => {
       gl,
       program,
       buffer,
-      { fill: '#00ff00', height: 2, width: 2, x: 9, y: 19 },
+      { fill: '#00ff00', fillAlpha: 1, height: 2, width: 2, x: 9, y: 19 },
       200,
       150,
       IDENTITY_VIEWPORT,

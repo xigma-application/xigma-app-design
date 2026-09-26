@@ -16,6 +16,7 @@ export const drawVectorRoundedCaps = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  alpha = 1,
 ): void => {
   if (node.capStyle === 'round') {
     getOpenVectorEndpoints(node).forEach((vertexId) => {
@@ -27,6 +28,7 @@ export const drawVectorRoundedCaps = (
         buffer,
         {
           fill: node.strokeColor,
+          fillAlpha: alpha,
           height: PENCIL_CAP_RADIUS_PX * 2,
           width: PENCIL_CAP_RADIUS_PX * 2,
           x: vertex.x - PENCIL_CAP_RADIUS_PX,

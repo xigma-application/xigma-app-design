@@ -9,12 +9,16 @@ import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRef
 import { useBlendModeRow } from '../useBlendModeRow';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, addNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { BlendMode, NodeType } from 'types/design/enums';
+import { TVectorNode } from 'types/design/types';
+
+// utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
   <Provider store={store}>
@@ -114,5 +118,20 @@ describe('useBlendModeRow', () => {
 
     // result
     expect([readBlendMode(firstId), readBlendMode(secondId)]).toEqual([BlendMode.passThrough, BlendMode.passThrough]);
+  });
+
+  it('should commit a chosen mode on a selected vector', () => {
+    // mock
+    store.dispatch(addNodes({ nodes: [makeSquareVector({ id: 'blend-vector' })], rootIds: ['blend-vector'] }));
+    store.dispatch(setSelection(['blend-vector']));
+
+    // before
+    const { result } = renderHook(() => useBlendModeRow(), { wrapper });
+
+    // action
+    act(() => result.current.onSelect(BlendMode.multiply));
+
+    // result
+    expect((selectActivePage(store.getState()).nodes['blend-vector'] as TVectorNode).blendMode).toBe(BlendMode.multiply);
   });
 });

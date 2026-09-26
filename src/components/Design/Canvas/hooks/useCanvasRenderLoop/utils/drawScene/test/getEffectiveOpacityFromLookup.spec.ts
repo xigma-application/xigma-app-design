@@ -37,4 +37,16 @@ describe('getEffectiveOpacityFromLookup', () => {
     // result
     expect(opacity).toBe(1);
   });
+
+  it('should apply the opacity of a vector inside a translucent parent', () => {
+    // mock
+    const vector = { id: 'v', opacity: 0.5, parentId: 'parent', type: 'vector' } as unknown as TSceneNode;
+    const parent = box('parent', null, 0.5);
+
+    // before
+    const opacity = getEffectiveOpacityFromLookup(vector, () => parent);
+
+    // result
+    expect(opacity).toBe(0.25);
+  });
 });

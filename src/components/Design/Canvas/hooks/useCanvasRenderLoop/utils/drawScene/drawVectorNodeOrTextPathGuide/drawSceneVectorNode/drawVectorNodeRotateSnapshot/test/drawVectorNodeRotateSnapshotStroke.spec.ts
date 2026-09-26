@@ -62,6 +62,7 @@ describe('drawVectorNodeRotateSnapshotStroke', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
   });
 
@@ -79,6 +80,17 @@ describe('drawVectorNodeRotateSnapshotStroke', () => {
     drawVectorNodeRotateSnapshotStroke(context, snapshot);
 
     // result
-    expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledWith(gl, program, buffer, null, [], '#0d99ff', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      null,
+      [],
+      '#0d99ff',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      1,
+    );
   });
 });

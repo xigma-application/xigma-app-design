@@ -13,8 +13,9 @@ import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBou
 import { getVectorStrokeShape } from 'utils/canvas/vector/stroke/getVectorStrokeShape';
 import { getVectorNodeThickStrokeVertices } from 'utils/canvas/vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
+import { withPaintsOpacity } from 'utils/design/paint/withPaintsOpacity';
 
-export const drawVectorNode = (context: TDrawSceneContext, node: TVectorNode): void => {
+export const drawVectorNode = (context: TDrawSceneContext, node: TVectorNode, opacity = 1): void => {
   const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const { faceBufferCache, strokeBufferCache } = imageContext;
   const renderedNode = getRenderedVectorNode(node);
@@ -22,7 +23,7 @@ export const drawVectorNode = (context: TDrawSceneContext, node: TVectorNode): v
   const strokeShapes = getVectorStrokeShape(renderedNode);
 
   groupFilledFacesForRendering(renderedNode).forEach(({ paint, polygons }) => {
-    drawVectorFillGroup(context, faceBufferCache, nodeBounds, polygons, paint);
+    drawVectorFillGroup(context, faceBufferCache, nodeBounds, polygons, withPaintsOpacity(paint, opacity));
   });
 
   if (strokeShapes) {
@@ -39,12 +40,12 @@ export const drawVectorNode = (context: TDrawSceneContext, node: TVectorNode): v
         canvasHeight,
         viewport,
         imageContext.isAlphaWriteEnabled,
-        1,
+        opacity,
         fillRule,
       );
     });
   } else if (renderedNode.widthProfile) {
-    drawVectorVariableStroke(gl, program, buffer, renderedNode, renderedNode.strokeColor, canvasWidth, canvasHeight, viewport);
+    drawVectorVariableStroke(gl, program, buffer, renderedNode, renderedNode.strokeColor, canvasWidth, canvasHeight, viewport, opacity);
   } else {
     const strokeVertices = getVectorNodeThickStrokeVertices(renderedNode, renderedNode.strokeWidth / 2);
     drawVectorThickStrokeVertices(
@@ -57,8 +58,9 @@ export const drawVectorNode = (context: TDrawSceneContext, node: TVectorNode): v
       canvasWidth,
       canvasHeight,
       viewport,
+      opacity,
     );
   }
 
-  drawVectorRoundedCaps(gl, program, buffer, renderedNode, canvasWidth, canvasHeight, viewport);
+  drawVectorRoundedCaps(gl, program, buffer, renderedNode, canvasWidth, canvasHeight, viewport, opacity);
 };

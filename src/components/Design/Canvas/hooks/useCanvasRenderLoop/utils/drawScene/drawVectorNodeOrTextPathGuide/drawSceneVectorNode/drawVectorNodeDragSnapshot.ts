@@ -6,7 +6,7 @@ import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 import { drawVectorFillPaints } from 'utils/canvas/drawVectorNode/drawVectorFillPaints';
 import { drawVectorThickStrokeVertices } from 'utils/canvas/drawVectorNode/drawVectorThickStrokeVertices';
 
-export const drawVectorNodeDragSnapshot = (context: TDrawSceneContext, snapshot: TVectorNodeDragSnapshot): void => {
+export const drawVectorNodeDragSnapshot = (context: TDrawSceneContext, snapshot: TVectorNodeDragSnapshot, opacity = 1): void => {
   const { buffer, canvasHeight, canvasWidth, gl, imageContext, imageFilterQuality, viewport } = context;
   const {
     cache: imageTextureCache,
@@ -60,5 +60,6 @@ export const drawVectorNodeDragSnapshot = (context: TDrawSceneContext, snapshot:
     canvasWidth,
     canvasHeight,
     viewport,
+    opacity,
   );
 };

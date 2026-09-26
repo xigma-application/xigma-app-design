@@ -6,7 +6,7 @@ import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 import { drawVectorNodeResizeSnapshotFace } from './drawVectorNodeResizeSnapshotFace';
 import { drawVectorNodeResizeSnapshotStroke } from './drawVectorNodeResizeSnapshotStroke';
 
-export const drawVectorNodeResizeSnapshot = (context: TDrawSceneContext, snapshot: TVectorNodeResizeSnapshot): void => {
+export const drawVectorNodeResizeSnapshot = (context: TDrawSceneContext, snapshot: TVectorNodeResizeSnapshot, opacity = 1): void => {
   snapshot.facesByPaint.forEach((face) => drawVectorNodeResizeSnapshotFace(context, snapshot, face));
-  drawVectorNodeResizeSnapshotStroke(context, snapshot);
+  drawVectorNodeResizeSnapshotStroke(context, snapshot, opacity);
 };

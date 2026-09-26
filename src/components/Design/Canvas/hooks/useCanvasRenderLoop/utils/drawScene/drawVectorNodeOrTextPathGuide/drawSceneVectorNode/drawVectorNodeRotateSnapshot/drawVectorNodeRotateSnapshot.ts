@@ -6,7 +6,7 @@ import { TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 import { drawVectorNodeRotateSnapshotFace } from './drawVectorNodeRotateSnapshotFace';
 import { drawVectorNodeRotateSnapshotStroke } from './drawVectorNodeRotateSnapshotStroke';
 
-export const drawVectorNodeRotateSnapshot = (context: TDrawSceneContext, snapshot: TVectorNodeRotateSnapshot): void => {
+export const drawVectorNodeRotateSnapshot = (context: TDrawSceneContext, snapshot: TVectorNodeRotateSnapshot, opacity = 1): void => {
   snapshot.facesByPaint.forEach((face) => drawVectorNodeRotateSnapshotFace(context, snapshot, face));
-  drawVectorNodeRotateSnapshotStroke(context, snapshot);
+  drawVectorNodeRotateSnapshotStroke(context, snapshot, opacity);
 };

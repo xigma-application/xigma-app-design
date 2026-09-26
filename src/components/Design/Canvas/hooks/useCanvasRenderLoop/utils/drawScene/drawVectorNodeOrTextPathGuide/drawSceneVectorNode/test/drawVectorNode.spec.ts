@@ -74,6 +74,41 @@ describe('drawVectorNode', () => {
     getVectorNodeBoundsMock.mockReturnValue(NODE_BOUNDS);
   });
 
+  it('should draw the fill and the stroke at the node opacity', () => {
+    // mock
+    const gl = {} as WebGL2RenderingContext;
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
+    const strokeBufferCache = {} as WeakMap<number[], WebGLBuffer>;
+    const node: TVectorNode = {
+      defaultFill: null,
+      fillByKey: { 's1,s2,s3': [{ color: '#ff0000', opacity: 100, type: 'solid' }] },
+      filledFaceKeys: ['s1,s2,s3'],
+      id: '1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {},
+      strokeColor: '#00ff00',
+      strokeWidth: 3,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {},
+    };
+
+    getVectorFillLoopPointsMock.mockReturnValue([{ x: 0, y: 0 }]);
+    getVectorNodeThickStrokeVerticesMock.mockReturnValue([0, 0, 1, 1]);
+
+    // before
+    drawVectorNode(buildContext(gl, program, buffer, faceBufferCache, strokeBufferCache), node, 0.5);
+
+    // result
+    expect(drawVectorFillMock.mock.calls[0][6]).toBe('#ff0000');
+    expect(drawVectorFillMock.mock.calls[0][11]).toBe(0.5);
+    expect(drawVectorThickStrokeVerticesMock.mock.calls[0][9]).toBe(0.5);
+  });
+
   it('should resolve each filled loop key to its current points then draw the fill followed by the stroke, using the node’s own colors and width', () => {
     // mock
     const gl = {} as WebGL2RenderingContext;
@@ -132,6 +167,7 @@ describe('drawVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
   });
 
@@ -295,7 +331,7 @@ describe('drawVectorNode', () => {
     drawVectorNode(buildContext(gl, program, buffer, faceBufferCache, strokeBufferCache), node);
 
     // result
-    expect(drawVectorVariableStrokeMock).toHaveBeenCalledWith(gl, program, buffer, node, '#00ff00', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorVariableStrokeMock).toHaveBeenCalledWith(gl, program, buffer, node, '#00ff00', 200, 150, IDENTITY_VIEWPORT, 1);
     expect(getVectorNodeThickStrokeVerticesMock).not.toHaveBeenCalled();
   });
 

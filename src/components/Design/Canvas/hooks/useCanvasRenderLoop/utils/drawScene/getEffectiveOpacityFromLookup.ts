@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
@@ -9,7 +10,7 @@ export const getEffectiveOpacityFromLookup = (node: TSceneNode, getNode: (id: st
   let current: TSceneNode | undefined = node;
 
   while (current) {
-    opacity *= isBoxSceneNode(current) ? (current.opacity ?? 1) : 1;
+    opacity *= isBoxSceneNode(current) || current.type === NodeType.vector ? (current.opacity ?? 1) : 1;
     current = current.parentId ? getNode(current.parentId) : undefined;
   }
 

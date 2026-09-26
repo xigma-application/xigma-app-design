@@ -17,7 +17,7 @@ const rotateStrokeVertices = (vertices: number[], snapshot: TVectorNodeRotateSna
   return rotatedVertices;
 };
 
-export const drawVectorNodeRotateSnapshotStroke = (context: TDrawSceneContext, snapshot: TVectorNodeRotateSnapshot): void => {
+export const drawVectorNodeRotateSnapshotStroke = (context: TDrawSceneContext, snapshot: TVectorNodeRotateSnapshot, opacity = 1): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const rotatedStrokeVertices = rotateStrokeVertices(snapshot.strokeVertices, snapshot);
 
@@ -31,5 +31,6 @@ export const drawVectorNodeRotateSnapshotStroke = (context: TDrawSceneContext, s
     canvasWidth,
     canvasHeight,
     viewport,
+    opacity,
   );
 };

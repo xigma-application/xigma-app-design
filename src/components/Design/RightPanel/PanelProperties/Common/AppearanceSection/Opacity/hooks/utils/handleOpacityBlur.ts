@@ -4,7 +4,7 @@ import { FocusEvent } from 'react';
 import { AppDispatch } from 'store';
 
 // types
-import { TStyledNode } from '../../../types';
+import { TOpacityPanelNode } from '../../../types';
 
 // utils
 import { clampOpacity } from './clampOpacity';
@@ -14,7 +14,7 @@ import { commitOpacityChange } from './commitOpacityChange';
 export const handleOpacityBlur = (
   event: FocusEvent<HTMLInputElement>,
   dispatch: AppDispatch,
-  nodes: TStyledNode[],
+  nodes: TOpacityPanelNode[],
   displayValue: string,
 ): void => {
   const stripped = event.target.value.trim().replace(/[^\d.-]/g, '');

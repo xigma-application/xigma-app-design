@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Vector snapshots > should render the header, position, layout, fill and export 1`] = `
+exports[`Vector snapshots > should render the header, position, layout, appearance, fill and export 1`] = `
 <DocumentFragment>
   <div
     class="_ComponentHeader_163cd5"
@@ -773,6 +773,146 @@ exports[`Vector snapshots > should render the header, position, layout, fill and
               </svg>
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="_Section_5940d2"
+    data-test-section="appearance"
+  >
+    <div
+      class="_Section__header_5940d2"
+    >
+      <span
+        class="_Section__label_5940d2"
+      >
+        Appearance
+      </span>
+      <div
+        class="_Section__component_5940d2"
+      >
+        <button
+          aria-label="Hide"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M6 12c0-.066.054-.358.313-.825a5.9 5.9 0 0 1 1.12-1.414C8.443 8.816 9.956 8 12 8s3.558.816 4.566 1.76c.508.477.88.98 1.121 1.415.258.467.313.76.313.825 0 .066-.055.358-.313.825-.24.435-.613.938-1.12 1.414C15.557 15.184 14.044 16 12 16s-3.558-.816-4.566-1.76a5.9 5.9 0 0 1-1.121-1.415C6.055 12.358 6 12.065 6 12m-1 0c0-1.25 2.333-5 7-5s7 3.75 7 5-2.333 5-7 5-7-3.75-7-5m8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m1 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+        <button
+          aria-expanded="false"
+          aria-haspopup="dialog"
+          aria-label="Apply blend mode"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              d="M11.353 5.623a.91.91 0 0 1 1.295 0C14 6.978 17 10.29 17 13.001c0 3.5-2.5 5-5 5s-5-1.5-5-5c0-2.711 3-6.023 4.352-7.378m.647.77c-.658.663-1.663 1.75-2.507 2.977C8.597 10.673 8 11.965 8 13.001c0 1.49.522 2.453 1.218 3.057.72.623 1.72.943 2.782.943s2.063-.32 2.782-.943C15.478 15.454 16 14.492 16 13c0-1.036-.597-2.328-1.493-3.63-.844-1.227-1.85-2.315-2.507-2.978"
+              data-svg-property="fill"
+              fill="white"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div
+      class="_SectionColumn_84b4eb"
+      data-test-section=""
+    >
+      <div
+        class="_SectionColumnLabels_ed28d5"
+        style="width: calc(100% - 32px);"
+      >
+        <span
+          class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+          style="font-size: 9px;"
+        >
+          Opacity
+        </span>
+      </div>
+      <div
+        class="_SectionColumn__row_84b4eb"
+      >
+        <div
+          class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
+          style="width: calc(100% - 32px);"
+        >
+          <div
+            class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+            data-test-text-field="opacity"
+          >
+            <div
+              class="ScrubbableInput"
+            >
+              <div
+                class="_InputAdornment_bfc2de"
+              >
+                <svg
+                  class="Icon"
+                  data-fpl-icon-size="24"
+                  fill="none"
+                  height="24"
+                  style="color: var(--color-neutral-2);"
+                  viewBox="0 0 24 24"
+                  width="24"
+                >
+                  <path
+                    clip-rule="evenodd"
+                    d="M8 7h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1M6 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2zm9 1.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1M13.5 11a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m-2 2a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m-2 2a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m1.5.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1m2-2a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1m.5 1.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m2-4a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m-.5 2.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1m.5 1.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"
+                    data-svg-property="fill"
+                    fill="white"
+                    fill-rule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
+            <input
+              aria-label="Opacity"
+              class="_TextFieldWrapper__input_9a3a67"
+              data-state="closed"
+              data-test-bypass-global-shortcuts="true"
+              data-test-text-field-input="opacity"
+              type="text"
+              value="100%"
+            />
+            <span
+              class="_TextFieldWrapper__endAdornment_9a3a67"
+            />
+          </div>
+        </div>
+        <div>
+          <div
+            class="_SectionColumnButtonIcons_71f71e"
+          />
         </div>
       </div>
     </div>

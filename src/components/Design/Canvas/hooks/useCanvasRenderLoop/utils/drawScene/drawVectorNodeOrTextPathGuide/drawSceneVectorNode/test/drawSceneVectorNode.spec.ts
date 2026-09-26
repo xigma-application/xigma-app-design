@@ -87,7 +87,7 @@ describe('drawSceneVectorNode', () => {
     drawSceneVectorNode(context, node, createVectorSnapshotsRefs());
 
     // result
-    expect(drawVectorNodeMock).toHaveBeenCalledWith(context, node);
+    expect(drawVectorNodeMock).toHaveBeenCalledWith(context, node, 1);
     expect(drawVectorNodeDragSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeResizeSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeRotateSnapshotMock).not.toHaveBeenCalled();
@@ -110,7 +110,7 @@ describe('drawSceneVectorNode', () => {
     drawSceneVectorNode(context, node, vectorSnapshots);
 
     // result
-    expect(drawVectorNodeMock).toHaveBeenCalledWith(context, node);
+    expect(drawVectorNodeMock).toHaveBeenCalledWith(context, node, 1);
     expect(drawVectorNodeDragSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeResizeSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeRotateSnapshotMock).not.toHaveBeenCalled();
@@ -132,7 +132,7 @@ describe('drawSceneVectorNode', () => {
     drawSceneVectorNode(context, node, vectorSnapshots);
 
     // result
-    expect(drawVectorNodeDragSnapshotMock).toHaveBeenCalledWith(context, snapshot);
+    expect(drawVectorNodeDragSnapshotMock).toHaveBeenCalledWith(context, snapshot, 1);
     expect(drawVectorNodeMock).not.toHaveBeenCalled();
     expect(drawVectorNodeResizeSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeRotateSnapshotMock).not.toHaveBeenCalled();
@@ -166,10 +166,41 @@ describe('drawSceneVectorNode', () => {
     drawSceneVectorNode(context, node, vectorSnapshots);
 
     // result
-    expect(drawVectorNodeResizeSnapshotMock).toHaveBeenCalledWith(context, snapshot);
+    expect(drawVectorNodeResizeSnapshotMock).toHaveBeenCalledWith(context, snapshot, 1);
     expect(drawVectorNodeMock).not.toHaveBeenCalled();
     expect(drawVectorNodeDragSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeRotateSnapshotMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a frozen snapshot with its fills and stroke at the node opacity', () => {
+    // mock
+    const context = buildContext({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, {} as WebGLProgram);
+    const snapshot: TVectorNodeResizeSnapshot = {
+      anchorX: 0,
+      anchorY: 0,
+      facesByPaint: [{ paint: [{ color: '#ff0000', opacity: 80, type: 'solid' }], points: [] }],
+      flattenedSegments: [],
+      pivot: { x: 0, y: 0 },
+      rotation: 0,
+      scaleX: 2,
+      scaleY: 1,
+      scaledCenter: { x: 0, y: 0 },
+      strokeColor: '#00ff00',
+      strokeWidth: 2,
+    };
+    const vectorSnapshots = createVectorSnapshotsRefs({
+      resizedVectorNodeSnapshotsRef: { current: new Map([['node-1', snapshot]]) },
+    });
+
+    // before
+    drawSceneVectorNode(context, node, vectorSnapshots, 0.5);
+
+    // result
+    expect(drawVectorNodeResizeSnapshotMock).toHaveBeenCalledWith(
+      context,
+      { ...snapshot, facesByPaint: [{ paint: [{ color: '#ff0000', opacity: 40, type: 'solid' }], points: [] }] },
+      0.5,
+    );
   });
 
   it('should draw the frozen rotate snapshot instead of the live node when one exists for this node’s id', () => {
@@ -194,7 +225,7 @@ describe('drawSceneVectorNode', () => {
     drawSceneVectorNode(context, node, vectorSnapshots);
 
     // result
-    expect(drawVectorNodeRotateSnapshotMock).toHaveBeenCalledWith(context, snapshot);
+    expect(drawVectorNodeRotateSnapshotMock).toHaveBeenCalledWith(context, snapshot, 1);
     expect(drawVectorNodeMock).not.toHaveBeenCalled();
     expect(drawVectorNodeDragSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeResizeSnapshotMock).not.toHaveBeenCalled();
