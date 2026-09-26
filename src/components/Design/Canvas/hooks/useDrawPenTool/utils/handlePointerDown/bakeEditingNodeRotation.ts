@@ -6,10 +6,10 @@ import { AppDispatch } from 'store';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { bakeVectorNodeRotation } from '../../../../utils/bakeVectorNodeRotation';
+import { getBakedVectorRotationChanges } from 'utils/canvas/vectorNetwork/getBakedVectorRotationChanges';
 
 export const bakeEditingNodeRotation = (dispatch: AppDispatch, editingNode: TVectorNode | null): void => {
   if (editingNode && editingNode.rotation) {
-    dispatch(updateNode({ changes: bakeVectorNodeRotation(editingNode), id: editingNode.id }));
+    dispatch(updateNode({ changes: getBakedVectorRotationChanges(editingNode), id: editingNode.id }));
   }
 };

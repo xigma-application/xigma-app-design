@@ -8,7 +8,7 @@ import { TArmContext } from '../types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
+import { getBakedVectorRotationChanges } from 'utils/canvas/vectorNetwork/getBakedVectorRotationChanges';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 
 export const armBakeVectorRotationOnPointerDown = ({ dispatch }: TArmContext): undefined => {
@@ -18,7 +18,7 @@ export const armBakeVectorRotationOnPointerDown = ({ dispatch }: TArmContext): u
     .map((id) => getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, id))
     .filter((node): node is TVectorNode => Boolean(node?.rotation))
     .forEach((node) => {
-      dispatch(updateNode({ changes: bakeVectorNodeRotation(node), id: node.id }));
+      dispatch(updateNode({ changes: getBakedVectorRotationChanges(node), id: node.id }));
     });
 
   return undefined;

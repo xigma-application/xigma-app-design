@@ -109,4 +109,31 @@ describe('captureVectorNodeResizeSnapshot', () => {
     expect(snapshot.flattenedSegments).toEqual([]);
     expect(flattenVectorSegmentsMock).not.toHaveBeenCalled();
   });
+
+  it('should keep the outline and turn of a fill whose rotation was baked into the points', () => {
+    // mock
+    flattenVectorSegmentsMock.mockReturnValue([
+      {
+        endId: 'v2',
+        points: [
+          { x: 1, y: 2 },
+          { x: 3, y: 4 },
+        ],
+        segmentId: 's1',
+        startId: 'v1',
+      },
+    ]);
+
+    // before
+    const snapshot = captureVectorNodeResizeSnapshot({ ...baseNode, fillRotation: 45 }, 0);
+
+    // result
+    expect(snapshot.fillFrame).toEqual({
+      degrees: 45,
+      points: [
+        { x: 1, y: 2 },
+        { x: 3, y: 4 },
+      ],
+    });
+  });
 });

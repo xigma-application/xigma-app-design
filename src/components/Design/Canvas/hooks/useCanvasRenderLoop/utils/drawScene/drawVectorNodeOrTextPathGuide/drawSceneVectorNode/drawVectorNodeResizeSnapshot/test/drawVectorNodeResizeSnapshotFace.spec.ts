@@ -139,4 +139,28 @@ describe('drawVectorNodeResizeSnapshotFace', () => {
     // result
     expect(drawVectorFillGroupMock.mock.calls[0][6]).toMatchObject({ localBounds: { height: 100, width: 400 } });
   });
+
+  it('should turn the fill frame of a vector whose rotation was baked into its points with the resized outline', () => {
+    // mock — a square outline whose fill keeps a 90deg turn, stretched 2x across
+    const paint = [{ opacity: 100, ref: 'photo.png', rotation: 0, scaleMode: 'fill' as const, type: 'image' as const }];
+    const fillFrame = {
+      degrees: 90,
+      points: [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+        { x: 0, y: 10 },
+      ],
+    };
+
+    // before
+    drawVectorNodeResizeSnapshotFace(context, { ...snapshot, fillFrame }, { paint, points: [fillFrame.points] });
+
+    // result — the frame now spans the stretched outline, measured along its own 90deg turn
+    const frame = drawVectorFillGroupMock.mock.calls[0][6] as { degrees: number; localBounds: { height: number; width: number } };
+
+    expect(frame.degrees).toBe(90);
+    expect(frame.localBounds.width).toBeCloseTo(10);
+    expect(frame.localBounds.height).toBeCloseTo(20);
+  });
 });

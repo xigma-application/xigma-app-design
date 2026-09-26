@@ -279,6 +279,7 @@ export type TVectorNodeResizeSnapshot = {
   effectLayers?: TLineStrokeShape[];
   facesByPaint: { paint: TPaint[]; points: TPoint[][] }[];
   fillBounds?: TDraftRect;
+  fillFrame?: { degrees: number; points: TPoint[] };
   flattenedSegments: TFlattenedVectorSegment[];
   pivot: TPoint;
   rotation: number;

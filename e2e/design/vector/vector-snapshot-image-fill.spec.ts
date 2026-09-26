@@ -10,76 +10,79 @@ const readPixel = async (page: Page, x: number, y: number): Promise<[number, num
   return [png.data[0], png.data[1], png.data[2]];
 };
 
-const addSplitImageVector = async (page: Page, rightBlendMode: string): Promise<void> => {
-  await page.evaluate(async (rightBlendMode) => {
-    const { store } = await import('/src/store/index.ts');
-    const { addNodes, setSelection } = await import('/src/store/design/slice.ts');
-    const { getVectorFillsChange } = await import('/src/utils/canvas/vectorNetwork/getVectorFillsChange.ts');
-    const { persistVectorNetworkCrossings } =
-      await import('/src/utils/canvas/vectorNetwork/planarizeVectorNetwork/persistVectorNetworkCrossings.ts');
-    const canvas = document.createElement('canvas');
+const addSplitImageVector = async (page: Page, rightBlendMode: string, id = 'split-image-vector', offsetX = 0): Promise<void> => {
+  await page.evaluate(
+    async ({ id, offsetX, rightBlendMode }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNodes, setSelection } = await import('/src/store/design/slice.ts');
+      const { getVectorFillsChange } = await import('/src/utils/canvas/vectorNetwork/getVectorFillsChange.ts');
+      const { persistVectorNetworkCrossings } =
+        await import('/src/utils/canvas/vectorNetwork/planarizeVectorNetwork/persistVectorNetworkCrossings.ts');
+      const canvas = document.createElement('canvas');
 
-    canvas.width = 200;
-    canvas.height = 100;
+      canvas.width = 200;
+      canvas.height = 100;
 
-    const context = canvas.getContext('2d')!;
-    const gradient = context.createLinearGradient(0, 0, 200, 0);
+      const context = canvas.getContext('2d')!;
+      const gradient = context.createLinearGradient(0, 0, 200, 0);
 
-    gradient.addColorStop(0, '#ff0000');
-    gradient.addColorStop(1, '#0000ff');
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, 200, 100);
+      gradient.addColorStop(0, '#ff0000');
+      gradient.addColorStop(1, '#0000ff');
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, 200, 100);
 
-    const point = (id: string, x: number, y: number): { id: string; x: number; y: number } => ({ id, x, y });
-    const line = (id: string, startId: string, endId: string): Record<string, unknown> => ({
-      endId,
-      id,
-      startId,
-      tangentEnd: null,
-      tangentStart: null,
-    });
-    const network = persistVectorNetworkCrossings(
-      {
-        b: line('b', 'v2', 'v3'),
-        cut: line('cut', 'c1', 'c2'),
-        l: line('l', 'v4', 'v1'),
-        r: line('r', 'v3', 'v4'),
-        t: line('t', 'v1', 'v2'),
-      } as never,
-      {
-        c1: point('c1', 1000, 290),
-        c2: point('c2', 1000, 410),
-        v1: point('v1', 900, 300),
-        v2: point('v2', 1100, 300),
-        v3: point('v3', 1100, 400),
-        v4: point('v4', 900, 400),
-      },
-    );
-    const vector = {
-      defaultFill: null,
-      filledFaceKeys: [],
-      id: 'split-image-vector',
-      name: 'Vector',
-      parentId: null,
-      rotation: 0,
-      segments: network.segments,
-      strokeWidth: 0,
-      strokes: [],
-      type: 'vector',
-      vertexHandleModes: {},
-      vertices: network.vertices,
-    };
-    const image = { opacity: 100, ref: canvas.toDataURL(), rotation: 0, scaleMode: 'fill', type: 'image' };
-    const filled = { ...vector, ...getVectorFillsChange(vector as never, [image] as never) } as typeof vector & {
-      fillByKey: Record<string, Record<string, unknown>[]>;
-      filledFaceKeys: string[];
-    };
-    const rightKey = filled.filledFaceKeys.find((key) => !key.includes('l['))!;
+      const point = (id: string, x: number, y: number): { id: string; x: number; y: number } => ({ id, x, y });
+      const line = (id: string, startId: string, endId: string): Record<string, unknown> => ({
+        endId,
+        id,
+        startId,
+        tangentEnd: null,
+        tangentStart: null,
+      });
+      const network = persistVectorNetworkCrossings(
+        {
+          b: line('b', 'v2', 'v3'),
+          cut: line('cut', 'c1', 'c2'),
+          l: line('l', 'v4', 'v1'),
+          r: line('r', 'v3', 'v4'),
+          t: line('t', 'v1', 'v2'),
+        } as never,
+        {
+          c1: point('c1', 1000 + offsetX, 290),
+          c2: point('c2', 1000 + offsetX, 410),
+          v1: point('v1', 900 + offsetX, 300),
+          v2: point('v2', 1100 + offsetX, 300),
+          v3: point('v3', 1100 + offsetX, 400),
+          v4: point('v4', 900 + offsetX, 400),
+        },
+      );
+      const vector = {
+        defaultFill: null,
+        filledFaceKeys: [],
+        id,
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: network.segments,
+        strokeWidth: 0,
+        strokes: [],
+        type: 'vector',
+        vertexHandleModes: {},
+        vertices: network.vertices,
+      };
+      const image = { opacity: 100, ref: canvas.toDataURL(), rotation: 0, scaleMode: 'fill', type: 'image' };
+      const filled = { ...vector, ...getVectorFillsChange(vector as never, [image] as never) } as typeof vector & {
+        fillByKey: Record<string, Record<string, unknown>[]>;
+        filledFaceKeys: string[];
+      };
+      const rightKey = filled.filledFaceKeys.find((key) => !key.includes('l['))!;
 
-    filled.fillByKey = { ...filled.fillByKey, [rightKey]: [{ ...image, blendMode: rightBlendMode }] };
-    store.dispatch(addNodes({ nodes: [filled as never], rootIds: [filled.id] }));
-    store.dispatch(setSelection([filled.id]));
-  }, rightBlendMode);
+      filled.fillByKey = { ...filled.fillByKey, [rightKey]: [{ ...image, blendMode: rightBlendMode }] };
+      store.dispatch(addNodes({ nodes: [filled as never], rootIds: [filled.id] }));
+      store.dispatch(setSelection([filled.id]));
+    },
+    { id, offsetX, rightBlendMode },
+  );
   await page.waitForTimeout(300);
 };
 
@@ -164,6 +167,41 @@ test('a rotated vector turns its image fill with it', async ({ page }) => {
       const [rightRed, , rightBlue] = await readPixel(page, 1090, 350);
 
       return leftBlue > leftRed + 100 && rightRed > rightBlue + 100;
+    })
+    .toBe(true);
+});
+
+test('rotating a group turns the image fill of every vector in it', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-group-rotated-image-fill');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — two red-to-blue image vectors side by side, grouped
+  await addSplitImageVector(page, 'normal', 'image-vector-left');
+  await addSplitImageVector(page, 'normal', 'image-vector-right', 300);
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { setSelection } = await import('/src/store/design/slice.ts');
+
+    store.dispatch(setSelection(['image-vector-left', 'image-vector-right']));
+  });
+  await page.keyboard.press('Control+g');
+
+  const rotation = page.getByRole('textbox', { name: 'Rotation' });
+
+  // action — turn the group upside down from the panel
+  await rotation.fill('180');
+  await rotation.press('Tab');
+  await designPage.click(1500, 900);
+
+  // result — the vectors swapped places and each image turned along: blue on the left of each, red on the right
+  await expect
+    .poll(async () => {
+      const samples = await Promise.all([910, 1090, 1210, 1390].map(async (x) => readPixel(page, x, 350)));
+      const [leftOfFirst, rightOfFirst, leftOfSecond, rightOfSecond] = samples.map(([red, , blue]) => red - blue);
+
+      return leftOfFirst < -100 && rightOfFirst > 100 && leftOfSecond < -100 && rightOfSecond > 100;
     })
     .toBe(true);
 });

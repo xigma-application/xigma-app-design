@@ -9,8 +9,8 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { armBakeVectorRotationOnPointerDown } from '../armBakeVectorRotationOnPointerDown';
 
-vi.mock('../../../../../../utils/bakeVectorNodeRotation', () => ({
-  bakeVectorNodeRotation: (node: TVectorNode): unknown => ({ baked: node.id }),
+vi.mock('utils/canvas/vectorNetwork/getBakedVectorRotationChanges', () => ({
+  getBakedVectorRotationChanges: (node: TVectorNode): unknown => ({ baked: node.id }),
 }));
 
 const vector = (id: string, rotation: number): TVectorNode =>

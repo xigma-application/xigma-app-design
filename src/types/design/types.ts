@@ -452,6 +452,7 @@ export type TVectorNode = {
   defaultFill: TPaint[] | null;
   effects?: TEffect[];
   fillByKey?: Record<string, TPaint[]>;
+  fillRotation?: number;
   filledFaceKeys: string[];
   hidden?: boolean;
   holeParentByKey?: Record<string, string>;

@@ -2,6 +2,7 @@
 import { TDesignState } from '../types';
 
 // utils
+import { bakeEnteringVectorRotations } from './bakeEnteringVectorRotations';
 import { handleDeleteNode } from './handleDeleteNode/handleDeleteNode';
 import { isEmptyVectorNode } from './isEmptyVectorNode';
 
@@ -9,6 +10,10 @@ export const handleSetVectorEditingNodeIds = (state: TDesignState, nextVectorEdi
   const previousVectorEditingNodeIds = state.vectorEditingNodeIds;
 
   state.vectorEditingNodeIds = nextVectorEditingNodeIds;
+  bakeEnteringVectorRotations(
+    state,
+    nextVectorEditingNodeIds.filter((id) => !previousVectorEditingNodeIds.includes(id)),
+  );
 
   if (nextVectorEditingNodeIds.length === 0) {
     state.lastMoreTool = null;

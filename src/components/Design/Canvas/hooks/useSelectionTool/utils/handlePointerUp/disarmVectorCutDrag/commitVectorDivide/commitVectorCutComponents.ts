@@ -1,10 +1,11 @@
+import { omit } from 'lodash';
+
 // store
 import { addNode, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
 import { TVectorNetworkComponent } from 'utils/canvas/vectorNetwork/cutVectorNetwork/types';
 import { TVectorNode } from 'types/design/types';
 
@@ -37,16 +38,11 @@ export const commitVectorCutComponents = (
 
       dispatch(
         addNode({
-          defaultFill: originalNode.defaultFill,
+          ...omit(originalNode, ['holeParentByKey', 'id', 'widthProfile']),
           fillByKey: finished.fillByKey ?? {},
           filledFaceKeys: finished.filledFaceKeys ?? [],
-          name: originalNode.name,
-          parentId: originalNode.parentId,
           rotation: 0,
           segments: finished.segments,
-          strokeWidth: originalNode.strokeWidth,
-          strokes: originalNode.strokes,
-          type: NodeType.vector,
           vertexHandleModes: finished.vertexHandleModes,
           vertices: finished.vertices,
         }),

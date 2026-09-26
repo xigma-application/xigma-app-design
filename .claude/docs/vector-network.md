@@ -5581,9 +5581,35 @@ returns the `TBoxFillRotation` a rotated vector's fills need — the unrotated r
 around the middle of the unrotated vertex bounds (the bake pivot) — and `drawVectorNode` passes it to every fill
 and stroke group (gradients ignore it, as for boxes). The drag and rotate snapshots store it as `fillRotation`: drag
 moves it by the delta, rotate adds its own turn with `composeVectorFillRotation` (the local rect's centre is carried
-around both pivots and the angles add up). The resize snapshot already turned fills by the node rotation. Still
-open: a multi-selection rotate bakes the turn into the vertices (rotation 0), so there the fill ends upright, and
-SVG/PDF export does not turn the fill of a rotated vector.
+around both pivots and the angles add up). The resize snapshot already turned fills by the node rotation.
+
+A rotate of several nodes (a rotate drag over a multi-selection, or turning a group, from the canvas or the panel)
+used to bake the turn into each vector's vertices and reset `rotation` to 0, which left its fill upright.
+`getRotatedNodeChanges` now keeps the turn for a vector in every case: `rotation + delta`, with the unrotated
+vertices shifted by how far the vector's own pivot (the centre of its unrotated vertex bounds) orbits around the
+group pivot — drawn, that is exactly the old baked shape, and the fill turns with it. SVG/PDF export needs nothing:
+image, video and pattern paints are not exportable as vector paths (`isSvgVectorPaint` / `isPlainPaint`), so such a
+vector is always rasterised through `drawVectorNode`, which turns the fill.
+
+## 85. Rotation is baked when a vector enters edit mode, the fill keeps the turn
+
+Edit tools work on the drawn points, so a rotated vector has its rotation baked into its vertices. That used to
+happen lazily on the first pointer down (`armBakeVectorRotationOnPointerDown`), so anything before it — hover, the
+Lasso (armed before the bake), Offset — worked on the unrotated points, and the bake dropped the fill's turn (an
+image jumped upright on the first click). Now `handleSetVectorEditingNodeIds` bakes every rotated vector entering
+edit mode (`bakeEnteringVectorRotations`), which covers every entry (Enter, double click, the toolbar, the Pen).
+All bakes use `getBakedVectorRotationChanges`, which adds the old `rotation` to `TVectorNode.fillRotation`: the
+turn of the fill frame relative to the points. The pointer-down and Pen bakes stay as a fallback (e.g. a rotation
+typed in the panel while editing).
+
+`getVectorFillRotation` now works for `rotation + fillRotation`: it turns the drawn shape back by that angle around
+its bounds centre, takes those bounds as the frame and returns it normalised so `center` is the middle of
+`localBounds` — the image quad (`drawImageTexture`) turns around its own rect centre and ignores `center`, which
+used to shift the image off lopsided pieces. The resize snapshot keeps the outline (`fillFrame.points`) of a vector
+with a `fillRotation` and rebuilds the frame from the scaled points every frame (`getFillFrameFromPoints`), since a
+turned rectangle stretched along the screen axes is no longer a rectangle. Cut pieces (`commitVectorCutComponents`)
+now copy the whole style of the original (opacity, blend mode, effects, corner radius, stroke settings,
+`fillRotation`) instead of only fills and strokes.
 
 ## Related
 

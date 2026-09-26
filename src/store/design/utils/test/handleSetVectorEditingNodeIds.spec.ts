@@ -6,6 +6,7 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { getActivePage } from '../getActivePage';
 import { handleSetVectorEditingNodeIds } from '../handleSetVectorEditingNodeIds';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const buildState = (nodes: TDesignPage['nodes'], overrides: Partial<TDesignState> = {}): TDesignState => ({
   activePageId: 'page-1',
@@ -202,5 +203,17 @@ describe('handleSetVectorEditingNodeIds', () => {
     expect(state.vectorEditingNodeIds).toEqual([nodeB.id]);
     expect(getActivePage(state).nodes[nodeA.id]).toBeDefined();
     expect(getActivePage(state).nodes[nodeB.id]).toBeDefined();
+  });
+
+  it('should bake the rotation of a vector as it enters edit mode, so every edit tool works on its drawn points', () => {
+    // mock
+    const turned = { ...makeSquareVector({ id: 'turned', rotation: 30 }), parentId: null } as TVectorNode;
+    const state = buildState({ turned });
+
+    // before
+    handleSetVectorEditingNodeIds(state, ['turned']);
+
+    // result
+    expect(getActivePage(state).nodes.turned).toMatchObject({ fillRotation: 30, rotation: 0 });
   });
 });

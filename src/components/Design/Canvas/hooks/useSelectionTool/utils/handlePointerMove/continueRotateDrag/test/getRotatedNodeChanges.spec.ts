@@ -1,3 +1,6 @@
+// types
+import { TVectorNode } from 'types/design/types';
+
 // utils
 import { bakeVectorNodeRotation } from '../../../../../../utils/bakeVectorNodeRotation';
 import { getRotatedNodeChanges } from '../getRotatedNodeChanges';
@@ -27,33 +30,35 @@ describe('getRotatedNodeChanges', () => {
     expect(changes).toEqual({ rotation: 100, segments: {}, vertices: { v1: { id: 'v1', x: 100, y: 50 } } });
   });
 
-  it('should bake the delta into a group-selected vector origin by its vertices and reset rotation to 0', () => {
+  it('should keep the turn of a group-selected vector in its rotation and move its vertices along the orbit around the group pivot', () => {
     // mock
     const origin = { rotation: 0, segments: {}, vertices: { v1: { id: 'v1', x: 100, y: 50 } } };
 
     // before
-    const changes = getRotatedNodeChanges(origin, { x: 50, y: 50 }, 90, false);
+    const changes = getRotatedNodeChanges(origin, { x: 50, y: 50 }, 90, false) as TVectorNode;
 
-    // result — not rounded, so checked with a tolerance for floating-point noise from
-    // Math.cos(90deg) not being an exact 0
-    expect((changes as { rotation: number }).rotation).toBe(0);
-    expect((changes as { vertices: Record<string, { x: number; y: number }> }).vertices.v1.x).toBeCloseTo(50);
-    expect((changes as { vertices: Record<string, { x: number; y: number }> }).vertices.v1.y).toBeCloseTo(100);
+    // result — not rounded, so checked with a tolerance for floating-point noise from Math.cos(90deg) not being an exact 0
+    expect(changes.rotation).toBe(90);
+    expect(changes.vertices.v1.x).toBeCloseTo(50);
+    expect(changes.vertices.v1.y).toBeCloseTo(100);
   });
 
-  it('should fold a group-selected vector origin’s own rotation in around its own bounds before rotating it around the external group pivot', () => {
-    // mock — the origin itself is already tilted 90deg; a naive group rotate that ignored this would
-    // silently drop that tilt instead of composing the two rotations
+  it('should draw a group-selected vector that is already tilted exactly where composing both turns by hand puts it', () => {
+    // mock — the origin itself is already tilted 90deg; the result must keep that tilt and add the delta
     const origin = { rotation: 90, segments: {}, vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } } };
 
     // before
-    const changes = getRotatedNodeChanges(origin, { x: 0, y: 0 }, 45, false);
+    const changes = getRotatedNodeChanges(origin, { x: 0, y: 0 }, 45, false) as TVectorNode;
 
-    // result — must match composing the same two rotations by hand: bake the origin's own 90deg around
-    // its own bounds center first, then rotate that result around the external pivot by the 45deg delta
-    const selfBaked = bakeVectorNodeRotation(origin);
+    // result — baking the new rotation lands on the same points as baking the old one and then turning it around the pivot
+    const drawn = bakeVectorNodeRotation(changes).vertices;
+    const expected = rotateVectorNodeOrigin(bakeVectorNodeRotation(origin), { x: 0, y: 0 }, 45).vertices;
 
-    expect(changes).toEqual({ rotation: 0, ...rotateVectorNodeOrigin(selfBaked, { x: 0, y: 0 }, 45) });
+    expect(changes.rotation).toBe(135);
+    ['v1', 'v2'].forEach((id) => {
+      expect(drawn[id].x).toBeCloseTo(expected[id].x);
+      expect(drawn[id].y).toBeCloseTo(expected[id].y);
+    });
   });
 
   it('should rotate a shape origin by its center, falling back to the default case', () => {

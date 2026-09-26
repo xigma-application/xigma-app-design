@@ -39,7 +39,9 @@ describe('bakeEditingNodeRotation', () => {
 
     // result
     expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(dispatch).toHaveBeenCalledWith(updateNode({ changes: bakeVectorNodeRotation(node), id: 'vector-1' }));
+    expect(dispatch).toHaveBeenCalledWith(
+      updateNode({ changes: { ...bakeVectorNodeRotation(node), fillRotation: node.rotation }, id: 'vector-1' }),
+    );
   });
 
   it('should do nothing when the editing node has no rotation', () => {
