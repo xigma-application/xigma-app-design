@@ -2,7 +2,7 @@
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
-import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
+import { getDrawnVectorNode } from 'utils/canvas/render/getDrawnVectorNode';
 import { getRotatedNodeBounds } from 'components/Design/Canvas/utils/getRotatedNodeBounds';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 import { getVisibleStrokePaints } from 'utils/canvas/vector/stroke/getVisibleStrokePaints';
@@ -16,7 +16,7 @@ const isOwnStyleSupported = (node: TVectorNode): boolean =>
   !node.effects?.some((effect) => effect.visible !== false) &&
   (!hasVisibleStroke(node) || !node.widthProfile) &&
   getVisibleStrokePaints(node.strokes).every(isSvgVectorPaint) &&
-  groupFilledFacesForRendering(getRenderedVectorNode(node)).every(({ paint }) => paint.every(isSvgVectorPaint));
+  groupFilledFacesForRendering(getDrawnVectorNode(node)).every(({ paint }) => paint.every(isSvgVectorPaint));
 
 export const canExportVectorNodeAsSvgVector = (node: TVectorNode, nodesById: Record<string, TSceneNode>): boolean =>
   isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true, true);

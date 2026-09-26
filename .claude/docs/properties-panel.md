@@ -1057,7 +1057,7 @@ Stroke with `ShapeStrokeSettings type={NodeType.star}`, Effects and Export. `Cou
 ## `Vector/`
 
 `Vector.tsx` (shown while every selected layer is a vector) is being built in stages (header, position,
-layout, export, fill, appearance, stroke, selection colors and effects are done; corner radius comes next). A vector has no stored box: its X/Y/W/H
+layout, export, fill, appearance with corner radius, stroke, selection colors and effects are done). A vector has no stored box: its X/Y/W/H
 are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
 
 - `VectorHeader`: "Vector path" with matching layers, create component (single selection), mask and boolean;
@@ -1085,7 +1085,7 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
   `useOpacity`, `useBlendModeRow` and `useBlendModeButton` take vectors. Visibility already worked through
   `hidden`.
 - Stroke: `FillSection property="strokes"` with `ShapeStrokeSettings type={NodeType.vector}` as its footer
-  (`TShapeStrokeNodeType` adds the vector; a vector without `strokeAlign` reads as Center, the way it is drawn).
+  (`TShapeOrVectorNodeType` adds the vector; a vector without `strokeAlign` reads as Center, the way it is drawn).
   `isFillPanelNode` takes a vector for both properties, but only `fills` goes through `getVectorPanelFills` /
   `getVectorFillsChange`; strokes use the plain `strokes` list. `getFillTargets` gives a vector Center as the
   default position and drops a zero `strokeWidth` (shapes flattened without a stroke) so the first stroke gets
@@ -1099,6 +1099,10 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
   `getSelectionColorSourcePaints` and writes an area back into `fillByKey[faceKey]` next to the other areas
   (`getSelectionColorPaintsChange`). Vectors inside a selected frame or group now count too
   (`isSelectionColorNode`).
+- Corner radius: `AppearanceSection shapeCornerRadiusType={NodeType.vector}` reuses `ShapeCornerRadiusInput` /
+  `useShapeCornerRadius` (types `TShapeOrVectorNode(Type)`, renamed from `TShapeStrokeNode`); it writes
+  `TVectorNode.cornerRadius` on every selected vector and shows Mixed when they differ. Rounding is described in
+  `vector-network.md` §81.
 - Effects: `Common/EffectsSection` takes vectors (`useEffectsSection` filters with `isStyledOrVectorNode`, which
   also replaced the identical `isOpacityPanelNode` and `isStrokeSettingsNode`). Rendering is described in
   `canvas-rendering-pipeline.md` ("Vector effects").

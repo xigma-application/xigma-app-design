@@ -16,7 +16,7 @@ import { drawThickPolygonOutline } from 'utils/canvas/shapes/drawThickPolygonOut
 import { drawThickStarOutline } from 'utils/canvas/shapes/drawThickStarOutline';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
-import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
+import { getDrawnVectorNode } from 'utils/canvas/render/getDrawnVectorNode';
 
 export const drawHoverOutline = (
   context: TDrawSceneContext,
@@ -101,7 +101,7 @@ export const drawHoverOutline = (
           gl,
           program,
           buffer,
-          flattenVectorSegments(getRenderedVectorNode(hoveredNode)),
+          flattenVectorSegments(getDrawnVectorNode(hoveredNode)),
           DRAFT_FRAME_STROKE,
           HOVER_OUTLINE_WIDTH / viewport.zoom,
           canvasWidth,

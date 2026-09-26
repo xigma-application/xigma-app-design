@@ -24,11 +24,11 @@ import { translationNameSpace } from './constants';
 
 // types
 import { TCountNodeType } from './Count/types';
-import { TShapeNodeType } from '../types';
+import { TShapeOrVectorNodeType } from '../types';
 
 export type TAppearanceSectionProps = {
   countType?: TCountNodeType;
-  shapeCornerRadiusType?: TShapeNodeType;
+  shapeCornerRadiusType?: TShapeOrVectorNodeType;
   withArc?: boolean;
   withCornerRadius?: boolean;
 };

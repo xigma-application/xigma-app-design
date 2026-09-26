@@ -11,9 +11,9 @@ import { useShapeCornerRadius } from './hooks/useShapeCornerRadius/useShapeCorne
 import { translationNameSpace } from '../constants';
 
 // types
-import { TShapeNodeType } from '../../types';
+import { TShapeOrVectorNodeType } from '../../types';
 
-export type TShapeCornerRadiusInputProps = { type: TShapeNodeType };
+export type TShapeCornerRadiusInputProps = { type: TShapeOrVectorNodeType };
 
 const ShapeCornerRadiusInput: FC<TShapeCornerRadiusInputProps> = ({ type }) => {
   const { t } = useTranslation();

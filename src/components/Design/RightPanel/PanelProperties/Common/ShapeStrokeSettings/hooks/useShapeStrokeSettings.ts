@@ -10,7 +10,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 // types
 import { NodeType, StrokeAlign, StrokeMode } from 'types/design/enums';
 import { TSceneNodeChanges } from 'types/design/types';
-import { TShapeStrokeNode, TShapeStrokeNodeType } from '../../types';
+import { TShapeOrVectorNode, TShapeOrVectorNodeType } from '../../types';
 
 // utils
 import { clampStrokeWeight } from '../../StrokeSection/StrokeSettingsRow/utils/clampStrokeWeight';
@@ -30,20 +30,20 @@ export type TUseShapeStrokeSettingsResult = {
   weight: number;
 };
 
-export const useShapeStrokeSettings = (type: TShapeStrokeNodeType): TUseShapeStrokeSettingsResult => {
+export const useShapeStrokeSettings = (type: TShapeOrVectorNodeType): TUseShapeStrokeSettingsResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter((node): node is TShapeStrokeNode => node?.type === type);
+  const nodes = useAppSelector(selectSelectedNodes).filter((node): node is TShapeOrVectorNode => node?.type === type);
   const defaultPosition = type === NodeType.vector ? StrokeAlign.center : StrokeAlign.inside;
   const weights = nodes.map((node) => node.strokeWidth ?? 1);
   const weight = weights[0] ?? 1;
   const sharedWeight = getSharedValue(weights);
   const modes = nodes.map((node) => node.strokeMode ?? StrokeMode.basic);
 
-  const commitEach = (getChanges: TFunc<[TShapeStrokeNode], TSceneNodeChanges>): void => {
+  const commitEach = (getChanges: TFunc<[TShapeOrVectorNode], TSceneNodeChanges>): void => {
     dispatch(updateNodes(nodes.map((node) => ({ changes: getChanges(node), id: node.id }))));
   };
 
-  const commitEachWithHistory = (getChanges: TFunc<[TShapeStrokeNode], TSceneNodeChanges>): void => {
+  const commitEachWithHistory = (getChanges: TFunc<[TShapeOrVectorNode], TSceneNodeChanges>): void => {
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
     commitEach(getChanges);
     dispatch(endHistoryGesture());

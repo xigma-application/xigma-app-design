@@ -4,7 +4,7 @@ import { TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
 // utils
 import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
-import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
+import { getDrawnVectorNode } from 'utils/canvas/render/getDrawnVectorNode';
 import { getThickVectorPathVertices } from '../vectorNetwork/getThickVectorPathVertices/getThickVectorPathVertices';
 import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
 import { getVectorStrokeShapeFaces } from '../vector/stroke/getVectorStrokeShapeFaces';
@@ -26,7 +26,7 @@ const getStrokeVertices = (renderedNode: TVectorNode, strokeFaces: TVectorNodeRo
     : getThickVectorPathVertices(flattenVectorSegments(renderedNode), renderedNode.strokeWidth / 2);
 
 export const captureVectorNodeRotateSnapshot = (node: TVectorNode): TVectorNodeRotateSnapshot => {
-  const renderedNode = getRenderedVectorNode(node);
+  const renderedNode = getDrawnVectorNode(node);
   const strokeFaces = getVectorStrokeShapeFaces(renderedNode);
   const facesByPaint = getFacesByPaint(renderedNode, strokeFaces);
   const strokeVertices = getStrokeVertices(renderedNode, strokeFaces);

@@ -29,7 +29,7 @@ const Vector: FC = () => {
       <UITools.Section e2eValue="layout" label={t(`${translationNameSpace}.layoutSection.label`)}>
         <VectorDimensions />
       </UITools.Section>
-      <AppearanceSection withCornerRadius={false} />
+      <AppearanceSection shapeCornerRadiusType={NodeType.vector} withCornerRadius={false} />
       <FillSection />
       <FillSection footer={<ShapeStrokeSettings type={NodeType.vector} />} property="strokes" />
       <SelectionColorsSection />

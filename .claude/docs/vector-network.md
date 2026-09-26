@@ -5519,6 +5519,30 @@ async), and `canExportVectorNodeAsSvgVector`/`canExportVectorNodeAsVector` also 
 paint to be exportable, falling back to raster otherwise. `canOutlineNodeStroke` reads the list for vectors.
 Known limit: a non-solid paint on a width-profile stroke is outlined at the uniform width.
 
+## 81. Corner radius — rounded at draw time, stored as one radius on the node
+
+`TVectorNode.cornerRadius` is the radius for every vertex (per-vertex radii are planned as overrides on top; the
+panel field will keep writing the one value for all). It is stored on the node, not on `TVectorVertex`, because
+move / resize / rotate rebuild vertices as plain `{ id, x, y }` and would drop a vertex field.
+
+The network itself stays sharp. `roundVectorCorners/getRoundedVectorNode` (cached per node) builds a rounded copy:
+`roundVectorNetworkCorners` takes every vertex where exactly two fully straight segments meet (not a junction, an
+open end, a curve or a fold back — `getVectorRoundableCorner`), cuts both segments at `radius / tan(angle / 2)`
+from the corner, clamped to half of the shorter segment (`getVectorCornerArc`), adds vertices `${vertexId}~${segmentId}`
+at the cuts and a cubic arc segment `${vertexId}~corner` between them (handle `4/3 · tan(turn / 4) · r`), and drops
+the corner vertex. Stored fill keys are piece keys that name the segment's end vertices, so they change;
+`getRoundedVectorFillData` maps each stored key to its face in the sharp network, finds the same face in the
+rounded one (its segment ids without the `~corner` arcs, `getOriginalVectorFaceKey`) and writes `fillByKey`,
+`filledFaceKeys` and `holeParentByKey` under the rounded keys. The rounded copy has `cornerRadius: undefined`, so it
+is baked.
+
+`render/getDrawnVectorNode` = rounded `getRenderedVectorNode`. Everything that draws or consumes the finished shape
+uses it: `drawVectorNode`, the effect shape, the drag and rotate snapshots (the resize snapshot rounds the unrotated
+node), SVG/PDF export, flatten, boolean operands and stroke outlines, hit testing (`isPointOnVectorNode`), the hover
+and mask outlines, and outline stroke (`getVectorStrokeOutlineLoops`). Edit tools keep `getRenderedVectorNode`: the
+handles, face selection, Paint, cut and width points work on the real sharp vertices, so in edit mode the points sit
+at the sharp corners while the shape is drawn rounded. Bounds stay the vertex bounds.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

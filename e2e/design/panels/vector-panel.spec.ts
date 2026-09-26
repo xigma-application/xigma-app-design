@@ -371,3 +371,45 @@ test('a vector drop shadow is drawn under its shape and moves with it while drag
 
   await designPage.pointerUp();
 });
+
+test('the vector Corner radius rounds every sharp corner of the vector and keeps its fill', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-panel-corner-radius');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — a filled 200x200 square from the pen, selected by its top edge
+  await designPage.drawVectorPath([
+    { x: 800, y: 300 },
+    { x: 1000, y: 300 },
+    { x: 1000, y: 500 },
+    { x: 800, y: 500 },
+    { x: 800, y: 300 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await designPage.click(900, 300);
+
+  const fillSection = page.locator('[data-test-section="fill"]');
+
+  await fillSection.getByLabel('Add fill').click();
+  await fillSection.getByText('Fill', { exact: true }).click();
+
+  const filled = await readPixelColor(page, 900, 400);
+
+  await expect.poll(async () => readPixelColor(page, 805, 305)).toEqual(filled);
+
+  // action
+  const cornerRadius = page.getByRole('textbox', { name: 'Corner radius' });
+
+  await cornerRadius.fill('40');
+  await cornerRadius.press('Tab');
+  await designPage.click(1500, 900);
+
+  // result — every corner is cut away while the middle keeps its fill
+  await expect.poll(async () => readPixelColor(page, 805, 305)).not.toEqual(filled);
+  await expect.poll(async () => readPixelColor(page, 995, 495)).not.toEqual(filled);
+  await expect.poll(async () => readPixelColor(page, 900, 400)).toEqual(filled);
+  await expect.poll(async () => readPixelColor(page, 900, 305)).toEqual(filled);
+});

@@ -20,7 +20,7 @@ import { drawThickStarOutline } from 'utils/canvas/shapes/drawThickStarOutline';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 import { getIsMaskChild } from 'store/design/utils/getIsMaskChild';
-import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
+import { getDrawnVectorNode } from 'utils/canvas/render/getDrawnVectorNode';
 
 export const drawMaskOutlines = (context: TDrawSceneContext, sceneNodes: TSceneNode[], nodesById: Record<string, TSceneNode>): void => {
   if (selectAreMaskOutlinesVisible(store.getState())) {
@@ -102,7 +102,7 @@ export const drawMaskOutlines = (context: TDrawSceneContext, sceneNodes: TSceneN
             gl,
             program,
             buffer,
-            flattenVectorSegments(getRenderedVectorNode(node)),
+            flattenVectorSegments(getDrawnVectorNode(node)),
             MASK_OUTLINE_STROKE,
             MASK_OUTLINE_WIDTH_PX / viewport.zoom,
             canvasWidth,

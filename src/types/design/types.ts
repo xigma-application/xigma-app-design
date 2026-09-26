@@ -448,6 +448,7 @@ export type TVectorWidthProfile = {
 export type TVectorNode = {
   blendMode?: BlendMode;
   capStyle?: 'round';
+  cornerRadius?: number;
   defaultFill: TPaint[] | null;
   effects?: TEffect[];
   fillByKey?: Record<string, TPaint[]>;

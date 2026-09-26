@@ -9,7 +9,7 @@ import { drawPdfVectorFills } from './drawPdfVectorFills';
 import { drawPdfVectorRoundedCaps } from './drawPdfVectorRoundedCaps';
 import { drawPdfVectorStroke } from './drawPdfVectorStroke';
 import { getEffectiveOpacity } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getEffectiveOpacity';
-import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
+import { getDrawnVectorNode } from 'utils/canvas/render/getDrawnVectorNode';
 
 export const drawPdfVectorNodeShape = (
   page: PDFPage,
@@ -18,7 +18,7 @@ export const drawPdfVectorNodeShape = (
   bounds: TDraftRect,
   graphicsStates: Map<number, PDFName>,
 ): void => {
-  const renderedNode = getRenderedVectorNode(node);
+  const renderedNode = getDrawnVectorNode(node);
   const opacity = getEffectiveOpacity(node, nodesById);
 
   drawPdfVectorFills(page, renderedNode, opacity, bounds, graphicsStates);

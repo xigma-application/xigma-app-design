@@ -6,6 +6,6 @@ export type TShapeNode = TEllipseNode | TPolygonNode | TStarNode;
 
 export type TShapeNodeType = NodeType.ellipse | NodeType.polygon | NodeType.star;
 
-export type TShapeStrokeNode = TShapeNode | TVectorNode;
+export type TShapeOrVectorNode = TShapeNode | TVectorNode;
 
-export type TShapeStrokeNodeType = TShapeNodeType | NodeType.vector;
+export type TShapeOrVectorNodeType = TShapeNodeType | NodeType.vector;

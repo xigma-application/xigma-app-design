@@ -6,7 +6,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 import { convertNodeToVector, isConvertibleToVectorNode } from '../vectorNetwork/convertShapeToVector/convertNodeToVector';
 import { getBooleanStrokeShapeVector } from './getBooleanStrokeShapeVector';
 import { getBooleanVectorNode } from './getBooleanVectorNode';
-import { getRenderedVectorNode } from '../render/getRenderedVectorNode';
+import { getDrawnVectorNode } from '../render/getDrawnVectorNode';
 
 const cache = new WeakMap<TSceneNode, TVectorNode>();
 
@@ -15,7 +15,7 @@ const getShapeVector = (node: TSceneNode): TVectorNode | null => {
 
   if (!cached) {
     if (isConvertibleToVectorNode(node)) {
-      const vector = getRenderedVectorNode(convertNodeToVector(node));
+      const vector = getDrawnVectorNode(convertNodeToVector(node));
       cache.set(node, vector);
 
       return vector;
@@ -35,7 +35,7 @@ export const getBooleanOperandVector = (node: TSceneNode, nodesById: Record<stri
       case NodeType.line:
         return getBooleanStrokeShapeVector(node);
       case NodeType.vector:
-        return node.filledFaceKeys.length > 0 ? getRenderedVectorNode(node) : getBooleanStrokeShapeVector(node);
+        return node.filledFaceKeys.length > 0 ? getDrawnVectorNode(node) : getBooleanStrokeShapeVector(node);
       default:
         return getShapeVector(node);
     }

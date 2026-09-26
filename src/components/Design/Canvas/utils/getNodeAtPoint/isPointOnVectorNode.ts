@@ -3,7 +3,7 @@ import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
+import { getDrawnVectorNode } from 'utils/canvas/render/getDrawnVectorNode';
 import { isPointInVectorRegions } from '../isPointInVectorRegions';
 import { isPointNearVectorPath } from '../isPointNearVectorPath';
 
@@ -17,7 +17,6 @@ export const isPointOnVectorNode = (
     return false;
   }
 
-  const bakedNode = getRenderedVectorNode(node);
-
+  const bakedNode = getDrawnVectorNode(node);
   return isPointInVectorRegions(testPoint, bakedNode) || isPointNearVectorPath(testPoint, bakedNode, lineTolerance);
 };

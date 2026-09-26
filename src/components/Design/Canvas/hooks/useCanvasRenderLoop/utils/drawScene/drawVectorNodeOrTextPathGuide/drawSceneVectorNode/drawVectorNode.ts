@@ -5,7 +5,7 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { drawVectorFillGroup } from './drawVectorFillGroup';
 import { drawVectorSolidStroke } from './drawVectorSolidStroke';
-import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
+import { getDrawnVectorNode } from 'utils/canvas/render/getDrawnVectorNode';
 import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 import { getVectorStrokeFillShape } from 'utils/canvas/vector/stroke/getVectorStrokeFillShape';
 import { getVisibleSolidStrokePaints } from 'utils/canvas/vector/stroke/getVisibleSolidStrokePaints';
@@ -15,7 +15,7 @@ import { withPaintsOpacity } from 'utils/design/paint/withPaintsOpacity';
 
 export const drawVectorNode = (context: TDrawSceneContext, node: TVectorNode, opacity = 1): void => {
   const { faceBufferCache } = context.imageContext;
-  const renderedNode = getRenderedVectorNode(node);
+  const renderedNode = getDrawnVectorNode(node);
   const nodeBounds = getVectorNodeBounds(renderedNode);
   const strokeShapes = getVectorStrokeFillShape(renderedNode);
 

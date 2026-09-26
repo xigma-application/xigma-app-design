@@ -8,6 +8,7 @@ import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
 import { getVectorStrokeShapeFaces } from '../vector/stroke/getVectorStrokeShapeFaces';
 import { getVisibleSolidStrokePaints } from '../vector/stroke/getVisibleSolidStrokePaints';
 import { getVectorSnapshotEffectLayers } from '../vector/effects/getVectorSnapshotEffectLayers';
+import { getRoundedVectorNode } from '../vectorNetwork/roundVectorCorners/getRoundedVectorNode';
 import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';
 
 const getFacesByPaint = (
@@ -24,17 +25,18 @@ const getFlattenedSegments = (
 ): TVectorNodeResizeSnapshot['flattenedSegments'] => (strokeFaces.length > 0 ? [] : flattenVectorSegments(node));
 
 export const captureVectorNodeResizeSnapshot = (node: TVectorNode, rotation: number): TVectorNodeResizeSnapshot => {
-  const strokeFaces = getVectorStrokeShapeFaces(node);
-  const facesByPaint = getFacesByPaint(node, strokeFaces);
+  const roundedNode = getRoundedVectorNode(node);
+  const strokeFaces = getVectorStrokeShapeFaces(roundedNode);
+  const facesByPaint = getFacesByPaint(roundedNode, strokeFaces);
   const bounds = getVectorNodeBounds(node);
   const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
 
   return {
     anchorX: null,
     anchorY: null,
-    effectLayers: getVectorSnapshotEffectLayers(node),
+    effectLayers: getVectorSnapshotEffectLayers(roundedNode),
     facesByPaint,
-    flattenedSegments: getFlattenedSegments(node, strokeFaces),
+    flattenedSegments: getFlattenedSegments(roundedNode, strokeFaces),
     pivot: center,
     rotation,
     scaleX: 1,

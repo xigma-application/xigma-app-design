@@ -6,13 +6,16 @@ import { act, renderHook } from '@testing-library/react';
 import { useShapeCornerRadius } from '../useShapeCornerRadius';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, addNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode } from 'types/design/types';
+import { TEllipseNode, TVectorNode } from 'types/design/types';
+
+// utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -164,5 +167,26 @@ describe('useShapeCornerRadius', () => {
     // result
     expect(result.current.isDisabled).toBe(false);
     expect(selectActivePage(store.getState()).nodes[id]).toMatchObject({ cornerRadius: 9 });
+  });
+
+  it('should set one corner radius on every selected vector and show Mixed while they differ', () => {
+    // mock
+    const first = makeSquareVector({ cornerRadius: 4, id: 'cornerVectorA' });
+    const second = makeSquareVector({ id: 'cornerVectorB' });
+
+    store.dispatch(addNodes({ nodes: [first, second], rootIds: [first.id, second.id] }));
+    store.dispatch(setSelection([first.id, second.id]));
+
+    // before
+    const { result } = renderHook(() => useShapeCornerRadius(NodeType.vector), { wrapper });
+
+    // result
+    expect(result.current).toMatchObject({ isDisabled: false, valueLabel: 'Mixed' });
+
+    // action
+    act(() => result.current.onCommit('12'));
+
+    // result
+    expect([first.id, second.id].map((id) => (selectActivePage(store.getState()).nodes[id] as TVectorNode).cornerRadius)).toEqual([12, 12]);
   });
 });

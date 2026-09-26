@@ -160,4 +160,4 @@ and Export. The Paint tool keeps painting single areas; the Fill section changes
 - [x] opacity and blend mode, also inside a see-through frame
 - [x] strokes with colors, gradients and images, position and weight, and selection colors
 - [x] effects
-- [ ] corner radius
+- [x] corner radius
