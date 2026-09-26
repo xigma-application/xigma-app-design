@@ -1067,6 +1067,8 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
   never disables it for a vector (vectors do not take part in auto layout, so there is no ignore toggle either);
   `commitColumnPosition` moves a vector like a group, through `translateNodeSubtree`; `rotateNodesRigidly` uses
   the bounds centre as the pivot. A single vector keeps the alignment row disabled (no box to align to its parent).
+- `ColumnSpacing` sits under `VectorDimensions` and shows for several vectors (it moves them through
+  `translateNodeSubtree`).
 - `VectorDimensions` replaces `ColumnDimensions` (no sizing modes or min/max): W/H rounded to two decimals,
   Mixed across vectors, and an aspect-ratio lock stored as `TVectorNode.lockedAspectRatio`.
   `resizeVectorToDimensions` scales through the canvas `resizeNode` around the top-left of the bounds, leaving an
@@ -1106,8 +1108,14 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
 - Effects: `Common/EffectsSection` takes vectors (`useEffectsSection` filters with `isStyledOrVectorNode`, which
   also replaced the identical `isOpacityPanelNode` and `isStrokeSettingsNode`). Rendering is described in
   `canvas-rendering-pipeline.md` ("Vector effects").
-- Edit mode: `PanelProperties` routes a single selected vector with `vectorEditingNodeIds.length === 1` to
-  `Vector/VectorEdit/VectorEdit.tsx` ahead of `Vector`. It is one `Section` titled "Vector" (13px title span, no
+- Edit mode: `PanelProperties` routes a selection of vectors while any vector is in vector edit mode to
+  `Vector/VectorEdit/VectorEdit.tsx` ahead of `Vector`. With several edited vectors it shows `PanelHeader`
+  "N selected" (no buttons), the same section without a title, Layout (`VectorDimensions` and `ColumnSpacing`), Fill,
+  Stroke and Selection colors. Every hook works on `useSelectedVectorPoints`, one entry per edited vector
+  (`getSelectedVectorPointsEntries`: handles count only while no vector has a selected point); Position moves all of
+  them by one delta (`commitVectorSelectionPosition`), groups carry their `nodeId`, and Corner radius targets the
+  vectors with selected points or, without any, every vector as a whole (`getVectorCornerRadiusTargets`).
+  For one vector: It is one `Section` titled "Vector" (13px title span, no
   header buttons) holding `VectorEditAlignment` (the alignment buttons plus the distribute trigger),
   `VectorEditPosition` (X/Y), `VectorEditMirroring` (`ToggleButtonGroup`, now with `disabled`, over
   `MIRRORING_OPTIONS`: No mirroring / Mirror angle / Mirror angle and length = the vertex handle modes

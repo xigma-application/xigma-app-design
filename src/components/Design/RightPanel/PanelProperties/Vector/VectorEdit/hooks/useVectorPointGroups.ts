@@ -8,10 +8,13 @@ import { TVectorPointGroup } from '../types';
 // utils
 import { getVectorPointGroups } from '../utils/getVectorPointGroups';
 
-export type TVectorPointGroups = { groups: TVectorPointGroup[]; node: TVectorNode | undefined };
+export type TVectorPointGroups = { groups: TVectorPointGroup[]; nodes: TVectorNode[] };
 
 export const useVectorPointGroups = (): TVectorPointGroups => {
-  const { node, vertexIds } = useSelectedVectorPoints();
+  const entries = useSelectedVectorPoints();
 
-  return { groups: node ? getVectorPointGroups(node, vertexIds) : [], node };
+  return {
+    groups: entries.flatMap(({ node, vertexIds }) => getVectorPointGroups(node, vertexIds)),
+    nodes: entries.map(({ node }) => node),
+  };
 };

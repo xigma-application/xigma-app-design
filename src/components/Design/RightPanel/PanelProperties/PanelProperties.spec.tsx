@@ -507,6 +507,30 @@ describe('PanelProperties behaviors', () => {
     expect(screen.getByText('Vector path')).toBeInTheDocument();
   });
 
+  it('should show the vector edit panel for several selected vectors in vector edit mode', () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [makeSquareVector({ id: 'routing-edit-a' }), makeSquareVector({ id: 'routing-edit-b' })],
+        rootIds: ['routing-edit-a', 'routing-edit-b'],
+      }),
+    );
+    store.dispatch(setSelection(['routing-edit-a', 'routing-edit-b']));
+    store.dispatch(setVectorEditingNodeIds(['routing-edit-a', 'routing-edit-b']));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
+    expect(screen.getByText('Mirroring')).toBeInTheDocument();
+
+    // cleanup
+    act(() => {
+      store.dispatch(setVectorEditingNodeIds([]));
+    });
+  });
+
   it('should show the Line panel with a stroke and no fill section while a line is selected', () => {
     // mock
     store.dispatch(

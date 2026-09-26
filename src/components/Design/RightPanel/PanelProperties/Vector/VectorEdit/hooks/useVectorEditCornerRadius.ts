@@ -15,6 +15,7 @@ import { useAppDispatch } from 'store';
 // utils
 import { getVectorCornerRadii } from 'utils/canvas/vectorNetwork/roundVectorCorners/getVectorCornerRadii';
 import { getVectorCornerRadiusChanges } from '../utils/getVectorCornerRadiusChanges';
+import { getVectorCornerRadiusTargets } from '../utils/getVectorCornerRadiusTargets';
 import { parseArcValue } from '../../../Common/AppearanceSection/Arc/hooks/utils/parseArcValue';
 
 export type TUseVectorEditCornerRadiusResult = {
@@ -28,14 +29,15 @@ export type TUseVectorEditCornerRadiusResult = {
 export const useVectorEditCornerRadius = (): TUseVectorEditCornerRadiusResult => {
   const dispatch = useAppDispatch();
   const history = useVectorPointsHistory();
-  const { node, pointIds } = useSelectedVectorPoints();
-  const radii = node ? getVectorCornerRadii(node, pointIds) : [0];
-  const [value] = radii;
+  const targets = getVectorCornerRadiusTargets(useSelectedVectorPoints());
+  const radii = targets.flatMap(({ node, pointIds }) => getVectorCornerRadii(node, pointIds));
+  const value = radii[0] ?? 0;
   const isMixed = radii.some((radius) => radius !== value);
 
-  const commit = (getValue: TFunc<[number], number>): void => {
-    dispatch(updateNode({ changes: getVectorCornerRadiusChanges(node!, pointIds, getValue), id: node!.id }));
-  };
+  const commit = (getValue: TFunc<[number], number>): void =>
+    targets.forEach(({ node, pointIds }) => {
+      dispatch(updateNode({ changes: getVectorCornerRadiusChanges(node, pointIds, getValue), id: node.id }));
+    });
 
   const handleCommit = (raw: string): void => {
     const parsed = parseArcValue(raw);
@@ -46,7 +48,7 @@ export const useVectorEditCornerRadius = (): TUseVectorEditCornerRadiusResult =>
   };
 
   return {
-    iconName: pointIds.length > 0 ? 'BorderRadiusT' : 'Corners',
+    iconName: targets.some(({ pointIds }) => pointIds.length > 0) ? 'BorderRadiusT' : 'Corners',
     onCommit: handleCommit,
     onScrub: (next): void => commit((radius) => radius + next - value),
     value,

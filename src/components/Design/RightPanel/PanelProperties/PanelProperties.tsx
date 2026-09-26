@@ -25,12 +25,7 @@ import { useIsEditingImageCrop } from './Common/hooks/useIsEditingImageCrop';
 import { useIsNoSelection } from '../hooks/useIsNoSelection';
 
 // store
-import {
-  selectActiveTool,
-  selectIsGridSettingsPanelOpen,
-  selectSelectedNodes,
-  selectVectorEditingNodeIds,
-} from 'store/design/selectors';
+import { selectActiveTool, selectIsGridSettingsPanelOpen, selectSelectedNodes, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
@@ -57,7 +52,6 @@ const PanelProperties: FC = () => {
   const isEveryPolygonSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.polygon);
   const isEveryStarSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.star);
   const isEveryVectorSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.vector);
-  const isEditingSingleVector = selectedNode?.type === NodeType.vector && vectorEditingNodeIds.length === 1;
   const isEverySliceSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.slice);
 
   useCloseGridSettingsPanelOnReselect(selectedNodes.length > 0, isGridSettingsPanelOpen);
@@ -91,7 +85,7 @@ const PanelProperties: FC = () => {
       return <Polygon />;
     case isEveryStarSelected:
       return <Star />;
-    case isEditingSingleVector:
+    case isEveryVectorSelected && vectorEditingNodeIds.length > 0:
       return <VectorEdit />;
     case isEveryVectorSelected:
       return <Vector />;

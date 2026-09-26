@@ -143,4 +143,34 @@ describe('useVectorEditCornerRadius', () => {
     // result
     expect(readVector().cornerRadiusByVertexId).toEqual({ a1: 8 });
   });
+
+  it('should show Mixed across edited vectors with different radii and set one radius on all of them', () => {
+    // mock
+    editVector({ cornerRadius: 3 });
+    store.dispatch(
+      addNodes({
+        nodes: [
+          makeNetworkVector({ c1: { x: 200, y: 0 }, c2: { x: 200, y: 50 } }, [['c1', 'c2']], { cornerRadius: 9, id: 'second-vector' }),
+        ],
+        rootIds: ['second-vector'],
+      }),
+    );
+    store.dispatch(setSelection(['edit-vector', 'second-vector']));
+    store.dispatch(setVectorEditingNodeIds(['edit-vector', 'second-vector']));
+
+    // before
+    const { result } = renderHook(() => useVectorEditCornerRadius(), { wrapper });
+
+    // result
+    expect(result.current.valueLabel).toBe(MIXED_LABEL);
+
+    // action
+    act(() => {
+      result.current.onCommit('5');
+    });
+
+    // result
+    expect(readVector().cornerRadius).toBe(5);
+    expect((selectActivePage(store.getState()).nodes['second-vector'] as TVectorNode).cornerRadius).toBe(5);
+  });
 });

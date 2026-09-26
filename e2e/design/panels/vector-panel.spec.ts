@@ -604,7 +604,13 @@ test('with points from two pieces of a vector selected, Align left moves each pi
     const sides = (prefix: string): [string, Record<string, unknown>][] =>
       [0, 1, 2, 3].map((index) => [
         `${prefix}s${index}`,
-        { endId: `${prefix}${(index + 1) % 4}`, id: `${prefix}s${index}`, startId: `${prefix}${index}`, tangentEnd: null, tangentStart: null },
+        {
+          endId: `${prefix}${(index + 1) % 4}`,
+          id: `${prefix}s${index}`,
+          startId: `${prefix}${index}`,
+          tangentEnd: null,
+          tangentStart: null,
+        },
       ]);
 
     store.dispatch(
@@ -726,4 +732,86 @@ test('a handle selected on the canvas in vector edit mode shows and moves its en
       };
     })
     .toEqual({ radius: { a: 12 }, tangent: { x: 80, y: -80 } });
+});
+
+test('several vectors in vector edit mode show N selected, Layout with spacing and Selection colors, and align and round the selected points across all of them', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-panel-edit-several');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — two closed squares side by side with a 100 gap, both selected
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { addNodes, setSelection } = await import('/src/store/design/slice.ts');
+    const square = (id: string, x: number, y: number): Record<string, unknown> => ({
+      defaultFill: null,
+      filledFaceKeys: [],
+      id,
+      name: id,
+      parentId: null,
+      rotation: 0,
+      segments: Object.fromEntries(
+        [0, 1, 2, 3].map((index) => [
+          `${id}s${index}`,
+          { endId: `${id}${(index + 1) % 4}`, id: `${id}s${index}`, startId: `${id}${index}`, tangentEnd: null, tangentStart: null },
+        ]),
+      ),
+      strokeWidth: 1,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: 'vector',
+      vertexHandleModes: {},
+      vertices: Object.fromEntries(
+        [
+          [0, 0],
+          [100, 0],
+          [100, 100],
+          [0, 100],
+        ].map(([dx, dy], index) => [`${id}${index}`, { id: `${id}${index}`, x: x + dx, y: y + dy }]),
+      ),
+    });
+
+    store.dispatch(addNodes({ nodes: [square('left', 800, 300), square('right', 1000, 400)] as never, rootIds: ['left', 'right'] }));
+    store.dispatch(setSelection(['left', 'right']));
+  });
+
+  // action
+  await page.locator('[data-test-component-header="vector"]').getByLabel('More actions').click();
+  await page.getByText('Edit objects', { exact: true }).click();
+
+  // result
+  await expect(page.getByText('2 selected', { exact: true })).toBeVisible();
+  await expect(page.locator('[data-test-section="layout"]').getByText('Spacing')).toBeVisible();
+  await expect(page.locator('[data-test-section="selectionColors"]')).toBeVisible();
+  await expect(page.locator('[data-test-section="effects"]')).toHaveCount(0);
+
+  // action — select every point of both vectors and align them left, then round every corner
+  const vectorEdit = page.locator('[data-test-section="vector-edit"]').last();
+
+  await designPage.canvas.hover();
+  await page.keyboard.press('Control+a');
+  await vectorEdit.getByRole('button', { name: 'Align left' }).click();
+
+  const cornerRadius = vectorEdit.getByLabel('Corner radius');
+
+  await cornerRadius.fill('10');
+  await cornerRadius.press('Tab');
+
+  // result
+  await expect
+    .poll(async () =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { activePageId, pages } = store.getState().design;
+        const nodes = pages[activePageId].nodes as unknown as Record<
+          string,
+          { cornerRadiusByVertexId?: Record<string, number>; vertices: Record<string, { x: number }> }
+        >;
+
+        return [nodes.right.vertices.right0.x, nodes.left.cornerRadiusByVertexId?.left2, nodes.right.cornerRadiusByVertexId?.right0];
+      }),
+    )
+    .toEqual([800, 10, 10]);
 });

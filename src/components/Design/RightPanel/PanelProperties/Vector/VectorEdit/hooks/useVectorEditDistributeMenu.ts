@@ -26,7 +26,7 @@ import { translateVectorPointGroups } from '../utils/translateVectorPointGroups'
 export const useVectorEditDistributeMenu = (): TUseDistributeMenuResult => {
   const dispatch = useAppDispatch();
   const history = useVectorPointsHistory();
-  const { groups, node } = useVectorPointGroups();
+  const { groups, nodes } = useVectorPointGroups();
   const canDistribute = groups.length >= DISTRIBUTE_MIN_CHILDREN;
   const canTidyUp = isVectorPointGroupsTidyable(groups);
   const tidyUpKind = canTidyUp ? getTidyUpKind(groups.map(({ rect }) => rect)) : undefined;
@@ -35,7 +35,7 @@ export const useVectorEditDistributeMenu = (): TUseDistributeMenuResult => {
     history.run(() =>
       translateVectorPointGroups(
         dispatch,
-        node!,
+        nodes,
         groups,
         action === 'tidyUp' ? getTidyUpVectorPointGroupDeltas(groups) : getDistributedVectorPointGroupDeltas(groups, action),
       ),

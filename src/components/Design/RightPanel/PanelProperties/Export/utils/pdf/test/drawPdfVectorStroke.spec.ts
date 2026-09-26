@@ -118,7 +118,12 @@ describe('drawPdfVectorStroke', () => {
     drawPdfVectorStroke(page, node({ strokes: [gradient] }), 1, bounds, states);
 
     // result
-    expect(drawPdfPaintPolygonsMock).toHaveBeenCalledWith(page, [gradient], polygons, 1, bounds, states, { height: 0, width: 0, x: 0, y: 0 });
+    expect(drawPdfPaintPolygonsMock).toHaveBeenCalledWith(page, [gradient], polygons, 1, bounds, states, {
+      height: 0,
+      width: 0,
+      x: 0,
+      y: 0,
+    });
     expect(drawPdfPolygonsMock).not.toHaveBeenCalled();
   });
 });

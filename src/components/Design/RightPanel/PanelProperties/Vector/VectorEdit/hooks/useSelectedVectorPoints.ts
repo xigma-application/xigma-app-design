@@ -4,30 +4,17 @@ import { useAppSelector } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TVectorHandleHover } from 'types/design/canvas/types';
+import { TSelectedVectorPointsEntry } from '../types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { getSelectedVectorHandles } from '../utils/getSelectedVectorHandles';
-import { getSelectedVectorPointIds } from '../utils/getSelectedVectorPointIds';
-import { getVectorHandleVertexId } from '../utils/getVectorHandleVertexId';
+import { getSelectedVectorPointsEntries } from '../utils/getSelectedVectorPointsEntries';
 
-export type TSelectedVectorPoints = {
-  handles: TVectorHandleHover[];
-  node: TVectorNode | undefined;
-  pointIds: string[];
-  vertexIds: string[];
-};
-
-export const useSelectedVectorPoints = (): TSelectedVectorPoints => {
+export const useSelectedVectorPoints = (): TSelectedVectorPointsEntry[] => {
   const nodes = useAppSelector(selectNodes);
-  const [nodeId] = useAppSelector(selectVectorEditingNodeIds);
-  const selection = useAppSelector(selectVectorPointSelection);
-  const editingNode = nodes[nodeId];
-  const node = editingNode?.type === NodeType.vector ? editingNode : undefined;
-  const vertexIds = node ? getSelectedVectorPointIds(node, selection) : [];
-  const handles = node && vertexIds.length === 0 ? getSelectedVectorHandles(node, selection) : [];
-  const pointIds = vertexIds.length > 0 ? vertexIds : [...new Set(handles.map((handle) => getVectorHandleVertexId(node!, handle)))];
+  const editingNodes = useAppSelector(selectVectorEditingNodeIds)
+    .map((nodeId) => nodes[nodeId])
+    .filter((node): node is TVectorNode => node?.type === NodeType.vector);
 
-  return { handles, node, pointIds, vertexIds };
+  return getSelectedVectorPointsEntries(editingNodes, useAppSelector(selectVectorPointSelection));
 };

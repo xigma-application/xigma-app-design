@@ -9,18 +9,24 @@ import { TVectorPointGroup } from '../types';
 
 export const translateVectorPointGroups = (
   dispatch: AppDispatch,
-  node: TVectorNode,
+  nodes: TVectorNode[],
   groups: TVectorPointGroup[],
   deltas: TPoint[],
-): void => {
-  const vertices = Object.fromEntries(
-    groups.flatMap(({ vertexIds }, index) =>
-      vertexIds.map((vertexId) => {
-        const vertex = node.vertices[vertexId];
-        return [vertexId, { ...vertex, x: vertex.x + deltas[index].x, y: vertex.y + deltas[index].y }];
-      }),
-    ),
-  );
+): void =>
+  nodes.forEach((node) => {
+    const vertices = Object.fromEntries(
+      groups.flatMap(({ nodeId, vertexIds }, index) =>
+        nodeId === node.id
+          ? vertexIds.map((vertexId) => {
+              const vertex = node.vertices[vertexId];
 
-  dispatch(updateNode({ changes: { vertices: { ...node.vertices, ...vertices } }, id: node.id }));
-};
+              return [vertexId, { ...vertex, x: vertex.x + deltas[index].x, y: vertex.y + deltas[index].y }];
+            })
+          : [],
+      ),
+    );
+
+    if (Object.keys(vertices).length > 0) {
+      dispatch(updateNode({ changes: { vertices: { ...node.vertices, ...vertices } }, id: node.id }));
+    }
+  });

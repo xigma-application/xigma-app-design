@@ -21,10 +21,10 @@ export type TUseVectorEditAlignmentResult = {
 export const useVectorEditAlignment = (): TUseVectorEditAlignmentResult => {
   const dispatch = useAppDispatch();
   const history = useVectorPointsHistory();
-  const { groups, node } = useVectorPointGroups();
+  const { groups, nodes } = useVectorPointGroups();
 
   const align = (horizontal: AlignmentHorizontal | undefined, vertical: AlignmentVertical | undefined): void =>
-    history.run(() => translateVectorPointGroups(dispatch, node!, groups, getAlignedVectorPointGroupDeltas(groups, horizontal, vertical)));
+    history.run(() => translateVectorPointGroups(dispatch, nodes, groups, getAlignedVectorPointGroupDeltas(groups, horizontal, vertical)));
 
   return {
     disabled: groups.length < 2,

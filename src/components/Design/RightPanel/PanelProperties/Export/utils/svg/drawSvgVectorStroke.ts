@@ -32,12 +32,18 @@ export const drawSvgVectorStroke = async (
     } else if (shapes) {
       shapes.forEach(({ fillRule, polygons }) =>
         solidPaints.forEach((paint) =>
-          drawSvgPolygons(elements, polygons, paint.color, (opacity * paint.opacity) / 100, bounds, fillRule === 'nonZero' ? 'nonzero' : 'evenodd'),
+          drawSvgPolygons(
+            elements,
+            polygons,
+            paint.color,
+            (opacity * paint.opacity) / 100,
+            bounds,
+            fillRule === 'nonZero' ? 'nonzero' : 'evenodd',
+          ),
         ),
       );
     } else {
       const triangles = getStrokeTrianglePolygons(getVectorNodeThickStrokeVertices(renderedNode, renderedNode.strokeWidth / 2));
-
       solidPaints.forEach((paint) => drawSvgPolygons(elements, triangles, paint.color, (opacity * paint.opacity) / 100, bounds, 'nonzero'));
     }
   }

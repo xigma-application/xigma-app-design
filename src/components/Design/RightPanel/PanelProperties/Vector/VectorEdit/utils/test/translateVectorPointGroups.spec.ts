@@ -34,7 +34,7 @@ const twoSquares = makeNetworkVector(
 );
 
 describe('translateVectorPointGroups', () => {
-  it('should move the points of each group by the delta of that group and keep the other points', () => {
+  it('should move the points of each group by the delta of that group and keep the other points and vectors', () => {
     // mock
     const vector = { ...twoSquares, id: 'groups-vector' };
 
@@ -43,10 +43,10 @@ describe('translateVectorPointGroups', () => {
     // before
     translateVectorPointGroups(
       store.dispatch,
-      vector,
+      [vector, { ...vector, id: 'other-vector' }],
       [
-        { rect: { height: 0, width: 0, x: 0, y: 0 }, vertexIds: ['a1'] },
-        { rect: { height: 0, width: 0, x: 30, y: 20 }, vertexIds: ['b1', 'b2'] },
+        { nodeId: 'groups-vector', rect: { height: 0, width: 0, x: 0, y: 0 }, vertexIds: ['a1'] },
+        { nodeId: 'groups-vector', rect: { height: 0, width: 0, x: 30, y: 20 }, vertexIds: ['b1', 'b2'] },
       ],
       [
         { x: 1, y: 2 },
@@ -61,5 +61,6 @@ describe('translateVectorPointGroups', () => {
     expect(vertices.b1).toEqual({ id: 'b1', x: 0, y: 20 });
     expect(vertices.b2).toEqual({ id: 'b2', x: 20, y: 20 });
     expect(vertices.b3).toEqual({ id: 'b3', x: 50, y: 40 });
+    expect(selectActivePage(store.getState()).nodes['other-vector']).toBeUndefined();
   });
 });

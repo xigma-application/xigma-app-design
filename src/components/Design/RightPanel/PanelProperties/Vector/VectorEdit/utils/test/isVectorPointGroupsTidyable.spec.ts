@@ -4,7 +4,7 @@ import { TVectorPointGroup } from '../../types';
 // utils
 import { isVectorPointGroupsTidyable } from '../isVectorPointGroupsTidyable';
 
-const group = (x: number, y: number): TVectorPointGroup => ({ rect: { height: 10, width: 10, x, y }, vertexIds: [`${x}`] });
+const group = (x: number, y: number): TVectorPointGroup => ({ nodeId: 'n', rect: { height: 10, width: 10, x, y }, vertexIds: [`${x}`] });
 
 describe('isVectorPointGroupsTidyable', () => {
   it('should be true for groups tidy up would move', () => {

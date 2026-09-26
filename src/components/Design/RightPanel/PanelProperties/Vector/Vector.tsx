@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import AppearanceSection from '../Common/AppearanceSection/AppearanceSection';
+import ColumnSpacing from '../Common/ColumnSpacing/ColumnSpacing';
 import EffectsSection from '../Common/EffectsSection/EffectsSection';
 import Export from '../Export/Export';
 import FillSection from '../Common/FillSection/FillSection';
@@ -28,6 +29,7 @@ const Vector: FC = () => {
       <PositionSection />
       <UITools.Section e2eValue="layout" label={t(`${translationNameSpace}.layoutSection.label`)}>
         <VectorDimensions />
+        <ColumnSpacing />
       </UITools.Section>
       <AppearanceSection shapeCornerRadiusType={NodeType.vector} withCornerRadius={false} />
       <FillSection />

@@ -65,4 +65,23 @@ describe('VectorEdit behaviors', () => {
     expect(screen.queryByText('Export')).not.toBeInTheDocument();
     expect(screen.queryByText('Effects')).not.toBeInTheDocument();
   });
+
+  it('should show N selected, the untitled point section, Layout with spacing and Selection colors for several edited vectors', () => {
+    // mock
+    store.dispatch(addNodes({ nodes: [makeSquareVector({ id: 'edit-panel-second' })], rootIds: ['edit-panel-second'] }));
+    store.dispatch(setSelection(['edit-panel-vector', 'edit-panel-second']));
+    store.dispatch(setVectorEditingNodeIds(['edit-panel-vector', 'edit-panel-second']));
+
+    // before
+    renderVectorEdit();
+
+    // result
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
+    expect(screen.queryByText('Vector')).not.toBeInTheDocument();
+    expect(screen.getByText('Mirroring')).toBeInTheDocument();
+    expect(screen.getByText('Layout')).toBeInTheDocument();
+    expect(screen.getByText('Selection colors')).toBeInTheDocument();
+    expect(screen.queryByText('Effects')).not.toBeInTheDocument();
+    expect(screen.queryByText('Export')).not.toBeInTheDocument();
+  });
 });

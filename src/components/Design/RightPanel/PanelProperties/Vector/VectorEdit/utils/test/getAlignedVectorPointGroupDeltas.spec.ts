@@ -6,8 +6,8 @@ import { TVectorPointGroup } from '../../types';
 import { getAlignedVectorPointGroupDeltas } from '../getAlignedVectorPointGroupDeltas';
 
 const groups: TVectorPointGroup[] = [
-  { rect: { height: 10, width: 10, x: 0, y: 0 }, vertexIds: ['a'] },
-  { rect: { height: 20, width: 20, x: 30, y: 20 }, vertexIds: ['b'] },
+  { nodeId: 'n', rect: { height: 10, width: 10, x: 0, y: 0 }, vertexIds: ['a'] },
+  { nodeId: 'n', rect: { height: 20, width: 20, x: 30, y: 20 }, vertexIds: ['b'] },
 ];
 
 describe('getAlignedVectorPointGroupDeltas', () => {

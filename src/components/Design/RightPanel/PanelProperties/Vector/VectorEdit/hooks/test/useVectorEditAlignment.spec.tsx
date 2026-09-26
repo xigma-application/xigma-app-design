@@ -108,4 +108,33 @@ describe('useVectorEditAlignment', () => {
     expect(readVector().vertices.b1).toEqual({ id: 'b1', x: 30, y: 0 });
     expect(readVector().vertices.b3).toEqual({ id: 'b3', x: 50, y: 40 });
   });
+
+  it('should align pieces from different edited vectors', () => {
+    // mock
+    editVector();
+    store.dispatch(
+      addNodes({
+        nodes: [
+          makeNetworkVector({ c1: { x: 200, y: 0 }, c2: { x: 200, y: 50 } }, [['c1', 'c2']], { cornerRadius: 9, id: 'second-vector' }),
+        ],
+        rootIds: ['second-vector'],
+      }),
+    );
+    store.dispatch(setSelection(['edit-vector', 'second-vector']));
+    store.dispatch(setVectorEditingNodeIds(['edit-vector', 'second-vector']));
+
+    // before
+    const { result } = renderHook(() => useVectorEditAlignment(), { wrapper });
+
+    selectPoints(['a1', 'a2', 'c1', 'c2']);
+
+    // action
+    act(() => {
+      result.current.onSelectHorizontal(AlignmentHorizontal.left);
+    });
+
+    // result
+    expect((selectActivePage(store.getState()).nodes['second-vector'] as TVectorNode).vertices.c1).toEqual({ id: 'c1', x: 0, y: 0 });
+    expect(readVector().vertices.a1).toEqual({ id: 'a1', x: 0, y: 0 });
+  });
 });

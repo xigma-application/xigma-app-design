@@ -65,7 +65,7 @@ describe('useVectorPointGroups', () => {
     const { result } = renderHook(() => useVectorPointGroups(), { wrapper });
 
     // result
-    expect(result.current).toEqual({ groups: [], node: undefined });
+    expect(result.current).toEqual({ groups: [], nodes: [] });
   });
 
   it('should group the selected points by their connected piece', () => {

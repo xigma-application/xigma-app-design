@@ -7,8 +7,8 @@ import { store } from 'store';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { commitVectorHandlesPosition } from '../commitVectorHandlesPosition';
 import { makeNetworkVector } from 'utils/canvas/vector/stroke/test/fixtures';
+import { translateVectorHandles } from '../translateVectorHandles';
 
 const curve = makeNetworkVector({ a: { x: 0, y: 0 }, b: { x: 100, y: 0 }, c: { x: 100, y: 100 } }, [
   ['a', 'b'],
@@ -19,16 +19,18 @@ curve.segments.s0 = { ...curve.segments.s0, tangentEnd: { x: -20, y: 10 }, tange
 
 const readSegments = (id: string): TVectorNode['segments'] => (selectActivePage(store.getState()).nodes[id] as TVectorNode).segments;
 
-describe('commitVectorHandlesPosition', () => {
-  it('should move the end of the handle to the new value', () => {
+describe('translateVectorHandles', () => {
+  it('should move the end of the handle by the delta', () => {
     // mock
-    store.dispatch(addNodes({ nodes: [{ ...curve, id: 'handle-vector' }], rootIds: ['handle-vector'] }));
+    const vector = { ...curve, id: 'handle-vector' };
+
+    store.dispatch(addNodes({ nodes: [vector], rootIds: [vector.id] }));
 
     // before
-    commitVectorHandlesPosition(store.dispatch, 'handle-vector', [{ end: 'start', segmentId: 's0' }], 'x', 50);
+    translateVectorHandles(store.dispatch, vector, [{ end: 'start', segmentId: 's0' }], { x: 20, y: 0 });
 
     // result
-    expect(readSegments('handle-vector').s0.tangentStart).toEqual({ x: 50, y: -40 });
+    expect(readSegments(vector.id).s0.tangentStart).toEqual({ x: 50, y: -40 });
   });
 
   it('should turn the opposite handle of a point with mirrored handles', () => {
@@ -40,13 +42,13 @@ describe('commitVectorHandlesPosition', () => {
       vertexHandleModes: { b: 'symmetric' as const },
     };
 
-    store.dispatch(addNodes({ nodes: [mirrored], rootIds: ['mirrored-vector'] }));
+    store.dispatch(addNodes({ nodes: [mirrored], rootIds: [mirrored.id] }));
 
     // before
-    commitVectorHandlesPosition(store.dispatch, 'mirrored-vector', [{ end: 'end', segmentId: 's0' }], 'y', 30);
+    translateVectorHandles(store.dispatch, mirrored, [{ end: 'end', segmentId: 's0' }], { x: 0, y: 20 });
 
     // result
-    const segments = readSegments('mirrored-vector');
+    const segments = readSegments(mirrored.id);
 
     expect(segments.s0.tangentEnd).toEqual({ x: -20, y: 30 });
     expect(segments.s1.tangentStart?.x).toBeCloseTo(20);

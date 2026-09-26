@@ -65,10 +65,10 @@ describe('useSelectedVectorPoints', () => {
     const { result } = renderHook(() => useSelectedVectorPoints(), { wrapper });
 
     // result
-    expect(result.current).toEqual({ handles: [], node: undefined, pointIds: [], vertexIds: [] });
+    expect(result.current).toEqual([]);
   });
 
-  it('should return the edited vector and its selected points with the ends of its selected segments', () => {
+  it('should return one entry per edited vector with its selected points', () => {
     // mock
     editVector();
 
@@ -79,31 +79,22 @@ describe('useSelectedVectorPoints', () => {
     selectPoints(['b1'], ['s0']);
 
     // result
-    expect(result.current.node?.id).toBe('edit-vector');
-    expect(result.current.vertexIds).toEqual(['b1', 'a1', 'a2']);
+    expect(result.current.map(({ node, vertexIds }) => [node.id, vertexIds])).toEqual([['edit-vector', ['b1', 'a1', 'a2']]]);
   });
 
-  it('should return the selected handles and the points they come out of while no point is selected', () => {
+  it('should skip an edited id that is not a vector', () => {
     // mock
-    editVector({
-      segments: { ...twoSquares.segments, s0: { ...twoSquares.segments.s0, tangentEnd: { x: -2, y: 6 }, tangentStart: { x: 3, y: -4 } } },
-    });
+    editVector();
 
     // before
     const { result } = renderHook(() => useSelectedVectorPoints(), { wrapper });
 
     // action
     act(() => {
-      store.dispatch(setVectorPointSelection({ handles: [{ end: 'start', segmentId: 's0' }], segmentIds: [], vertexIds: [] }));
+      store.dispatch(setVectorEditingNodeIds(['edit-vector', 'missing']));
     });
 
     // result
-    expect(result.current).toMatchObject({ handles: [{ end: 'start', segmentId: 's0' }], pointIds: ['a1'], vertexIds: [] });
-
-    // action
-    selectPoints(['b1']);
-
-    // result
-    expect(result.current).toMatchObject({ handles: [], pointIds: ['b1'], vertexIds: ['b1'] });
+    expect(result.current.map(({ node }) => node.id)).toEqual(['edit-vector']);
   });
 });

@@ -5,9 +5,9 @@ import { TVectorPointGroup } from '../../types';
 import { getDistributedVectorPointGroupDeltas } from '../getDistributedVectorPointGroupDeltas';
 
 const groups: TVectorPointGroup[] = [
-  { rect: { height: 10, width: 10, x: 100, y: 0 }, vertexIds: ['c'] },
-  { rect: { height: 10, width: 10, x: 0, y: 0 }, vertexIds: ['a'] },
-  { rect: { height: 10, width: 10, x: 20, y: 50 }, vertexIds: ['b'] },
+  { nodeId: 'n', rect: { height: 10, width: 10, x: 100, y: 0 }, vertexIds: ['c'] },
+  { nodeId: 'n', rect: { height: 10, width: 10, x: 0, y: 0 }, vertexIds: ['a'] },
+  { nodeId: 'n', rect: { height: 10, width: 10, x: 20, y: 50 }, vertexIds: ['b'] },
 ];
 
 describe('getDistributedVectorPointGroupDeltas', () => {

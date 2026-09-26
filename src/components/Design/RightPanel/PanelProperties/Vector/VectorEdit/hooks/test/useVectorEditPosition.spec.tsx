@@ -160,4 +160,36 @@ describe('useVectorEditPosition', () => {
     // result
     expect(readVector().segments.s0.tangentStart).toEqual({ x: 13, y: -4 });
   });
+
+  it('should show and move the selected points of every edited vector together', () => {
+    // mock
+    editVector();
+    store.dispatch(
+      addNodes({
+        nodes: [
+          makeNetworkVector({ c1: { x: 200, y: 0 }, c2: { x: 200, y: 50 } }, [['c1', 'c2']], { cornerRadius: 9, id: 'second-vector' }),
+        ],
+        rootIds: ['second-vector'],
+      }),
+    );
+    store.dispatch(setSelection(['edit-vector', 'second-vector']));
+    store.dispatch(setVectorEditingNodeIds(['edit-vector', 'second-vector']));
+
+    // before
+    const { result } = renderHook(() => useVectorEditPosition(), { wrapper });
+
+    selectPoints(['b1', 'c1']);
+
+    // result
+    expect(result.current).toMatchObject({ displayX: 30, displayY: 0 });
+
+    // action
+    act(() => {
+      result.current.onScrubY(10);
+    });
+
+    // result
+    expect(readVector().vertices.b1).toEqual({ id: 'b1', x: 30, y: 30 });
+    expect((selectActivePage(store.getState()).nodes['second-vector'] as TVectorNode).vertices.c1).toEqual({ id: 'c1', x: 200, y: 10 });
+  });
 });

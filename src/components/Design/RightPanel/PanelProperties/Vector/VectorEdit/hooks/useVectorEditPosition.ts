@@ -10,8 +10,7 @@ import { selectNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // utils
-import { commitVectorHandlesPosition } from '../utils/commitVectorHandlesPosition';
-import { commitVectorPointsPosition } from '../utils/commitVectorPointsPosition';
+import { commitVectorSelectionPosition } from '../utils/commitVectorSelectionPosition';
 import { getSelectedVectorPositionPoints } from '../utils/getSelectedVectorPositionPoints';
 import { getVectorPointsPosition } from '../utils/getVectorPointsPosition';
 
@@ -33,9 +32,9 @@ export const useVectorEditPosition = (): TUseVectorEditPositionResult => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const history = useVectorPointsHistory();
-  const { handles, node, vertexIds } = useSelectedVectorPoints();
-  const points = node ? getSelectedVectorPositionPoints(node, vertexIds, handles) : [];
-  const position = points.length > 0 ? getVectorPointsPosition(node!, points, nodes) : undefined;
+  const entries = useSelectedVectorPoints().filter(({ handles, vertexIds }) => vertexIds.length + handles.length > 0);
+  const points = entries.flatMap(({ handles, node, vertexIds }) => getSelectedVectorPositionPoints(node, vertexIds, handles));
+  const position = entries.length > 0 ? getVectorPointsPosition(entries[0].node, points, nodes) : undefined;
   const x = position ? Math.round(position.x * 100) / 100 : 0;
   const y = position ? Math.round(position.y * 100) / 100 : 0;
   const displayX = position ? x : '';
@@ -43,13 +42,8 @@ export const useVectorEditPosition = (): TUseVectorEditPositionResult => {
 
   const commit =
     (axis: 'x' | 'y'): TFunc<[number]> =>
-    (value): void => {
-      if (vertexIds.length > 0) {
-        commitVectorPointsPosition(dispatch, node!.id, vertexIds, axis, value);
-      } else {
-        commitVectorHandlesPosition(dispatch, node!.id, handles, axis, value);
-      }
-    };
+    (value): void =>
+      commitVectorSelectionPosition(dispatch, entries, axis, value);
 
   return {
     disabled: !position,

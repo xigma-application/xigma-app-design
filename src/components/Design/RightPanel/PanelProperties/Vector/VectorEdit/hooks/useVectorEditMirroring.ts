@@ -17,14 +17,16 @@ export type TUseVectorEditMirroringResult = { disabled: boolean; onChange: TFunc
 export const useVectorEditMirroring = (): TUseVectorEditMirroringResult => {
   const dispatch = useAppDispatch();
   const history = useVectorPointsHistory();
-  const { node, pointIds } = useSelectedVectorPoints();
-  const disabled = !node || pointIds.length === 0;
+  const entries = useSelectedVectorPoints().filter(({ pointIds }) => pointIds.length > 0);
+  const disabled = entries.length === 0;
 
   const handleChange = (mode: string): void =>
-    history.run(() => {
-      const modes = Object.fromEntries(pointIds.map((vertexId) => [vertexId, mode as TVertexHandleMode]));
-      dispatch(updateNode({ changes: { vertexHandleModes: { ...node!.vertexHandleModes, ...modes } }, id: node!.id }));
-    });
+    history.run(() =>
+      entries.forEach(({ node, pointIds }) => {
+        const modes = Object.fromEntries(pointIds.map((vertexId) => [vertexId, mode as TVertexHandleMode]));
+        dispatch(updateNode({ changes: { vertexHandleModes: { ...node.vertexHandleModes, ...modes } }, id: node.id }));
+      }),
+    );
 
-  return { disabled, onChange: handleChange, value: disabled ? '' : getVectorPointsMirroring(node, pointIds) };
+  return { disabled, onChange: handleChange, value: disabled ? '' : getVectorPointsMirroring(entries) };
 };

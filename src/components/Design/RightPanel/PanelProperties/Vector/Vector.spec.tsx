@@ -52,4 +52,20 @@ describe('Vector behaviors', () => {
     expect(screen.getByText('Layout')).toBeInTheDocument();
     expect(screen.getByText('Export')).toBeInTheDocument();
   });
+
+  it('should show the spacing between several selected vectors', () => {
+    // mock
+    const square = makeSquareVector({ id: 'spaced-vector' });
+    const vertices = Object.fromEntries(Object.values(square.vertices).map((vertex) => [vertex.id, { ...vertex, x: vertex.x + 300 }]));
+
+    store.dispatch(addNodes({ nodes: [{ ...square, vertices }], rootIds: [square.id] }));
+    store.dispatch(setSelection(['panel-vector', square.id]));
+
+    // before
+    renderVector();
+
+    // result
+    expect(screen.getByText('Spacing')).toBeInTheDocument();
+    expect((screen.getByLabelText('Horizontal spacing') as HTMLInputElement).value).toBe('200');
+  });
 });

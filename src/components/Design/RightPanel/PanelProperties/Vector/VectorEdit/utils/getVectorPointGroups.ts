@@ -38,6 +38,6 @@ export const getVectorPointGroups = (node: TVectorNode, vertexIds: string[]): TV
     const x = Math.min(...xs);
     const y = Math.min(...ys);
 
-    return { rect: { height: Math.max(...ys) - y, width: Math.max(...xs) - x, x, y }, vertexIds: ids };
+    return { nodeId: node.id, rect: { height: Math.max(...ys) - y, width: Math.max(...xs) - x, x, y }, vertexIds: ids };
   });
 };

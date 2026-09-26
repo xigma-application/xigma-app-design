@@ -125,4 +125,33 @@ describe('useVectorEditMirroring', () => {
     // result
     expect(readVector().vertexHandleModes).toEqual({ a1: 'smooth' });
   });
+
+  it('should set the mirroring of the selected points in every edited vector', () => {
+    // mock
+    editVector();
+    store.dispatch(
+      addNodes({
+        nodes: [
+          makeNetworkVector({ c1: { x: 200, y: 0 }, c2: { x: 200, y: 50 } }, [['c1', 'c2']], { cornerRadius: 9, id: 'second-vector' }),
+        ],
+        rootIds: ['second-vector'],
+      }),
+    );
+    store.dispatch(setSelection(['edit-vector', 'second-vector']));
+    store.dispatch(setVectorEditingNodeIds(['edit-vector', 'second-vector']));
+
+    // before
+    const { result } = renderHook(() => useVectorEditMirroring(), { wrapper });
+
+    selectPoints(['a1', 'c1']);
+
+    // action
+    act(() => {
+      result.current.onChange('smooth');
+    });
+
+    // result
+    expect(readVector().vertexHandleModes).toEqual({ a1: 'smooth' });
+    expect((selectActivePage(store.getState()).nodes['second-vector'] as TVectorNode).vertexHandleModes).toEqual({ c1: 'smooth' });
+  });
 });

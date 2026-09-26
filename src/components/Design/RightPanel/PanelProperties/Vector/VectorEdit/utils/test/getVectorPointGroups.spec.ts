@@ -29,8 +29,8 @@ describe('getVectorPointGroups', () => {
   it('should group the selected points by the connected piece they belong to, with the box of each group', () => {
     // result
     expect(getVectorPointGroups(twoSquares, ['a1', 'b1', 'a3', 'b2'])).toEqual([
-      { rect: { height: 10, width: 10, x: 0, y: 0 }, vertexIds: ['a1', 'a3'] },
-      { rect: { height: 0, width: 20, x: 30, y: 20 }, vertexIds: ['b1', 'b2'] },
+      { nodeId: 'vector', rect: { height: 10, width: 10, x: 0, y: 0 }, vertexIds: ['a1', 'a3'] },
+      { nodeId: 'vector', rect: { height: 0, width: 20, x: 30, y: 20 }, vertexIds: ['b1', 'b2'] },
     ]);
   });
 

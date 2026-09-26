@@ -31,8 +31,8 @@ describe('getVectorPointsMirroring', () => {
     const vector = { ...twoSquares, vertexHandleModes: { a1: 'smooth' as const, a2: 'smooth' as const, a3: 'corner' as const } };
 
     // result
-    expect(getVectorPointsMirroring(vector, ['a1', 'a2'])).toBe('smooth');
-    expect(getVectorPointsMirroring(vector, ['a3', 'a4'])).toBe('corner');
+    expect(getVectorPointsMirroring([{ handles: [], node: vector, pointIds: ['a1', 'a2'], vertexIds: ['a1', 'a2'] }])).toBe('smooth');
+    expect(getVectorPointsMirroring([{ handles: [], node: vector, pointIds: ['a3', 'a4'], vertexIds: ['a3', 'a4'] }])).toBe('corner');
   });
 
   it('should return an empty value when the points differ', () => {
@@ -40,6 +40,6 @@ describe('getVectorPointsMirroring', () => {
     const vector = { ...twoSquares, vertexHandleModes: { a1: 'symmetric' as const } };
 
     // result
-    expect(getVectorPointsMirroring(vector, ['a1', 'a2'])).toBe('');
+    expect(getVectorPointsMirroring([{ handles: [], node: vector, pointIds: ['a1', 'a2'], vertexIds: ['a1', 'a2'] }])).toBe('');
   });
 });
