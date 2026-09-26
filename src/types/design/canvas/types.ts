@@ -18,6 +18,7 @@ import { TExportRenderRequest } from 'utils/canvas/exportRender/types';
 import { TOffsetVectorEdgeHit } from 'utils/canvas/offsetVector/types';
 import { TPatternThumbnailRequest } from 'utils/canvas/patternThumbnail/types';
 import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
+import { TLineStrokeShape } from 'utils/canvas/line/types';
 import { TImageCrop, TPaint, TSolidPaint } from 'types/design/paint/types';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
 import { TShapeContactGuide } from 'components/Design/Canvas/utils/getShapeContactGuides';
@@ -263,6 +264,7 @@ export type TVectorWidthLastHandleSide = { nodeId: string; pointId: string; side
 export type TVectorNodeDragSnapshot = {
   deltaX: number;
   deltaY: number;
+  effectLayers?: TLineStrokeShape[];
   facesByPaint: { paint: TPaint[]; points: TPoint[][] }[];
   strokes: TSolidPaint[];
   strokeVertices: number[];
@@ -271,6 +273,7 @@ export type TVectorNodeDragSnapshot = {
 export type TVectorNodeResizeSnapshot = {
   anchorX: number | null;
   anchorY: number | null;
+  effectLayers?: TLineStrokeShape[];
   facesByPaint: { paint: TPaint[]; points: TPoint[][] }[];
   flattenedSegments: TFlattenedVectorSegment[];
   pivot: TPoint;
@@ -284,6 +287,7 @@ export type TVectorNodeResizeSnapshot = {
 
 export type TVectorNodeRotateSnapshot = {
   deltaDegrees: number;
+  effectLayers?: TLineStrokeShape[];
   facesByPaint: { paint: TPaint[]; points: TPoint[][] }[];
   pivot: TPoint;
   strokes: TSolidPaint[];

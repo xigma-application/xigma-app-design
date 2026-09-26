@@ -1877,3 +1877,27 @@ is not flattened first). `TVectorNode.blendMode` needs no render change: `getNod
 `blendMode` from any node, so a vector with a real blend mode goes through the isolated blend path. SVG/PDF export
 already used `getEffectiveOpacity`, so it picks up the vector opacity too.
 
+## Vector effects
+
+`TVectorNode.effects` uses the same effect list as the other shapes. Layer blur, texture and glass need nothing
+new (the generic `drawSceneNodes` passes read `effects` from any node; glass uses the vector bounds like it does
+for a polygon). Drop shadow, inner shadow and noise go through the boolean drawers (`drawBooleanEffects`), which
+take a `TBooleanShape`. For a vector that shape is the union of what is drawn: every filled area plus the stroke
+outline (`utils/canvas/vector/effects/getVectorEffectLayers`: the filled faces as even-odd layers, then the mode
+stroke shape or, for a plain stroke, `getVectorUniformStrokeShape`). A union cannot be one even-odd pass, so
+`TBooleanShape` got optional `layers` (`getBooleanShapeLayers`); `drawBooleanShapeFill` and `drawBooleanNoiseMask`
+fill each layer in its own stencil pass with the same opaque color, which adds up to the union. Shapes without
+layers draw as before.
+
+`drawSceneVectorNode` (which now takes the canvas refs, for the blend mode preview) draws the drop shadow before the
+vector and the inner shadow and noise after it. `getSceneVectorEffectShape` returns null unless a visible shadow or
+noise exists (`hasVectorShapeEffects`), so plain vectors pay nothing. During drag, resize and rotate the store node
+does not change, so the snapshots keep `effectLayers` in the same space as their faces
+(`getVectorSnapshotEffectLayers`, empty without effects) and the shape is mapped with the snapshot's own transform
+(translate, `scalePoint`, `rotateSnapshotPoint`). The drag shape keeps the node shape's key, so the cached shadow
+texture is reused while dragging; resize and rotate build a new key each frame, like a live polygon resize.
+
+Background blur masks with the vector's filled areas painted white (`paintBackgroundBlurShape`, strokes and effects
+dropped). SVG/PDF vector export refuses a vector with a visible effect, so it goes through the raster path that
+draws the effects. Progressive blur handles use `getNodeBounds`, so they sit on the vector bounds.
+

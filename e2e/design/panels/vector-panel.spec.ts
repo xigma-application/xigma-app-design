@@ -323,3 +323,51 @@ test('the vector Stroke section sets its weight and position, and Selection colo
     .toBe('#00ff00');
   await expect.poll(async () => readPixelColor(page, 900, 360)).toEqual([0, 255, 0]);
 });
+
+test('a vector drop shadow is drawn under its shape and moves with it while dragging', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-panel-effects');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — a filled triangle
+  await drawSelectedTriangle(designPage, page);
+
+  const fillSection = page.locator('[data-test-section="fill"]');
+
+  await fillSection.getByLabel('Add fill').click();
+  await fillSection.getByText('Fill', { exact: true }).click();
+
+  const background = await readPixelColor(page, 900, 475);
+
+  // action — add a drop shadow from the panel, then make it a hard black one 40px lower
+  await page.getByLabel('Add effect').click();
+  await page.getByText('Drop shadow', { exact: true }).last().click();
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+    const id = rootOrder[rootOrder.length - 1];
+    const [shadow] = (nodes[id] as unknown as { effects: Record<string, unknown>[] }).effects;
+
+    store.dispatch(
+      updateNode({ changes: { effects: [{ ...shadow, blur: 0, color: '#000000', opacity: 100, x: 0, y: 40 }] } as never, id }),
+    );
+  });
+  await designPage.click(1500, 900);
+
+  // result — below the apex, where only the shadow reaches
+  await expect.poll(async () => readPixelColor(page, 900, 475)).toEqual([0, 0, 0]);
+
+  // action — drag the triangle 150px to the right by its fill and hold it
+  await designPage.pointerDown(900, 340);
+  await designPage.pointerMove(975, 340);
+  await designPage.pointerMove(1050, 340);
+
+  // result — the shadow went along
+  await expect.poll(async () => readPixelColor(page, 1050, 475)).toEqual([0, 0, 0]);
+  await expect.poll(async () => readPixelColor(page, 900, 475)).toEqual(background);
+
+  await designPage.pointerUp();
+});

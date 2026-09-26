@@ -10,17 +10,18 @@ import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/c
 import { useEffectsSection } from './useEffectsSection';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, addNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
 
 // types
 import { EffectType, NodeType } from 'types/design/enums';
-import { TEffect, TRectangleNode } from 'types/design/types';
+import { TEffect, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { createEffect } from 'utils/design/effects/createEffect';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
   <Provider store={store}>
@@ -147,5 +148,22 @@ describe('useEffectsSection with several layers selected', () => {
 
     // result
     expect([readEffects(firstId)[0].visible, readEffects(secondId)[0].visible]).toEqual([false, false]);
+  });
+
+  it('should add an effect to a selected vector', () => {
+    // mock
+    const vector = makeSquareVector({ id: 'effectsVector' });
+
+    store.dispatch(addNodes({ nodes: [vector], rootIds: [vector.id] }));
+    store.dispatch(setSelection([vector.id]));
+
+    // before
+    const { result } = renderHook(() => useEffectsSection(), { wrapper });
+
+    // action
+    act(() => result.current.onAdd(EffectType.dropShadow));
+
+    // result
+    expect((selectActivePage(store.getState()).nodes[vector.id] as TVectorNode).effects).toMatchObject([{ type: EffectType.dropShadow }]);
   });
 });

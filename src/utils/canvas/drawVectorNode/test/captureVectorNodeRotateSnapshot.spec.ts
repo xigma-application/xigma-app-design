@@ -84,6 +84,7 @@ describe('captureVectorNodeRotateSnapshot', () => {
     expect(getVectorNodeBoundsMock).toHaveBeenCalledWith(baseNode);
     expect(snapshot).toEqual({
       deltaDegrees: 0,
+      effectLayers: [],
       facesByPaint: [{ paint, points }],
       pivot: { x: 30, y: 20 },
       strokeVertices: [0, 0, 10, 0, 10, 1],

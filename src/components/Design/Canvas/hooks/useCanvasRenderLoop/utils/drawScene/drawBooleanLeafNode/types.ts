@@ -3,10 +3,12 @@ import { BlendMode } from 'types/design/enums';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TDrawSceneContext } from '../types';
 import { TEffect } from 'types/design/types';
+import { TLineStrokeShape } from 'utils/canvas/line/types';
 
 export type TBooleanShape = {
   bounds: TDraftRect;
   key: number;
+  layers?: TLineStrokeShape[];
   polygons: TPoint[][];
 };
 

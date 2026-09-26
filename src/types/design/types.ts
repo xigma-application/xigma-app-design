@@ -449,6 +449,7 @@ export type TVectorNode = {
   blendMode?: BlendMode;
   capStyle?: 'round';
   defaultFill: TPaint[] | null;
+  effects?: TEffect[];
   fillByKey?: Record<string, TPaint[]>;
   filledFaceKeys: string[];
   hidden?: boolean;

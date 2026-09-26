@@ -1,6 +1,6 @@
 // types
-import { NodeType } from 'types/design/enums';
-import { TFrameNode, TVectorNode } from 'types/design/types';
+import { EffectType, NodeType } from 'types/design/enums';
+import { TEffect, TFrameNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { canExportVectorNodeAsSvgVector } from '../canExportVectorNodeAsSvgVector';
@@ -55,6 +55,17 @@ describe('canExportVectorNodeAsSvgVector', () => {
     expect(canExportVectorNodeAsSvgVector(vectorNode(), {})).toBe(true);
   });
 
+  it('should reject a vector with a visible effect and allow one whose effects are hidden', () => {
+    // mock
+    groupFilledFacesForRenderingMock.mockReturnValue([solidGroup]);
+
+    const effect = { type: EffectType.dropShadow } as TEffect;
+
+    // result
+    expect(canExportVectorNodeAsSvgVector(vectorNode({ effects: [effect] }), {})).toBe(false);
+    expect(canExportVectorNodeAsSvgVector(vectorNode({ effects: [{ ...effect, visible: false }] }), {})).toBe(true);
+  });
+
   it('should reject a hidden node', () => {
     expect(canExportVectorNodeAsSvgVector(vectorNode({ hidden: true }), {})).toBe(false);
   });
@@ -65,13 +76,18 @@ describe('canExportVectorNodeAsSvgVector', () => {
   });
 
   it('should allow a visible uniform stroke without a width profile', () => {
-    expect(canExportVectorNodeAsSvgVector(vectorNode({ strokeWidth: 2, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }] }), {})).toBe(true);
+    expect(
+      canExportVectorNodeAsSvgVector(vectorNode({ strokeWidth: 2, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }] }), {}),
+    ).toBe(true);
   });
 
   it('should reject a visible stroke that has a variable width profile', () => {
-    expect(canExportVectorNodeAsSvgVector(vectorNode({ strokeWidth: 2, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }], widthProfile: { points: {} } }), {})).toBe(
-      false,
-    );
+    expect(
+      canExportVectorNodeAsSvgVector(
+        vectorNode({ strokeWidth: 2, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }], widthProfile: { points: {} } }),
+        {},
+      ),
+    ).toBe(false);
   });
 
   it('should allow a width profile when the stroke itself is not visible', () => {

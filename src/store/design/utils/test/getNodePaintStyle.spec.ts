@@ -59,12 +59,19 @@ describe('getNodePaintStyle', () => {
     });
   });
 
-  it('should read a vector fill and its stroke only when the stroke has a width', () => {
+  it('should read a vector fill, its effects and its stroke only when the stroke has a width', () => {
     // mock
-    const vector = { defaultFill: null, strokeWidth: 3, strokes: [{ color: '#444444', opacity: 100, type: 'solid' }], type: NodeType.vector } as TSceneNode;
+    const vector = {
+      defaultFill: null,
+      effects: [],
+      strokeWidth: 3,
+      strokes: [{ color: '#444444', opacity: 100, type: 'solid' }],
+      type: NodeType.vector,
+    } as unknown as TSceneNode;
 
     // result
     expect(getNodePaintStyle(vector)).toEqual({
+      effects: [],
       fills: [DEFAULT_VECTOR_PAINT],
       strokeWidth: 3,
       strokes: [{ color: '#444444', opacity: 100, type: 'solid' }],

@@ -5,6 +5,7 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { drawVectorFill } from 'utils/canvas/drawVectorNode/drawVectorFill';
+import { getBooleanShapeLayers } from './getBooleanShapeLayers';
 
 export const drawBooleanShapeFill = (
   context: TDrawSceneContext,
@@ -14,18 +15,21 @@ export const drawBooleanShapeFill = (
   color: string,
   alpha: number,
 ): void => {
-  drawVectorFill(
-    context.gl,
-    context.program,
-    context.buffer,
-    null,
-    null,
-    shape.polygons,
-    color,
-    size.width,
-    size.height,
-    { x: -origin.x, y: -origin.y, zoom: 1 },
-    true,
-    alpha,
+  getBooleanShapeLayers(shape).forEach(({ fillRule, polygons }) =>
+    drawVectorFill(
+      context.gl,
+      context.program,
+      context.buffer,
+      null,
+      null,
+      polygons,
+      color,
+      size.width,
+      size.height,
+      { x: -origin.x, y: -origin.y, zoom: 1 },
+      true,
+      alpha,
+      fillRule,
+    ),
   );
 };

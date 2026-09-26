@@ -47,6 +47,8 @@ describe('drawBooleanNoiseMask', () => {
       100,
       viewport,
       true,
+      1,
+      'evenOdd',
     );
     expect(gl.bindFramebuffer).toHaveBeenLastCalledWith(gl.FRAMEBUFFER, { tag: 'p-36006' });
   });

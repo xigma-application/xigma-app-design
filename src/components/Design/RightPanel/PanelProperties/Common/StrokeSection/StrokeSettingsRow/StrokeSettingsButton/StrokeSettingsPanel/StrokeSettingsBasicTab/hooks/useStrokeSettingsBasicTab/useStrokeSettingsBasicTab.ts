@@ -10,7 +10,7 @@ import { isAppearanceNode } from '../../../../../../../AppearanceSection/types';
 import { TCommitStrokeChanges, TStrokeChanges, TStrokeSettingsValues, TUseStrokeSettingsBasicTabResult } from './types';
 
 // utils
-import { isStrokeSettingsNode } from '../../../../../../../AppearanceSection/utils/isStrokeSettingsNode';
+import { isStyledOrVectorNode } from '../../../../../../../AppearanceSection/utils/isStyledOrVectorNode';
 import { getSharedStrokeSettings } from './utils/getSharedStrokeSettings';
 import { getStrokeSettingsValues } from './utils/getStrokeSettingsValues';
 import { handleStrokeDashBlur } from './utils/handleStrokeDashBlur';
@@ -31,7 +31,7 @@ import { handleStrokeStyleSelect } from './utils/handleStrokeStyleSelect';
 
 export const useStrokeSettingsBasicTab = (): TUseStrokeSettingsBasicTabResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isStrokeSettingsNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledOrVectorNode);
   const valuesList = nodes.length > 0 ? nodes.map(getStrokeSettingsValues) : [getStrokeSettingsValues(undefined)];
   const [scrubValues] = valuesList;
   const shared = getSharedStrokeSettings(valuesList);

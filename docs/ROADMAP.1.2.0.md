@@ -159,5 +159,5 @@ and Export. The Paint tool keeps painting single areas; the Fill section changes
 - [x] Fill for the whole vector, "Click + to replace mixed content" when areas differ
 - [x] opacity and blend mode, also inside a see-through frame
 - [x] strokes with colors, gradients and images, position and weight, and selection colors
-- [ ] effects
+- [x] effects
 - [ ] corner radius

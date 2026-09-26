@@ -5,6 +5,7 @@ import { TRectangleNode } from 'types/design/types';
 
 // utils
 import { createEffect } from 'utils/design/effects/createEffect';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 import { paintBackgroundBlurShape } from '../paintBackgroundBlurShape';
 
 const node: TRectangleNode = {
@@ -45,5 +46,25 @@ describe('paintBackgroundBlurShape', () => {
 
     // result
     expect(paintLeaf).not.toHaveBeenCalled();
+  });
+
+  it('should paint every filled area of a vector as an opaque white, without its strokes and effects', () => {
+    // mock
+    const paintLeaf = vi.fn();
+    const vector = makeSquareVector({ effects: node.effects, filledFaceKeys: ['a', 'b'] });
+
+    // action
+    paintBackgroundBlurShape({ paintLeaf } as unknown as TMaskRenderer, vector);
+
+    // result
+    expect(paintLeaf).toHaveBeenCalledWith(
+      {
+        ...vector,
+        effects: undefined,
+        fillByKey: { a: [{ color: '#ffffff', opacity: 100, type: 'solid' }], b: [{ color: '#ffffff', opacity: 100, type: 'solid' }] },
+        strokes: [],
+      },
+      'fill',
+    );
   });
 });

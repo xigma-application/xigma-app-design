@@ -33,6 +33,27 @@ describe('drawBooleanShapeFill', () => {
       { x: -4, y: -6, zoom: 1 },
       true,
       0.5,
+      'evenOdd',
     );
+  });
+
+  it('should fill every layer of the shape with its own fill rule', () => {
+    // mock
+    const context = { buffer: {}, gl: {}, program: {} } as unknown as TDrawSceneContext;
+    const layers = [
+      { fillRule: 'evenOdd' as const, polygons: [[{ x: 0, y: 0 }]] },
+      { fillRule: 'nonZero' as const, polygons: [[{ x: 1, y: 1 }]] },
+    ];
+
+    drawVectorFillMock.mockClear();
+
+    // action
+    drawBooleanShapeFill(context, { ...booleanShape, layers }, { height: 50, width: 60 }, { x: 0, y: 0 }, '#ff0000', 1);
+
+    // result
+    expect(drawVectorFillMock.mock.calls.map((call) => [call[5], call[12]])).toEqual([
+      [layers[0].polygons, 'evenOdd'],
+      [layers[1].polygons, 'nonZero'],
+    ]);
   });
 });

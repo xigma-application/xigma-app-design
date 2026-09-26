@@ -11,6 +11,7 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { getGradientMoveSnapGuide } from '../../../../utils/getGradientMoveSnapGuide';
+import { getNodeBounds } from '../../../../utils/getNodeBounds';
 import { getGradientMoveSnapPoint } from '../../../../utils/getGradientMoveSnapPoint';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { isProgressiveBlur } from 'utils/design/effects/isProgressiveBlur';
@@ -34,7 +35,7 @@ export const continueProgressiveBlurDrag = (
     const effect = node && 'effects' in node ? node.effects?.[effectIndex] : undefined;
 
     if (node && 'effects' in node && node.effects && effect && isProgressiveBlur(effect)) {
-      const bounds = { height: node.height, width: node.width, x: node.x, y: node.y };
+      const bounds = getNodeBounds(node);
       const boundsCenter: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
       const viewport = selectViewport(state);
       const worldPoint = screenToWorld(getPointerPosition(canvas, event), viewport);

@@ -8,6 +8,7 @@ import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
 import { getThickVectorPathVertices } from '../vectorNetwork/getThickVectorPathVertices/getThickVectorPathVertices';
 import { getVectorStrokeShapeFaces } from '../vector/stroke/getVectorStrokeShapeFaces';
 import { getVisibleSolidStrokePaints } from '../vector/stroke/getVisibleSolidStrokePaints';
+import { getVectorSnapshotEffectLayers } from '../vector/effects/getVectorSnapshotEffectLayers';
 import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';
 
 const getFacesByPaint = (
@@ -29,5 +30,12 @@ export const captureVectorNodeDragSnapshot = (node: TVectorNode): TVectorNodeDra
   const facesByPaint = getFacesByPaint(renderedNode, strokeFaces);
   const strokeVertices = getStrokeVertices(renderedNode, strokeFaces);
 
-  return { deltaX: 0, deltaY: 0, facesByPaint, strokeVertices, strokes: getVisibleSolidStrokePaints(renderedNode.strokes) };
+  return {
+    deltaX: 0,
+    deltaY: 0,
+    effectLayers: getVectorSnapshotEffectLayers(renderedNode),
+    facesByPaint,
+    strokeVertices,
+    strokes: getVisibleSolidStrokePaints(renderedNode.strokes),
+  };
 };

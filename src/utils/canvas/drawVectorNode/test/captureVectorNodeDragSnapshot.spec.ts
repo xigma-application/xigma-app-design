@@ -76,6 +76,7 @@ describe('captureVectorNodeDragSnapshot', () => {
     expect(snapshot).toEqual({
       deltaX: 0,
       deltaY: 0,
+      effectLayers: [],
       facesByPaint: [{ paint, points }],
       strokeVertices: [0, 0, 10, 0, 10, 1],
       strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],

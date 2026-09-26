@@ -5,6 +5,7 @@ import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/
 
 // utils
 import { drawVectorFill } from 'utils/canvas/drawVectorNode/drawVectorFill';
+import { getBooleanShapeLayers } from './getBooleanShapeLayers';
 import { setAlphaWriteEnabled } from 'utils/canvas/setAlphaWriteEnabled';
 
 export const drawBooleanNoiseMask = (context: TDrawSceneContext, shape: TBooleanShape): TRenderTarget => {
@@ -26,7 +27,9 @@ export const drawBooleanNoiseMask = (context: TDrawSceneContext, shape: TBoolean
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
   gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-  drawVectorFill(gl, program, buffer, null, null, shape.polygons, '#ffffff', canvasWidth, canvasHeight, viewport, true);
+  getBooleanShapeLayers(shape).forEach(({ fillRule, polygons }) =>
+    drawVectorFill(gl, program, buffer, null, null, polygons, '#ffffff', canvasWidth, canvasHeight, viewport, true, 1, fillRule),
+  );
 
   gl.bindFramebuffer(gl.FRAMEBUFFER, previousFramebuffer);
   gl.viewport(previousViewport[0], previousViewport[1], previousViewport[2], previousViewport[3]);

@@ -1,19 +1,20 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, addNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { EffectBlurType, EffectType, NodeType } from 'types/design/enums';
 import { TProgressiveBlurDragState } from 'types/design/canvas/types';
-import { TRectangleNode } from 'types/design/types';
+import { TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { continueProgressiveBlurDrag } from '../continueProgressiveBlurDrag';
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { createEffect } from 'utils/design/effects/createEffect';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -131,5 +132,39 @@ describe('continueProgressiveBlurDrag', () => {
 
     // result
     expect(readEffect(nodeId).start).toBeUndefined();
+  });
+
+  it('should place the endpoint within the bounds of a vector and leave its other effects alone', () => {
+    // mock
+    const shadow = createEffect(EffectType.dropShadow);
+    const vector = makeSquareVector({
+      effects: [shadow, { ...createEffect(EffectType.layerBlur), blurType: EffectBlurType.progressive }],
+      id: 'progressiveBlurVector',
+    });
+
+    store.dispatch(addNodes({ nodes: [vector], rootIds: [vector.id] }));
+
+    const dragRef = createDragRef({ effectIndex: 1, endpoint: 'end', nodeId: vector.id });
+
+    // action — pointer at (30, 60) of the 100x100 square = (0.3, 0.6)
+    continueProgressiveBlurDrag(createCanvas(), pointerEvent(30, 60), store.dispatch, dragRef, createCanvasRefs());
+
+    // result
+    const { effects } = selectActivePage(store.getState()).nodes[vector.id] as TVectorNode;
+
+    expect(effects?.[0]).toEqual(shadow);
+    expect(effects?.[1].end).toEqual({ x: 0.3, y: 0.6 });
+  });
+
+  it('should do nothing for a layer that no longer exists', () => {
+    // mock
+    const canvasRefs = createCanvasRefs();
+    const dragRef = createDragRef({ effectIndex: 0, endpoint: 'end', nodeId: 'missing' });
+
+    // action
+    continueProgressiveBlurDrag(createCanvas(), pointerEvent(10, 10), store.dispatch, dragRef, canvasRefs);
+
+    // result
+    expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
   });
 });

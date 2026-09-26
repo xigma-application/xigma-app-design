@@ -13,6 +13,7 @@ const hasVisibleStroke = (node: TVectorNode): boolean => node.strokeWidth > 0 &&
 
 const isOwnStyleSupported = (node: TVectorNode): boolean =>
   !node.hidden &&
+  !node.effects?.some((effect) => effect.visible !== false) &&
   (!hasVisibleStroke(node) || !node.widthProfile) &&
   getVisibleStrokePaints(node.strokes).every(isSvgVectorPaint) &&
   groupFilledFacesForRendering(getRenderedVectorNode(node)).every(({ paint }) => paint.every(isSvgVectorPaint));

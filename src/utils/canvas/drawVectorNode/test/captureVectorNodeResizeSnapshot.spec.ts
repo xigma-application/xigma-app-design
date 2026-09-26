@@ -64,6 +64,7 @@ describe('captureVectorNodeResizeSnapshot', () => {
     expect(snapshot).toEqual({
       anchorX: null,
       anchorY: null,
+      effectLayers: [],
       facesByPaint: [{ paint, points }],
       flattenedSegments: flattened,
       pivot: { x: 0, y: 0 },

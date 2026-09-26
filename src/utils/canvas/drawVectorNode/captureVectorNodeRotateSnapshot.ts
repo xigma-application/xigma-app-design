@@ -9,6 +9,7 @@ import { getThickVectorPathVertices } from '../vectorNetwork/getThickVectorPathV
 import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
 import { getVectorStrokeShapeFaces } from '../vector/stroke/getVectorStrokeShapeFaces';
 import { getVisibleSolidStrokePaints } from '../vector/stroke/getVisibleSolidStrokePaints';
+import { getVectorSnapshotEffectLayers } from '../vector/effects/getVectorSnapshotEffectLayers';
 import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';
 
 const getFacesByPaint = (
@@ -32,5 +33,12 @@ export const captureVectorNodeRotateSnapshot = (node: TVectorNode): TVectorNodeR
   const bounds = getVectorNodeBounds(node);
   const pivot = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
 
-  return { deltaDegrees: 0, facesByPaint, pivot, strokeVertices, strokes: getVisibleSolidStrokePaints(renderedNode.strokes) };
+  return {
+    deltaDegrees: 0,
+    effectLayers: getVectorSnapshotEffectLayers(renderedNode),
+    facesByPaint,
+    pivot,
+    strokeVertices,
+    strokes: getVisibleSolidStrokePaints(renderedNode.strokes),
+  };
 };

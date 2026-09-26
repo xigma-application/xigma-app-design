@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import AppearanceSection from '../Common/AppearanceSection/AppearanceSection';
+import EffectsSection from '../Common/EffectsSection/EffectsSection';
 import Export from '../Export/Export';
 import FillSection from '../Common/FillSection/FillSection';
 import PositionSection from '../Common/PositionSection/PositionSection';
@@ -32,6 +33,7 @@ const Vector: FC = () => {
       <FillSection />
       <FillSection footer={<ShapeStrokeSettings type={NodeType.vector} />} property="strokes" />
       <SelectionColorsSection />
+      <EffectsSection />
       <Export />
     </Fragment>
   );

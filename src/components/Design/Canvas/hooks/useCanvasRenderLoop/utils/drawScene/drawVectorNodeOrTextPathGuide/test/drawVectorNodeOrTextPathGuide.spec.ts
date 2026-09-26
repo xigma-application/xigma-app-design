@@ -1,4 +1,5 @@
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { NodeType } from 'types/design/enums';
 import { TDrawSceneContext } from '../../types';
 import { TSceneNode, TTextNode, TVectorNode } from 'types/design/types';
@@ -103,7 +104,14 @@ const draw = (
     viewport: IDENTITY_VIEWPORT,
   };
 
-  drawVectorNodeOrTextPathGuide(context, node, createVectorSnapshotsRefs(), pathOutlineStyles, nodesById, editingPathId);
+  drawVectorNodeOrTextPathGuide(
+    context,
+    node,
+    { vectorSnapshots: createVectorSnapshotsRefs() } as TCanvasRefs,
+    pathOutlineStyles,
+    nodesById,
+    editingPathId,
+  );
 };
 
 describe('drawVectorNodeOrTextPathGuide', () => {

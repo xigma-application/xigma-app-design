@@ -14,7 +14,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 import { BlendMode } from 'types/design/enums';
 
 // utils
-import { isOpacityPanelNode } from '../../../utils/isOpacityPanelNode';
+import { isStyledOrVectorNode } from '../../../utils/isStyledOrVectorNode';
 import { commitBlendModeToNodes } from './utils/commitBlendModeToNodes';
 import { getSharedBlendMode } from './utils/getSharedBlendMode';
 
@@ -32,7 +32,7 @@ export const useBlendModeButton = (): TUseBlendModeButtonResult => {
   const [open, setOpen] = useState(false);
   const dispatch = useAppDispatch();
   const { blendMode: blendModeRefs } = useCanvasRefsContext();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isOpacityPanelNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledOrVectorNode);
   const value = getSharedBlendMode(nodes);
   const isDefault = value === BlendMode.passThrough;
 

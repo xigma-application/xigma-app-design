@@ -14,7 +14,7 @@ import { STROKE_SCATTER_BRUSH_FIELDS } from '../../constants';
 import { TOriginalStrokeBrush, TStrokeBrushChanges, TUseStrokeSettingsBrushTabResult } from './types';
 
 // utils
-import { isStrokeSettingsNode } from '../../../../../../../AppearanceSection/utils/isStrokeSettingsNode';
+import { isStyledOrVectorNode } from '../../../../../../../AppearanceSection/utils/isStyledOrVectorNode';
 import { getBrushCategoryId } from '../../utils/getBrushCategoryId';
 import { getSharedStrokeBrushValue } from './utils/getSharedStrokeBrushValue';
 import { getStrokeBrushValues } from 'utils/design/stroke/getStrokeBrushValues';
@@ -25,7 +25,7 @@ import { handleStrokeBrushScatterBlur } from './utils/handleStrokeBrushScatterBl
 
 export const useStrokeSettingsBrushTab = (): TUseStrokeSettingsBrushTabResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isStrokeSettingsNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledOrVectorNode);
   const valuesList = nodes.length > 0 ? nodes.map(getStrokeBrushValues) : [getStrokeBrushValues(undefined)];
   const originalBrushesRef = useRef<TOriginalStrokeBrush[] | null>(null);
   const brush = getSharedStrokeBrushValue(valuesList, 'brush');

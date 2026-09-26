@@ -1057,7 +1057,7 @@ Stroke with `ShapeStrokeSettings type={NodeType.star}`, Effects and Export. `Cou
 ## `Vector/`
 
 `Vector.tsx` (shown while every selected layer is a vector) is being built in stages (header, position,
-layout, export, fill, appearance, stroke and selection colors are done; effects and corner radius come next). A vector has no stored box: its X/Y/W/H
+layout, export, fill, appearance, stroke, selection colors and effects are done; corner radius comes next). A vector has no stored box: its X/Y/W/H
 are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
 
 - `VectorHeader`: "Vector path" with matching layers, create component (single selection), mask and boolean;
@@ -1081,7 +1081,7 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
   (`getDisabledFillModes`). The Paint tool is separate: it fills or clears one area with its own Solid/Gradient
   paint, which is what makes the areas differ. A group's Fill now also includes its vectors.
 - Appearance: `AppearanceSection withCornerRadius={false}` (corner radius comes later). `TVectorNode` now has
-  `opacity` and `blendMode`; `Common/AppearanceSection/utils/isOpacityPanelNode` (type `TOpacityPanelNode`) lets
+  `opacity` and `blendMode`; `Common/AppearanceSection/utils/isStyledOrVectorNode` (type `TStyledOrVectorNode`) lets
   `useOpacity`, `useBlendModeRow` and `useBlendModeButton` take vectors. Visibility already worked through
   `hidden`.
 - Stroke: `FillSection property="strokes"` with `ShapeStrokeSettings type={NodeType.vector}` as its footer
@@ -1090,7 +1090,7 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
   `getVectorFillsChange`; strokes use the plain `strokes` list. `getFillTargets` gives a vector Center as the
   default position and drops a zero `strokeWidth` (shapes flattened without a stroke) so the first stroke gets
   width 1. The advanced stroke panel (Basic/Dynamic/Brush tabs, width profile) filters its nodes with
-  `Common/AppearanceSection/utils/isStrokeSettingsNode` (styled nodes plus vectors); vectors already draw every
+  `Common/AppearanceSection/utils/isStyledOrVectorNode` (styled nodes plus vectors); vectors already draw every
   mode, dashes and profiles.
 - Selection colors: `isSelectionColorsRootNode` takes a vector and the section always shows for one. An
   occurrence of a vector area fill carries `faceKey` (`getSelectionColorPaintSources`: one fills source per
@@ -1099,6 +1099,9 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
   `getSelectionColorSourcePaints` and writes an area back into `fillByKey[faceKey]` next to the other areas
   (`getSelectionColorPaintsChange`). Vectors inside a selected frame or group now count too
   (`isSelectionColorNode`).
+- Effects: `Common/EffectsSection` takes vectors (`useEffectsSection` filters with `isStyledOrVectorNode`, which
+  also replaced the identical `isOpacityPanelNode` and `isStrokeSettingsNode`). Rendering is described in
+  `canvas-rendering-pipeline.md` ("Vector effects").
 
 ## `ImageCrop/`
 

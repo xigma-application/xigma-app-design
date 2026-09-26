@@ -3,10 +3,14 @@ import { AppDispatch } from 'store/store';
 import { updateNode, updateNodes } from 'store/design/slice';
 
 // types
-import { TStyledNode } from '../../../../AppearanceSection/types';
+import { TStyledOrVectorNode } from '../../../../AppearanceSection/types';
 import { TEffect } from 'types/design/types';
 
-export const commitNodesEffects = (dispatch: AppDispatch, nodes: TStyledNode[], getEffects: TFunc<[TEffect[]], TEffect[]>): void => {
+export const commitNodesEffects = (
+  dispatch: AppDispatch,
+  nodes: TStyledOrVectorNode[],
+  getEffects: TFunc<[TEffect[]], TEffect[]>,
+): void => {
   const updates = nodes.map((node) => ({ changes: { effects: getEffects(node.effects ?? []) }, id: node.id }));
 
   if (updates.length === 1) {

@@ -1,10 +1,10 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TOpacityPanelNode } from '../types';
 import { TSceneNode } from 'types/design/types';
+import { TStyledOrVectorNode } from '../types';
 
 // utils
 import { isStyledNode } from './isStyledNode';
 
-export const isOpacityPanelNode = (node: TSceneNode | undefined): node is TOpacityPanelNode =>
+export const isStyledOrVectorNode = (node: TSceneNode | undefined): node is TStyledOrVectorNode =>
   isStyledNode(node) || node?.type === NodeType.vector;

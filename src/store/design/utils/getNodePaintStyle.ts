@@ -29,6 +29,7 @@ export const getNodePaintStyle = (node: TSceneNode | undefined): TNodePaintStyle
       return { fills: [makeSolidPaint(node.fill)] };
     case NodeType.vector:
       return {
+        effects: node.effects,
         fills: node.defaultFill ?? [DEFAULT_VECTOR_PAINT],
         strokeWidth: node.strokeWidth,
         strokes: node.strokeWidth > 0 ? node.strokes : undefined,

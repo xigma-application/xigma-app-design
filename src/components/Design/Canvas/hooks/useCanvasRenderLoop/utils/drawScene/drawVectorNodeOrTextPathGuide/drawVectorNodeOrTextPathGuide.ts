@@ -5,7 +5,7 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 import { TDrawSceneContext } from '../types';
 import { TPathOutlineStyle } from '../getPathOutlineStyles';
 import { TSceneNode, TVectorNode } from 'types/design/types';
-import { TVectorSnapshotsRefs } from 'types/design/canvas/types';
+import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { drawDashedVectorPathOutline } from './drawDashedVectorPathOutline/drawDashedVectorPathOutline';
@@ -16,7 +16,7 @@ import { mirrorGuideVectorForText } from 'utils/canvas/text/mirrorGuideVectorFor
 export const drawVectorNodeOrTextPathGuide = (
   context: TDrawSceneContext,
   node: TVectorNode,
-  vectorSnapshots: TVectorSnapshotsRefs,
+  refs: TCanvasRefs,
   pathOutlineStyles: Map<string, TPathOutlineStyle>,
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
@@ -32,7 +32,7 @@ export const drawVectorNodeOrTextPathGuide = (
     if (isBoundAsTextPath) {
       drawDashedVectorPathOutline(gl, program, buffer, renderNode, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
     } else {
-      drawSceneVectorNode(context, renderNode, vectorSnapshots, opacity);
+      drawSceneVectorNode(context, renderNode, refs, opacity);
     }
   }
 };

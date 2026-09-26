@@ -20,7 +20,7 @@ import { TEffect } from 'types/design/types';
 import { TUseEffectsSectionResult } from './types';
 
 // utils
-import { isStyledNode } from '../../../AppearanceSection/utils/isStyledNode';
+import { isStyledOrVectorNode } from '../../../AppearanceSection/utils/isStyledOrVectorNode';
 import { getItemsWithPatch } from '../../../utils/getItemsWithPatch';
 import { getReorderedItems } from '../../../utils/getReorderedItems';
 import { handleItemRemove } from '../../../utils/handleItemRemove';
@@ -37,7 +37,7 @@ import { handleEffectOpenChange } from './utils/handleEffectOpenChange';
 
 export const useEffectsSection = (): TUseEffectsSectionResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledOrVectorNode);
   const [node] = nodes;
   const isMixed = !hasMatchingItemTypes(nodes.map((selected) => selected.effects ?? NO_EFFECTS));
   const effects = isMixed ? NO_EFFECTS : (node?.effects ?? NO_EFFECTS);

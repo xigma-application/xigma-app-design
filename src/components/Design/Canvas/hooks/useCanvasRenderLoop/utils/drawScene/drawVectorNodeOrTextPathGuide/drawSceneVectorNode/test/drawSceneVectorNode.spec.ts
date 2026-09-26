@@ -1,9 +1,15 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { EffectType, NodeType } from 'types/design/enums';
 import { TDrawSceneContext } from '../../../types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
-import { TVectorNodeDragSnapshot, TVectorNodeResizeSnapshot, TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
+import {
+  TCanvasRefs,
+  TVectorNodeDragSnapshot,
+  TVectorNodeResizeSnapshot,
+  TVectorNodeRotateSnapshot,
+  TVectorSnapshotsRefs,
+} from 'types/design/canvas/types';
 
 // utils
 import { createVectorSnapshotsRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorSnapshotsRefs/createVectorSnapshotsRefs';
@@ -26,6 +32,18 @@ vi.mock('../drawVectorNodeResizeSnapshot/drawVectorNodeResizeSnapshot', () => ({
 vi.mock('../drawVectorNodeRotateSnapshot/drawVectorNodeRotateSnapshot', () => ({
   drawVectorNodeRotateSnapshot: (...args: unknown[]): void => drawVectorNodeRotateSnapshotMock(...args),
 }));
+
+const drawBooleanEffectsMock = vi.fn();
+const getSceneVectorEffectShapeMock = vi.fn<(...args: unknown[]) => unknown>(() => null);
+
+vi.mock('../../../drawBooleanLeafNode/drawBooleanEffects', () => ({
+  drawBooleanEffects: (...args: unknown[]): void => drawBooleanEffectsMock(...args),
+}));
+vi.mock('../getSceneVectorEffectShape', () => ({
+  getSceneVectorEffectShape: (...args: unknown[]): unknown => getSceneVectorEffectShapeMock(...args),
+}));
+
+const asRefs = (vectorSnapshots: TVectorSnapshotsRefs): TCanvasRefs => ({ vectorSnapshots }) as TCanvasRefs;
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const IS_ALPHA_WRITE_ENABLED = false;
@@ -84,7 +102,7 @@ describe('drawSceneVectorNode', () => {
     const context = buildContext(gl, program, buffer, dragSnapshotProgram);
 
     // before
-    drawSceneVectorNode(context, node, createVectorSnapshotsRefs());
+    drawSceneVectorNode(context, node, asRefs(createVectorSnapshotsRefs()));
 
     // result
     expect(drawVectorNodeMock).toHaveBeenCalledWith(context, node, 1);
@@ -107,7 +125,7 @@ describe('drawSceneVectorNode', () => {
     });
 
     // before
-    drawSceneVectorNode(context, node, vectorSnapshots);
+    drawSceneVectorNode(context, node, asRefs(vectorSnapshots));
 
     // result
     expect(drawVectorNodeMock).toHaveBeenCalledWith(context, node, 1);
@@ -123,13 +141,19 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const dragSnapshotProgram = {} as WebGLProgram;
     const context = buildContext(gl, program, buffer, dragSnapshotProgram);
-    const snapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeVertices: [], strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }] };
+    const snapshot: TVectorNodeDragSnapshot = {
+      deltaX: 5,
+      deltaY: 10,
+      facesByPaint: [],
+      strokeVertices: [],
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
+    };
     const vectorSnapshots = createVectorSnapshotsRefs({
       draggedVectorNodeSnapshotsRef: { current: new Map([['node-1', snapshot]]) },
     });
 
     // before
-    drawSceneVectorNode(context, node, vectorSnapshots);
+    drawSceneVectorNode(context, node, asRefs(vectorSnapshots));
 
     // result
     expect(drawVectorNodeDragSnapshotMock).toHaveBeenCalledWith(context, snapshot, 1);
@@ -163,7 +187,7 @@ describe('drawSceneVectorNode', () => {
     });
 
     // before
-    drawSceneVectorNode(context, node, vectorSnapshots);
+    drawSceneVectorNode(context, node, asRefs(vectorSnapshots));
 
     // result
     expect(drawVectorNodeResizeSnapshotMock).toHaveBeenCalledWith(context, snapshot, 1);
@@ -193,7 +217,7 @@ describe('drawSceneVectorNode', () => {
     });
 
     // before
-    drawSceneVectorNode(context, node, vectorSnapshots, 0.5);
+    drawSceneVectorNode(context, node, asRefs(vectorSnapshots), 0.5);
 
     // result
     expect(drawVectorNodeResizeSnapshotMock).toHaveBeenCalledWith(
@@ -222,7 +246,7 @@ describe('drawSceneVectorNode', () => {
     });
 
     // before
-    drawSceneVectorNode(context, node, vectorSnapshots);
+    drawSceneVectorNode(context, node, asRefs(vectorSnapshots));
 
     // result
     expect(drawVectorNodeRotateSnapshotMock).toHaveBeenCalledWith(context, snapshot, 1);
@@ -239,7 +263,13 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const dragSnapshotProgram = {} as WebGLProgram;
     const context = buildContext(gl, program, buffer, dragSnapshotProgram);
-    const dragSnapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeVertices: [], strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }] };
+    const dragSnapshot: TVectorNodeDragSnapshot = {
+      deltaX: 5,
+      deltaY: 10,
+      facesByPaint: [],
+      strokeVertices: [],
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
+    };
     const resizeSnapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
@@ -259,7 +289,7 @@ describe('drawSceneVectorNode', () => {
     });
 
     // before
-    drawSceneVectorNode(context, node, vectorSnapshots);
+    drawSceneVectorNode(context, node, asRefs(vectorSnapshots));
 
     // result
     expect(drawVectorNodeDragSnapshotMock).toHaveBeenCalledTimes(1);
@@ -299,10 +329,30 @@ describe('drawSceneVectorNode', () => {
     });
 
     // before
-    drawSceneVectorNode(context, node, vectorSnapshots);
+    drawSceneVectorNode(context, node, asRefs(vectorSnapshots));
 
     // result
     expect(drawVectorNodeResizeSnapshotMock).toHaveBeenCalledTimes(1);
     expect(drawVectorNodeRotateSnapshotMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw the drop shadow under the vector and the inner shadow and noise over it', () => {
+    // mock
+    const context = buildContext({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, {} as WebGLProgram);
+    const refs = asRefs(createVectorSnapshotsRefs());
+    const shape = { bounds: { height: 1, width: 1, x: 0, y: 0 }, key: 1, polygons: [] };
+    const order: string[] = [];
+
+    getSceneVectorEffectShapeMock.mockReturnValueOnce(shape);
+    drawBooleanEffectsMock.mockImplementation((...args: unknown[]) => order.push(String(args[5])));
+    drawVectorNodeMock.mockImplementationOnce(() => order.push('vector'));
+
+    // before
+    drawSceneVectorNode(context, node, refs, 0.5);
+
+    // result
+    expect(getSceneVectorEffectShapeMock).toHaveBeenCalledWith(node, refs.vectorSnapshots);
+    expect(drawBooleanEffectsMock).toHaveBeenCalledWith(context, node, shape, 0.5, refs, EffectType.dropShadow);
+    expect(order).toEqual([EffectType.dropShadow, 'vector', EffectType.innerShadow, EffectType.noise]);
   });
 });
