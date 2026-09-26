@@ -60,6 +60,7 @@ describe('drawSmoothedPencilPreview', () => {
       program,
       buffer,
       expect.objectContaining({ capStyle: 'round', name: PENCIL_NAME, segments: 'segments', type: NodeType.vector, vertices: 'vertices' }),
+      PENCIL_STROKE,
       200,
       100,
       viewport,

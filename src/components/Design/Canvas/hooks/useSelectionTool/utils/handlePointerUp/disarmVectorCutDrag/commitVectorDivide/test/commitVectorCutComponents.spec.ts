@@ -20,8 +20,8 @@ const addVectorNode = (): TVectorNode => {
       parentId: null,
       rotation: 0,
       segments: {},
-      strokeColor: '#00ff00',
       strokeWidth: 3,
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: {},
@@ -89,7 +89,7 @@ describe('commitVectorCutComponents', () => {
 
     expect(Object.keys(newNode.vertices).sort()).toEqual(['a', 'b']);
     expect(newNode.defaultFill).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' }]);
-    expect(newNode.strokeColor).toBe('#00ff00');
+    expect(newNode.strokes).toMatchObject([{ color: '#00ff00' }]);
     expect(newNode.strokeWidth).toBe(3);
     expect(newNode.rotation).toBe(0);
   });

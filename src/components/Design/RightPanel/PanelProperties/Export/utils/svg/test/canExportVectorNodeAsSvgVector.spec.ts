@@ -37,8 +37,8 @@ const vectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
   parentId: null,
   rotation: 0,
   segments: {},
-  strokeColor: '',
   strokeWidth: 0,
+  strokes: [],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 20, y: 20 } },
@@ -65,11 +65,11 @@ describe('canExportVectorNodeAsSvgVector', () => {
   });
 
   it('should allow a visible uniform stroke without a width profile', () => {
-    expect(canExportVectorNodeAsSvgVector(vectorNode({ strokeColor: '#000000', strokeWidth: 2 }), {})).toBe(true);
+    expect(canExportVectorNodeAsSvgVector(vectorNode({ strokeWidth: 2, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }] }), {})).toBe(true);
   });
 
   it('should reject a visible stroke that has a variable width profile', () => {
-    expect(canExportVectorNodeAsSvgVector(vectorNode({ strokeColor: '#000000', strokeWidth: 2, widthProfile: { points: {} } }), {})).toBe(
+    expect(canExportVectorNodeAsSvgVector(vectorNode({ strokeWidth: 2, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }], widthProfile: { points: {} } }), {})).toBe(
       false,
     );
   });

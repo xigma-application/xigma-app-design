@@ -152,6 +152,15 @@ describe('computeBooleanVectorNode', () => {
     const result = computeBooleanVectorNode(node, [bottom])!;
 
     // result
-    expect(result).toMatchObject({ strokeColor: '#0000ff', strokeWidth: 3 });
+    expect(result).toMatchObject({ strokeWidth: 3, strokes: [expect.objectContaining({ color: '#0000ff' })] });
+  });
+
+  it('should default the stroke width to 1, and drop the stroke for a boolean without strokes', () => {
+    // mock
+    const stroked = { ...makeBoolean(BooleanOperation.union), strokes: [{ color: '#0000ff', opacity: 100, type: 'solid' as const }] };
+
+    // result
+    expect(computeBooleanVectorNode(stroked, [bottom])!.strokeWidth).toBe(1);
+    expect(computeBooleanVectorNode(makeBoolean(BooleanOperation.union), [bottom])).toMatchObject({ strokeWidth: 0, strokes: [] });
   });
 });

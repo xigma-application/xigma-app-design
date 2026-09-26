@@ -54,8 +54,8 @@ describe('getCurvedTunnelPath', () => {
         s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
         s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
       },
-      strokeColor: '#000',
       strokeWidth: 1,
+      strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: {

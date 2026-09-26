@@ -79,7 +79,7 @@ describe('convertStarToVector', () => {
     const result = convertStarToVector(node);
 
     // result
-    expect(result).toMatchObject({ strokeAlign: StrokeAlign.outside, strokeColor: '#123456', strokeWidth: 4 });
+    expect(result).toMatchObject({ strokeAlign: StrokeAlign.outside, strokeWidth: 4, strokes: [expect.objectContaining({ color: '#123456' })] });
   });
 
   it('should fall back to an empty stroke colour when the star has no solid fill', () => {
@@ -87,7 +87,7 @@ describe('convertStarToVector', () => {
     const result = convertStarToVector(buildStar({ fills: [] }));
 
     // result
-    expect(result.strokeColor).toBe('');
+    expect(result.strokes).toEqual([]);
     expect(result.defaultFill).toEqual([]);
   });
 });

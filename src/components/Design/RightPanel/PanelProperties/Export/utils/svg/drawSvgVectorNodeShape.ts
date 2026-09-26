@@ -20,7 +20,6 @@ export const drawSvgVectorNodeShape = async (
   const opacity = getEffectiveOpacity(node, nodesById);
 
   await drawSvgVectorFills(elements, defs, renderedNode, opacity, bounds);
-
-  drawSvgVectorStroke(elements, renderedNode, opacity, bounds);
+  await drawSvgVectorStroke(elements, defs, renderedNode, opacity, bounds);
   drawSvgVectorRoundedCaps(elements, renderedNode, opacity, bounds);
 };

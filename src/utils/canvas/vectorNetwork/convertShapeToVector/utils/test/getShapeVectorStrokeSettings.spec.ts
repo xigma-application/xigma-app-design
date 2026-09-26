@@ -21,7 +21,7 @@ const makeRectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode 
   }) as TRectangleNode;
 
 describe('getShapeVectorStrokeSettings', () => {
-  it('should carry the stroke color, weight, position and mode over to the vector', () => {
+  it('should carry the strokes, weight, position and mode over to the vector', () => {
     // before
     const settings = getShapeVectorStrokeSettings(
       makeRectangle({
@@ -33,7 +33,12 @@ describe('getShapeVectorStrokeSettings', () => {
     );
 
     // result
-    expect(settings).toEqual({ strokeAlign: StrokeAlign.outside, strokeColor: '#ff0000', strokeMode: StrokeMode.dynamic, strokeWidth: 4 });
+    expect(settings).toEqual({
+      strokeAlign: StrokeAlign.outside,
+      strokeMode: StrokeMode.dynamic,
+      strokeWidth: 4,
+      strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+    });
   });
 
   it('should default the position to inside', () => {
@@ -46,7 +51,7 @@ describe('getShapeVectorStrokeSettings', () => {
     expect(settings.strokeAlign).toBe(StrokeAlign.inside);
   });
 
-  it('should carry nothing without a visible stroke paint', () => {
+  it('should carry nothing without strokes', () => {
     // result
     expect(getShapeVectorStrokeSettings(makeRectangle({ strokeWidth: 2 }))).toEqual({});
   });

@@ -153,8 +153,8 @@ const addVectorNode = (): string => {
       parentId: null,
       rotation: 0,
       segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
-      strokeColor: '#000000',
       strokeWidth: 1,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
@@ -545,7 +545,7 @@ describe('continueDrag', () => {
     const idA = addVectorNode();
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
-    const snapshot = { deltaX: 0, deltaY: 0, facesByPaint: [], strokeColor: '#000000', strokeVertices: [] };
+    const snapshot = { deltaX: 0, deltaY: 0, facesByPaint: [], strokeVertices: [], strokes: [{ color: '#000000', opacity: 100, type: 'solid' as const }] };
 
     canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
 
@@ -563,7 +563,7 @@ describe('continueDrag', () => {
     flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
-    expect(snapshot).toEqual({ deltaX: 10, deltaY: 5, facesByPaint: [], strokeColor: '#000000', strokeVertices: [] });
+    expect(snapshot).toEqual({ deltaX: 10, deltaY: 5, facesByPaint: [], strokeVertices: [], strokes: [{ color: '#000000', opacity: 100, type: 'solid' as const }] });
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
       vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     });

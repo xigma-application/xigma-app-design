@@ -213,3 +213,51 @@ test('the vector Appearance opacity fades its fill on the canvas', async ({ page
     })
     .toBe(true);
 });
+
+test('a vector stroke with a gradient paint is drawn with the gradient across the vector', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-gradient-stroke');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — a triangle with a thick red-to-blue stroke
+  await drawSelectedTriangle(designPage, page);
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { rootOrder } = pages[activePageId];
+
+    store.dispatch(
+      updateNode({
+        changes: {
+          strokeWidth: 12,
+          strokes: [
+            {
+              end: { x: 1, y: 0.5 },
+              opacity: 100,
+              start: { x: 0, y: 0.5 },
+              stops: [
+                { color: '#ff0000', opacity: 100, position: 0 },
+                { color: '#0000ff', opacity: 100, position: 1 },
+              ],
+              type: 'gradient-linear',
+            },
+          ],
+        } as never,
+        id: rootOrder[rootOrder.length - 1],
+      }),
+    );
+  });
+  await designPage.click(1500, 900);
+
+  // result — the top edge is red near its left end and blue near its right end
+  await expect
+    .poll(async () => {
+      const [leftRed, , leftBlue] = await readPixelColor(page, 815, 300);
+      const [rightRed, , rightBlue] = await readPixelColor(page, 985, 300);
+
+      return leftRed > leftBlue && rightBlue > rightRed;
+    })
+    .toBe(true);
+});

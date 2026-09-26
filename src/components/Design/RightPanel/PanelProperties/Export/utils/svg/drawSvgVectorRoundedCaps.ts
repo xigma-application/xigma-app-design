@@ -9,6 +9,7 @@ import { TVectorNode } from 'types/design/types';
 import { drawSvgPolygons } from './drawSvgPolygons';
 import { getEllipsePoints } from 'utils/canvas/shapes/getEllipsePoints';
 import { getOpenVectorEndpoints } from 'utils/canvas/vectorNetwork/getOpenVectorEndpoints';
+import { getVisibleSolidStrokePaints } from 'utils/canvas/vector/stroke/getVisibleSolidStrokePaints';
 
 const CAP_SEGMENTS = 16;
 
@@ -29,7 +30,9 @@ export const drawSvgVectorRoundedCaps = (elements: string[], renderedNode: TVect
     });
 
     if (polygons.length > 0) {
-      drawSvgPolygons(elements, polygons, renderedNode.strokeColor, opacity, bounds);
+      getVisibleSolidStrokePaints(renderedNode.strokes).forEach((paint) =>
+        drawSvgPolygons(elements, polygons, paint.color, (opacity * paint.opacity) / 100, bounds),
+      );
     }
   }
 };

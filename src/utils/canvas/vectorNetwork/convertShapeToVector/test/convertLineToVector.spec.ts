@@ -29,7 +29,7 @@ describe('convertLineToVector', () => {
     expect(result.id).toBe('line-1');
     expect(result.defaultFill).toBeNull();
     expect(result.filledFaceKeys).toEqual([]);
-    expect(result.strokeColor).toBe('#ff00ff');
+    expect(result.strokes).toMatchObject([{ color: '#ff00ff' }]);
     expect(result.strokeWidth).toBe(LINE_RENDER_STROKE_WIDTH);
     expect(Object.keys(result.vertices)).toHaveLength(1 + 1);
     expect(Object.keys(result.segments)).toHaveLength(1);
@@ -87,6 +87,6 @@ describe('convertLineToVector', () => {
 
     // result
     expect(result.strokeWidth).toBe(3);
-    expect(result.strokeColor).toBe('');
+    expect(result.strokes).toEqual([]);
   });
 });

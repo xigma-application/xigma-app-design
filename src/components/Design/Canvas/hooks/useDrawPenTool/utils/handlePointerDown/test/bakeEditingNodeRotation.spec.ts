@@ -17,8 +17,8 @@ const node: TVectorNode = {
   parentId: null,
   rotation: 90,
   segments: {},
-  strokeColor: '#000000',
   strokeWidth: 1,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {

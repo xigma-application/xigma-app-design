@@ -247,8 +247,8 @@ test('an unfilled vector dropped into a Union is drawn as its stroke shape in th
             parentId: null,
             rotation: 0,
             segments,
-            strokeColor: '#ff0000',
             strokeWidth: 6,
+            strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
             type: 'vector',
             vertexHandleModes: {},
             vertices,
@@ -492,7 +492,7 @@ test('a Union with a gradient stroke draws that stroke around its shape', async 
   expect(withStroke.equals(withoutStroke)).toBe(false);
 });
 
-test('flattening a Union with a gradient stroke keeps a stroke in the gradient first color', async ({ page }) => {
+test('flattening a Union with a gradient stroke keeps the gradient stroke', async ({ page }) => {
   const designPage = new DesignPage(page);
 
   await designPage.goto('e2e-test-boolean-flatten-gradient-stroke');
@@ -531,12 +531,12 @@ test('flattening a Union with a gradient stroke keeps a stroke in the gradient f
     const { store } = await import('/src/store/index.ts');
     const { activePageId, pages } = store.getState().design;
     const { nodes, rootOrder } = pages[activePageId];
-    const node = nodes[rootOrder[0]] as unknown as { strokeColor: string; strokeWidth: number; type: string };
+    const node = nodes[rootOrder[0]] as unknown as { strokeWidth: number; strokes: { type: string }[]; type: string };
 
-    return { strokeColor: node.strokeColor, strokeWidth: node.strokeWidth, type: node.type };
+    return { strokeTypes: node.strokes.map((stroke) => stroke.type), strokeWidth: node.strokeWidth, type: node.type };
   });
 
-  expect(flattened).toEqual({ strokeColor: '#ff0000', strokeWidth: 4, type: 'vector' });
+  expect(flattened).toEqual({ strokeTypes: ['gradient-linear'], strokeWidth: 4, type: 'vector' });
 });
 
 test('a thick stroke on a Union of thin lines is drawn as a solid band, not a hollow outline with a line through it', async ({ page }) => {

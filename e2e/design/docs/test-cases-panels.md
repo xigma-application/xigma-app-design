@@ -1516,3 +1516,4 @@ There is no Fill section.
 | 671 | A selected vector shows the Vector path panel; its X, W (with the aspect-ratio lock) and Rotation fields move, resize around the top-left and turn it |  ✅  |   ✅ `vector-panel.spec.ts`    |
 | 672 | The vector Fill section: + on a vector without fills fills every closed area, − on the last fill empties them, and areas with different fills show "Click + to replace mixed content" where + gives them all one fill |  ✅  |   ✅ `vector-panel.spec.ts`    |
 | 673 | The vector Appearance section: Opacity fades the vector's fill and stroke on the canvas (also inside a translucent parent), and a blend mode is stored on the vector |  ✅  |   ✅ `vector-panel.spec.ts`    |
+| 674 | A vector stroke with a gradient paint is drawn with the gradient across the whole vector (red at one end of an edge, blue at the other); flattening a shape or Union keeps its gradient stroke |  ✅  |   ✅ `vector-panel.spec.ts`, `boolean-operations.spec.ts`    |

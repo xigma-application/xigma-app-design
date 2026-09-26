@@ -38,8 +38,8 @@ const node: TVectorNode = {
   parentId: null,
   rotation: 0,
   segments: {},
-  strokeColor: '#00ff00',
   strokeWidth: 2,
+  strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {},
@@ -123,7 +123,7 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const dragSnapshotProgram = {} as WebGLProgram;
     const context = buildContext(gl, program, buffer, dragSnapshotProgram);
-    const snapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeColor: '#00ff00', strokeVertices: [] };
+    const snapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeVertices: [], strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }] };
     const vectorSnapshots = createVectorSnapshotsRefs({
       draggedVectorNodeSnapshotsRef: { current: new Map([['node-1', snapshot]]) },
     });
@@ -155,8 +155,8 @@ describe('drawSceneVectorNode', () => {
       scaleX: 2,
       scaleY: 1,
       scaledCenter: { x: 0, y: 0 },
-      strokeColor: '#00ff00',
       strokeWidth: 2,
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
     };
     const vectorSnapshots = createVectorSnapshotsRefs({
       resizedVectorNodeSnapshotsRef: { current: new Map([['node-1', snapshot]]) },
@@ -185,8 +185,8 @@ describe('drawSceneVectorNode', () => {
       scaleX: 2,
       scaleY: 1,
       scaledCenter: { x: 0, y: 0 },
-      strokeColor: '#00ff00',
       strokeWidth: 2,
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
     };
     const vectorSnapshots = createVectorSnapshotsRefs({
       resizedVectorNodeSnapshotsRef: { current: new Map([['node-1', snapshot]]) },
@@ -214,8 +214,8 @@ describe('drawSceneVectorNode', () => {
       deltaDegrees: 45,
       facesByPaint: [],
       pivot: { x: 0, y: 0 },
-      strokeColor: '#00ff00',
       strokeVertices: [],
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
     };
     const vectorSnapshots = createVectorSnapshotsRefs({
       rotatedVectorNodeSnapshotsRef: { current: new Map([['node-1', snapshot]]) },
@@ -239,7 +239,7 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const dragSnapshotProgram = {} as WebGLProgram;
     const context = buildContext(gl, program, buffer, dragSnapshotProgram);
-    const dragSnapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeColor: '#00ff00', strokeVertices: [] };
+    const dragSnapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeVertices: [], strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }] };
     const resizeSnapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
@@ -250,8 +250,8 @@ describe('drawSceneVectorNode', () => {
       scaleX: 2,
       scaleY: 1,
       scaledCenter: { x: 0, y: 0 },
-      strokeColor: '#00ff00',
       strokeWidth: 2,
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
     };
     const vectorSnapshots = createVectorSnapshotsRefs({
       draggedVectorNodeSnapshotsRef: { current: new Map([['node-1', dragSnapshot]]) },
@@ -283,15 +283,15 @@ describe('drawSceneVectorNode', () => {
       scaleX: 2,
       scaleY: 1,
       scaledCenter: { x: 0, y: 0 },
-      strokeColor: '#00ff00',
       strokeWidth: 2,
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
     };
     const rotateSnapshot: TVectorNodeRotateSnapshot = {
       deltaDegrees: 45,
       facesByPaint: [],
       pivot: { x: 0, y: 0 },
-      strokeColor: '#00ff00',
       strokeVertices: [],
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
     };
     const vectorSnapshots = createVectorSnapshotsRefs({
       resizedVectorNodeSnapshotsRef: { current: new Map([['node-1', resizeSnapshot]]) },

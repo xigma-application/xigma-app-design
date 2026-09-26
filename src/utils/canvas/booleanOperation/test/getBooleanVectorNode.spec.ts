@@ -123,8 +123,8 @@ describe('getBooleanVectorNode', () => {
         s3: { endId: 'v4', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
         s4: { endId: 'v1', id: 's4', startId: 'v4', tangentEnd: null, tangentStart: null },
       },
-      strokeColor: '#000000',
       strokeWidth: 4,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: {

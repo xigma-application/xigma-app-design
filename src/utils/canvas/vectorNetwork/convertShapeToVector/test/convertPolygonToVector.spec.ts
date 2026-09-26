@@ -79,7 +79,7 @@ describe('convertPolygonToVector', () => {
     const result = convertPolygonToVector(node);
 
     // result
-    expect(result).toMatchObject({ strokeAlign: StrokeAlign.center, strokeColor: '#ff0000', strokeWidth: 3 });
+    expect(result).toMatchObject({ strokeAlign: StrokeAlign.center, strokeWidth: 3, strokes: [expect.objectContaining({ color: '#ff0000' })] });
   });
 
   it('should fall back to an empty stroke color without a solid fill', () => {
@@ -87,6 +87,6 @@ describe('convertPolygonToVector', () => {
     const result = convertPolygonToVector(buildPolygon({ fills: [] }));
 
     // result
-    expect(result.strokeColor).toBe('');
+    expect(result.strokes).toEqual([]);
   });
 });

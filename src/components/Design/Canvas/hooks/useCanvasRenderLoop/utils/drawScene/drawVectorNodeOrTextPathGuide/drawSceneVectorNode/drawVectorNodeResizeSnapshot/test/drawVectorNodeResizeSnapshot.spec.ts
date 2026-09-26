@@ -64,8 +64,8 @@ describe('drawVectorNodeResizeSnapshot', () => {
       scaleX: 2,
       scaleY: 0.5,
       scaledCenter: { x: 0, y: 0 },
-      strokeColor: '#0d99ff',
       strokeWidth: 4,
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // before
@@ -124,8 +124,8 @@ describe('drawVectorNodeResizeSnapshot', () => {
       scaleX: 3,
       scaleY: 2,
       scaledCenter: { x: 0, y: 0 },
-      strokeColor: '#0d99ff',
       strokeWidth: 4,
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // before
@@ -171,8 +171,8 @@ describe('drawVectorNodeResizeSnapshot', () => {
       scaleX: 2,
       scaleY: 1,
       scaledCenter: { x: 0, y: 0 },
-      strokeColor: '#0d99ff',
       strokeWidth: 4,
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     getThickVectorPathVerticesMock.mockReturnValue([1, 2, 3, 4]);
@@ -222,8 +222,8 @@ describe('drawVectorNodeResizeSnapshot', () => {
       scaleX: 1,
       scaleY: 1,
       scaledCenter: { x: 10, y: 10 },
-      strokeColor: '#0d99ff',
       strokeWidth: 4,
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // before

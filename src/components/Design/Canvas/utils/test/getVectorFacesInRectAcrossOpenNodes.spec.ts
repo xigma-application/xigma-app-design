@@ -17,8 +17,8 @@ const buildTriangleNode = (id: string, offsetX: number): TVectorNode => ({
     s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
     s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
   },
-  strokeColor: '#ffffff',
   strokeWidth: 1,
+  strokes: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {

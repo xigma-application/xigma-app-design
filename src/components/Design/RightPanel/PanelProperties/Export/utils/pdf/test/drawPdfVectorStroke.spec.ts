@@ -20,6 +20,12 @@ vi.mock('utils/canvas/vector/stroke/getVectorStrokeShape', () => ({
 }));
 vi.mock('../drawPdfPolygons', () => ({ drawPdfPolygons: (...args: unknown[]): void => drawPdfPolygonsMock(...args) }));
 
+const drawPdfPaintPolygonsMock = vi.fn();
+
+vi.mock('../drawPdfPaintPolygons', () => ({
+  drawPdfPaintPolygons: (...args: unknown[]): void => drawPdfPaintPolygonsMock(...args),
+}));
+
 const bounds = { height: 100, width: 100, x: 0, y: 0 };
 const page = {} as never;
 const states = new Map<number, PDFName>();
@@ -32,8 +38,8 @@ const node = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
   parentId: null,
   rotation: 0,
   segments: {},
-  strokeColor: '#000000',
   strokeWidth: 2,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {},
@@ -70,9 +76,9 @@ describe('drawPdfVectorStroke', () => {
     expect(drawPdfPolygonsMock).not.toHaveBeenCalled();
   });
 
-  it('should skip drawing when the stroke color is empty', () => {
+  it('should skip drawing when the vector has no strokes', () => {
     // action
-    drawPdfVectorStroke(page, node({ strokeColor: '' }), 1, bounds, states);
+    drawPdfVectorStroke(page, node({ strokes: [] }), 1, bounds, states);
 
     // result
     expect(drawPdfPolygonsMock).not.toHaveBeenCalled();
@@ -90,5 +96,29 @@ describe('drawPdfVectorStroke', () => {
     // result
     expect(getVectorNodeThickStrokeVerticesMock).not.toHaveBeenCalled();
     expect(drawPdfPolygonsMock).toHaveBeenCalledWith(page, polygons, '#000000', 1, bounds, states, 'evenOdd');
+  });
+
+  it('should draw a gradient stroke shape through the paint polygons over the vector bounds', () => {
+    // mock
+    const polygons = [[{ x: 0, y: 0 }]];
+    const gradient = {
+      end: { x: 1, y: 0 },
+      opacity: 100,
+      start: { x: 0, y: 0 },
+      stops: [
+        { color: '#ff0000', opacity: 100, position: 0 },
+        { color: '#0000ff', opacity: 100, position: 1 },
+      ],
+      type: 'gradient-linear' as const,
+    };
+
+    getVectorStrokeShapeMock.mockReturnValueOnce([{ fillRule: 'evenOdd', polygons }]);
+
+    // action
+    drawPdfVectorStroke(page, node({ strokes: [gradient] }), 1, bounds, states);
+
+    // result
+    expect(drawPdfPaintPolygonsMock).toHaveBeenCalledWith(page, [gradient], polygons, 1, bounds, states, { height: 0, width: 0, x: 0, y: 0 });
+    expect(drawPdfPolygonsMock).not.toHaveBeenCalled();
   });
 });

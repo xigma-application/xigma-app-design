@@ -47,8 +47,8 @@ const splitRectangleNode: TVectorNode = {
     rightUpper: { endId: 'f', id: 'rightUpper', startId: 'b', tangentEnd: null, tangentStart: null },
     top: { endId: 'b', id: 'top', startId: 'a', tangentEnd: null, tangentStart: null },
   },
-  strokeColor: '#000000',
   strokeWidth: 1,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {
@@ -176,8 +176,8 @@ describe('commitVectorShapeBuilder', () => {
       [`${id}s3`]: { endId: `${id}v4`, id: `${id}s3`, startId: `${id}v3`, tangentEnd: null, tangentStart: null },
       [`${id}s4`]: { endId: `${id}v1`, id: `${id}s4`, startId: `${id}v4`, tangentEnd: null, tangentStart: null },
     },
-    strokeColor: '#000000',
     strokeWidth: 1,
+    strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
     type: NodeType.vector,
     vertexHandleModes: {},
     vertices: {

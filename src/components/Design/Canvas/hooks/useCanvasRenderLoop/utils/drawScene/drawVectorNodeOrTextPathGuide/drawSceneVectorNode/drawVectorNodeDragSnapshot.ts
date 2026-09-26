@@ -50,16 +50,18 @@ export const drawVectorNodeDragSnapshot = (context: TDrawSceneContext, snapshot:
     );
   });
 
-  drawVectorThickStrokeVertices(
-    gl,
-    dragSnapshotProgram,
-    buffer,
-    dragSnapshotStrokeBufferCache,
-    snapshot.strokeVertices,
-    snapshot.strokeColor,
-    canvasWidth,
-    canvasHeight,
-    viewport,
-    opacity,
+  snapshot.strokes.forEach((paint) =>
+    drawVectorThickStrokeVertices(
+      gl,
+      dragSnapshotProgram,
+      buffer,
+      dragSnapshotStrokeBufferCache,
+      snapshot.strokeVertices,
+      paint.color,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      (paint.opacity / 100) * opacity,
+    ),
   );
 };

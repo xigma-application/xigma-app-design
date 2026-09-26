@@ -19,8 +19,8 @@ const makeSquare = (): TVectorNode => ({
     s3: { endId: 'd', id: 's3', startId: 'c', tangentEnd: { x: 0, y: 0 }, tangentStart: { x: 0, y: 0 } },
     s4: { endId: 'a', id: 's4', startId: 'd', tangentEnd: { x: 0, y: 0 }, tangentStart: { x: 0, y: 0 } },
   },
-  strokeColor: '',
   strokeWidth: 0,
+  strokes: [],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 10, y: 0 }, c: { id: 'c', x: 10, y: 20 }, d: { id: 'd', x: 0, y: 20 } },
@@ -41,7 +41,7 @@ describe('getBooleanShape', () => {
 
     // action
     const first = getBooleanShape(vector);
-    const second = getBooleanShape({ ...vector, strokeColor: '#ff0000' });
+    const second = getBooleanShape({ ...vector, strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }] });
 
     // result
     expect(second).toBe(first);

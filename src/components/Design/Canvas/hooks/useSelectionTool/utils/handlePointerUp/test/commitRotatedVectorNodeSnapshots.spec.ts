@@ -64,7 +64,7 @@ describe('commitRotatedVectorNodeSnapshots', () => {
     const dragState = buildRotateDragState({ [id]: { height: 20, rotation: 0, width: 20, x: 40, y: 40 } });
 
     canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([
-      [id, { deltaDegrees: 90, facesByPaint: [], pivot: { x: 50, y: 50 }, strokeColor: '#00ff00', strokeVertices: [] }],
+      [id, { deltaDegrees: 90, facesByPaint: [], pivot: { x: 50, y: 50 }, strokeVertices: [], strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }] }],
     ]);
 
     // before
@@ -104,7 +104,7 @@ describe('commitRotatedVectorNodeSnapshots', () => {
     const dragState = buildRotateDragState({ [id]: { height: 20, rotation: 0, width: 20, x: 40, y: 40 } });
 
     canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([
-      [id, { deltaDegrees: 90, facesByPaint: [], pivot: { x: 50, y: 50 }, strokeColor: '#00ff00', strokeVertices: [] }],
+      [id, { deltaDegrees: 90, facesByPaint: [], pivot: { x: 50, y: 50 }, strokeVertices: [], strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }] }],
     ]);
 
     // before
@@ -123,7 +123,7 @@ describe('commitRotatedVectorNodeSnapshots', () => {
     const dragState = buildRotateDragState({});
 
     canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([
-      ['missing-id', { deltaDegrees: 45, facesByPaint: [], pivot: { x: 0, y: 0 }, strokeColor: '#00ff00', strokeVertices: [] }],
+      ['missing-id', { deltaDegrees: 45, facesByPaint: [], pivot: { x: 0, y: 0 }, strokeVertices: [], strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }] }],
     ]);
 
     // before

@@ -13,8 +13,8 @@ const buildNode = (rotation: number): TVectorNode => ({
   parentId: null,
   rotation,
   segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 5, y: 0 } } },
-  strokeColor: '#000000',
   strokeWidth: 1,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {

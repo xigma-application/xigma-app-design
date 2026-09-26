@@ -182,8 +182,8 @@ describe('drawPerNodeSelectionOutlines', () => {
       parentId: null,
       rotation: 0,
       segments: {},
-      strokeColor: '#000000',
       strokeWidth: 1,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: {
@@ -219,8 +219,8 @@ describe('drawPerNodeSelectionOutlines', () => {
       parentId: null,
       rotation: 45,
       segments: {},
-      strokeColor: '#000000',
       strokeWidth: 1,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: {
@@ -254,8 +254,8 @@ describe('drawPerNodeSelectionOutlines', () => {
       parentId: null,
       rotation: 0,
       segments: {},
-      strokeColor: '#000000',
       strokeWidth: 1,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: {

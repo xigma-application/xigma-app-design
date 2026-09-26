@@ -13,8 +13,8 @@ const vector: TVectorNode = {
   parentId: null,
   rotation: 0,
   segments: {},
-  strokeColor: '',
   strokeWidth: 0,
+  strokes: [],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {},
@@ -51,19 +51,27 @@ describe('applyBooleanStyle', () => {
     expect(result).toMatchObject({ id: 'union', name: 'Union', parentId: 'frame' });
   });
 
-  it('should use the visible solid stroke with the boolean stroke width', () => {
+  it('should carry the boolean strokes with its stroke width', () => {
     // action
     const result = applyBooleanStyle(vector, makeBoolean({ strokeWidth: 3, strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }] }));
 
     // result
-    expect(result).toMatchObject({ strokeColor: '#00ff00', strokeWidth: 3 });
+    expect(result).toMatchObject({ strokeWidth: 3, strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }] });
   });
 
-  it('should drop the stroke without a visible solid stroke', () => {
+  it('should drop the stroke width when the boolean has no strokes', () => {
     // action
     const result = applyBooleanStyle(vector, makeBoolean({ strokeWidth: 3 }));
 
     // result
-    expect(result).toMatchObject({ strokeColor: '', strokeWidth: 0 });
+    expect(result).toMatchObject({ strokeWidth: 0, strokes: [] });
+  });
+
+  it('should default the stroke width to 1 for a boolean with strokes but no width', () => {
+    // action
+    const result = applyBooleanStyle(vector, makeBoolean({ strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }] }));
+
+    // result
+    expect(result.strokeWidth).toBe(1);
   });
 });

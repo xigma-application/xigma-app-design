@@ -7,7 +7,6 @@ import { TPoint } from 'types/canvas';
 import { combineVectorNetworks } from './combineVectorNetworks';
 import { deriveVectorFaces } from '../vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getBooleanFilledFaceKeys } from './getBooleanFilledFaceKeys';
-import { getBooleanStrokeColor } from './getBooleanStrokeColor';
 import { getRemainingVertices } from '../vectorNetwork/getRemainingVertices';
 import { getVectorRegionPolygons } from './getVectorRegionPolygons';
 import { isBooleanBoundarySegment } from './isBooleanBoundarySegment';
@@ -31,8 +30,8 @@ export const computeBooleanVectorNode = (node: TBooleanNode, operands: TVectorNo
       parentId: node.parentId,
       rotation: 0,
       segments: combined.segments,
-      strokeColor: getBooleanStrokeColor(node) ?? '',
-      strokeWidth: getBooleanStrokeColor(node) ? (node.strokeWidth ?? 1) : 0,
+      strokeWidth: (node.strokes ?? []).length > 0 ? (node.strokeWidth ?? 1) : 0,
+      strokes: node.strokes ?? [],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: combined.vertices,

@@ -79,7 +79,7 @@ describe('convertEllipseToVector', () => {
 
     // result
     expect(result.defaultFill).toBe(fills);
-    expect(result.strokeColor).toBe('');
+    expect(result.strokes).toEqual([]);
   });
 
   it('should keep the stroke with its position on the vector', () => {
@@ -94,6 +94,6 @@ describe('convertEllipseToVector', () => {
     const result = convertEllipseToVector(node);
 
     // result
-    expect(result).toMatchObject({ strokeAlign: StrokeAlign.outside, strokeColor: '#ff0000', strokeWidth: 6 });
+    expect(result).toMatchObject({ strokeAlign: StrokeAlign.outside, strokeWidth: 6, strokes: [expect.objectContaining({ color: '#ff0000' })] });
   });
 });

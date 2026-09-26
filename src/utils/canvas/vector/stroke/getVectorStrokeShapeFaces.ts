@@ -5,12 +5,13 @@ import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { getVectorStrokeShape } from './getVectorStrokeShape';
+import { getVectorStrokeFillShape } from './getVectorStrokeFillShape';
+import { getVisibleStrokePaints } from './getVisibleStrokePaints';
 
 const getShapeFacePolygons = (shape: TLineStrokeShape): TPoint[][][] =>
   shape.fillRule === 'nonZero' ? shape.polygons.map((polygon) => [polygon]) : [shape.polygons];
 
 export const getVectorStrokeShapeFaces = (node: TVectorNode): { paint: TPaint[]; points: TPoint[][] }[] =>
-  (getVectorStrokeShape(node) ?? [])
+  (getVectorStrokeFillShape(node) ?? [])
     .flatMap(getShapeFacePolygons)
-    .map((points) => ({ paint: [{ color: node.strokeColor, opacity: 100, type: 'solid' }], points }));
+    .map((points) => ({ paint: getVisibleStrokePaints(node.strokes), points }));

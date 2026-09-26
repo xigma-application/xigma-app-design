@@ -30,8 +30,8 @@ const baseNode: TVectorNode = {
   parentId: null,
   rotation: 0,
   segments: {},
-  strokeColor: '#00ff00',
   strokeWidth: 4,
+  strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {},
@@ -45,7 +45,7 @@ describe('captureVectorNodeResizeSnapshot', () => {
     flattenVectorSegmentsMock.mockReturnValue([]);
   });
 
-  it('should capture a zeroed scale, no anchor, the grouped fill faces, the flattened segments, and the stroke color/width from the node as given', () => {
+  it('should capture a zeroed scale, no anchor, the grouped fill faces, the flattened segments, and the stroke paints/width from the node as given', () => {
     // mock
     const points = [[{ x: 0, y: 0 }]];
     const flattened = [{ endId: 'v2', points: [{ x: 0, y: 0 }], segmentId: 's1', startId: 'v1' }];
@@ -71,8 +71,8 @@ describe('captureVectorNodeResizeSnapshot', () => {
       scaleX: 1,
       scaleY: 1,
       scaledCenter: { x: 0, y: 0 },
-      strokeColor: '#00ff00',
       strokeWidth: 4,
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
     });
   });
 

@@ -25,8 +25,8 @@ const node: TVectorNode = {
   parentId: null,
   rotation: 0,
   segments: {},
-  strokeColor: '',
   strokeWidth: 0,
+  strokes: [],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {},
@@ -48,7 +48,7 @@ describe('drawSvgVectorNodeShape', () => {
 
     // result
     expect(drawSvgVectorFillsMock).toHaveBeenCalledWith(elements, defs, node, 1, bounds);
-    expect(drawSvgVectorStrokeMock).toHaveBeenCalledWith(elements, node, 1, bounds);
+    expect(drawSvgVectorStrokeMock).toHaveBeenCalledWith(elements, defs, node, 1, bounds);
     expect(drawSvgVectorRoundedCapsMock).toHaveBeenCalledWith(elements, node, 1, bounds);
   });
 

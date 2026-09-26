@@ -8,7 +8,6 @@ import { TVectorNode } from 'types/design/types';
 import { combineVectorNetworks } from '../booleanOperation/combineVectorNetworks';
 import { deriveVectorFaces } from '../vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getBooleanFilledFaceKeys } from '../booleanOperation/getBooleanFilledFaceKeys';
-import { getBooleanStrokeColor } from '../booleanOperation/getBooleanStrokeColor';
 import { getVectorRegionPolygons } from '../booleanOperation/getVectorRegionPolygons';
 import { isPointInEvenOddPolygons } from '../booleanOperation/isPointInEvenOddPolygons';
 
@@ -18,15 +17,14 @@ export const computeFlattenVectorNode = (base: TFlattenBase, operands: TVectorNo
   const regions = operands.filter((operand) => operand.filledFaceKeys.length > 0).map(getVectorRegionPolygons);
   const isInside = (point: TPoint): boolean => regions.some((polygons) => isPointInEvenOddPolygons(point, polygons));
   const combined = combineVectorNetworks(operands);
-  const strokeColor = getBooleanStrokeColor(style);
   const result: TVectorNode = {
     ...base,
     defaultFill: style.fills,
     filledFaceKeys: [],
     rotation: 0,
     segments: combined.segments,
-    strokeColor: strokeColor ?? '',
-    strokeWidth: strokeColor ? (style.strokeWidth ?? 1) : 0,
+    strokeWidth: (style.strokes ?? []).length > 0 ? (style.strokeWidth ?? 1) : 0,
+    strokes: style.strokes ?? [],
     type: NodeType.vector,
     vertexHandleModes: {},
     vertices: combined.vertices,

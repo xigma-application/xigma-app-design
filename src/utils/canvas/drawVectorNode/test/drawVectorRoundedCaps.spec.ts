@@ -24,8 +24,8 @@ const baseNode: TVectorNode = {
   parentId: null,
   rotation: 0,
   segments: {},
-  strokeColor: '#00ff00',
   strokeWidth: 2,
+  strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: { v1: { id: 'v1', x: 10, y: 20 } },
@@ -46,7 +46,7 @@ describe('drawVectorRoundedCaps', () => {
     getOpenVectorEndpointsMock.mockReturnValue(['v1']);
 
     // before
-    drawVectorRoundedCaps(gl, program, buffer, baseNode, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorRoundedCaps(gl, program, buffer, baseNode, '#00ff00', 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(getOpenVectorEndpointsMock).toHaveBeenCalledWith(baseNode);
@@ -72,7 +72,7 @@ describe('drawVectorRoundedCaps', () => {
     getOpenVectorEndpointsMock.mockReturnValue(['v1', 'v2']);
 
     // before
-    drawVectorRoundedCaps(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorRoundedCaps(gl, program, buffer, node, '#00ff00', 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawEllipseMock).toHaveBeenCalledTimes(2);
@@ -86,7 +86,7 @@ describe('drawVectorRoundedCaps', () => {
     const node: TVectorNode = { ...baseNode, capStyle: undefined };
 
     // before
-    drawVectorRoundedCaps(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorRoundedCaps(gl, program, buffer, node, '#00ff00', 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(getOpenVectorEndpointsMock).not.toHaveBeenCalled();

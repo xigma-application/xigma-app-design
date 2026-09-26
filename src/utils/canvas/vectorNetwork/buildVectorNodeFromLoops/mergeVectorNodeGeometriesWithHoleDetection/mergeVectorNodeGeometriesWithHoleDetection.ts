@@ -14,28 +14,28 @@ export const mergeVectorNodeGeometriesWithHoleDetection = (
   base: TVectorNodeLoopsBase,
   fillColor: string,
 ): TVectorNode | null => {
-  if (nodes.length === 0) {
-    return null;
+  if (nodes.length !== 0) {
+    const faces = getNodeFaces(nodes);
+    const holeParentByKey = getHoleParentByKey(faces);
+    const { fillByKey, filledFaceKeys, segments, vertices } = mergeNodeFields(nodes);
+    
+    return {
+      defaultFill: [makeSolidPaint(fillColor)],
+      fillByKey,
+      filledFaceKeys,
+      holeParentByKey,
+      id: base.id,
+      name: base.name,
+      parentId: base.parentId,
+      rotation: base.rotation,
+      segments,
+      strokeWidth: 0,
+      strokes: [],
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices,
+    };
   }
-
-  const faces = getNodeFaces(nodes);
-  const holeParentByKey = getHoleParentByKey(faces);
-  const { fillByKey, filledFaceKeys, segments, vertices } = mergeNodeFields(nodes);
-
-  return {
-    defaultFill: [makeSolidPaint(fillColor)],
-    fillByKey,
-    filledFaceKeys,
-    holeParentByKey,
-    id: base.id,
-    name: base.name,
-    parentId: base.parentId,
-    rotation: base.rotation,
-    segments,
-    strokeColor: fillColor,
-    strokeWidth: 0,
-    type: NodeType.vector,
-    vertexHandleModes: {},
-    vertices,
-  };
+  
+  return null;
 };

@@ -20,8 +20,8 @@ const triangleNode: TVectorNode = {
     s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
     s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
   },
-  strokeColor: '#000000',
   strokeWidth: 1,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {
@@ -49,8 +49,8 @@ const splitRectangleNode: TVectorNode = {
     rightUpper: { endId: 'f', id: 'rightUpper', startId: 'b', tangentEnd: null, tangentStart: null },
     top: { endId: 'b', id: 'top', startId: 'a', tangentEnd: null, tangentStart: null },
   },
-  strokeColor: '#000000',
   strokeWidth: 1,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {

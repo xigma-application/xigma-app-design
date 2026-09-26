@@ -21,16 +21,18 @@ export const drawVectorNodeRotateSnapshotStroke = (context: TDrawSceneContext, s
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const rotatedStrokeVertices = rotateStrokeVertices(snapshot.strokeVertices, snapshot);
 
-  drawVectorThickStrokeVertices(
-    gl,
-    program,
-    buffer,
-    null,
-    rotatedStrokeVertices,
-    snapshot.strokeColor,
-    canvasWidth,
-    canvasHeight,
-    viewport,
-    opacity,
+  snapshot.strokes.forEach((paint) =>
+    drawVectorThickStrokeVertices(
+      gl,
+      program,
+      buffer,
+      null,
+      rotatedStrokeVertices,
+      paint.color,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      (paint.opacity / 100) * opacity,
+    ),
   );
 };

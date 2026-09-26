@@ -313,8 +313,8 @@ describe('continueRotateDrag', () => {
       deltaDegrees: 0,
       facesByPaint: [],
       pivot: { x: 50, y: 50 },
-      strokeColor: '#000000',
       strokeVertices: [],
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
     });
 
     it('should update a snapshotted vector node’s delta and mark it as rotated, without touching the store at all', () => {

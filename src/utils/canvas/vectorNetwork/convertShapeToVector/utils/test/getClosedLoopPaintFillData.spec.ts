@@ -25,8 +25,8 @@ describe('getClosedLoopPaintFillData', () => {
       name: 'Vector',
       parentId: null,
       rotation: 0,
-      strokeColor: '',
       strokeWidth: 0,
+      strokes: [],
       type: NodeType.vector,
       vertexHandleModes: {},
     };

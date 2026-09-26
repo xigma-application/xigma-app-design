@@ -3,64 +3,33 @@ import { TDrawSceneContext } from '../../types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { drawVectorFill } from 'utils/canvas/drawVectorNode/drawVectorFill';
 import { drawVectorFillGroup } from './drawVectorFillGroup';
-import { drawVectorRoundedCaps } from 'utils/canvas/drawVectorNode/drawVectorRoundedCaps';
-import { drawVectorThickStrokeVertices } from 'utils/canvas/drawVectorNode/drawVectorThickStrokeVertices';
-import { drawVectorVariableStroke } from './drawVectorVariableStroke';
+import { drawVectorSolidStroke } from './drawVectorSolidStroke';
 import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
-import { getVectorStrokeShape } from 'utils/canvas/vector/stroke/getVectorStrokeShape';
-import { getVectorNodeThickStrokeVertices } from 'utils/canvas/vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices';
+import { getVectorStrokeFillShape } from 'utils/canvas/vector/stroke/getVectorStrokeFillShape';
+import { getVisibleSolidStrokePaints } from 'utils/canvas/vector/stroke/getVisibleSolidStrokePaints';
+import { getVisibleStrokePaints } from 'utils/canvas/vector/stroke/getVisibleStrokePaints';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 import { withPaintsOpacity } from 'utils/design/paint/withPaintsOpacity';
 
 export const drawVectorNode = (context: TDrawSceneContext, node: TVectorNode, opacity = 1): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
-  const { faceBufferCache, strokeBufferCache } = imageContext;
+  const { faceBufferCache } = context.imageContext;
   const renderedNode = getRenderedVectorNode(node);
   const nodeBounds = getVectorNodeBounds(renderedNode);
-  const strokeShapes = getVectorStrokeShape(renderedNode);
+  const strokeShapes = getVectorStrokeFillShape(renderedNode);
 
   groupFilledFacesForRendering(renderedNode).forEach(({ paint, polygons }) => {
     drawVectorFillGroup(context, faceBufferCache, nodeBounds, polygons, withPaintsOpacity(paint, opacity));
   });
 
   if (strokeShapes) {
-    strokeShapes.forEach(({ fillRule, polygons }) => {
-      drawVectorFill(
-        gl,
-        program,
-        buffer,
-        null,
-        null,
-        polygons,
-        renderedNode.strokeColor,
-        canvasWidth,
-        canvasHeight,
-        viewport,
-        imageContext.isAlphaWriteEnabled,
-        opacity,
-        fillRule,
-      );
-    });
-  } else if (renderedNode.widthProfile) {
-    drawVectorVariableStroke(gl, program, buffer, renderedNode, renderedNode.strokeColor, canvasWidth, canvasHeight, viewport, opacity);
-  } else {
-    const strokeVertices = getVectorNodeThickStrokeVertices(renderedNode, renderedNode.strokeWidth / 2);
-    drawVectorThickStrokeVertices(
-      gl,
-      program,
-      buffer,
-      strokeBufferCache,
-      strokeVertices,
-      renderedNode.strokeColor,
-      canvasWidth,
-      canvasHeight,
-      viewport,
-      opacity,
-    );
-  }
+    const strokePaints = withPaintsOpacity(getVisibleStrokePaints(renderedNode.strokes), opacity);
 
-  drawVectorRoundedCaps(gl, program, buffer, renderedNode, canvasWidth, canvasHeight, viewport, opacity);
+    strokeShapes.forEach(({ fillRule, polygons }) => {
+      drawVectorFillGroup(context, null, nodeBounds, polygons, strokePaints, [], undefined, fillRule);
+    });
+  } else {
+    getVisibleSolidStrokePaints(renderedNode.strokes).forEach((paint) => drawVectorSolidStroke(context, renderedNode, paint, opacity));
+  }
 };

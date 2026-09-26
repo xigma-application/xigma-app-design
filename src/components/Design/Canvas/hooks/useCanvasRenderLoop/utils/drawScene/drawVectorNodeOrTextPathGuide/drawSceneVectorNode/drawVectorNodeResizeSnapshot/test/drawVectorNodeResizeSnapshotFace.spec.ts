@@ -48,8 +48,8 @@ const snapshot: TVectorNodeResizeSnapshot = {
   scaleX: 2,
   scaleY: 1,
   scaledCenter: { x: 0, y: 0 },
-  strokeColor: '#0d99ff',
   strokeWidth: 4,
+  strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
 };
 
 describe('drawVectorNodeResizeSnapshotFace', () => {

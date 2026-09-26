@@ -104,8 +104,8 @@ const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => (
   parentId: null,
   rotation: 0,
   segments: {},
-  strokeColor: '#000',
   strokeWidth: 4,
+  strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {},
@@ -323,14 +323,14 @@ describe('handleUpdateNode', () => {
 
   it('should not run the width-profile eligibility check when the patch does not touch segments', () => {
     // mock
-    const vectorNode = buildVectorNode({ strokeColor: '#000', widthProfile: null });
+    const vectorNode = buildVectorNode({ strokes: [{ color: '#000', opacity: 100, type: 'solid' }], widthProfile: null });
     const state = buildState({ [vectorNode.id]: vectorNode });
 
     // before
-    handleUpdateNode(state, { changes: { strokeColor: '#fff' }, id: vectorNode.id });
+    handleUpdateNode(state, { changes: { strokes: [{ color: '#fff', opacity: 100, type: 'solid' }] }, id: vectorNode.id });
 
     // result
-    expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).strokeColor).toBe('#fff');
+    expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).strokes).toEqual([{ color: '#fff', opacity: 100, type: 'solid' }]);
   });
 
   it('should move a rotated group box directly on a plain x/y update, without scaling its children', () => {

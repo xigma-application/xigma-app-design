@@ -112,8 +112,8 @@ const addVectorNode = (x: number, y: number, width: number, height: number, rota
       parentId: null,
       rotation,
       segments: {},
-      strokeColor: '#000000',
       strokeWidth: 1,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: {
@@ -1095,8 +1095,8 @@ describe('continueResizeDrag', () => {
       scaleX: 1,
       scaleY: 1,
       scaledCenter: { x: 0, y: 0 },
-      strokeColor: '#000000',
       strokeWidth: 1,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
     });
 
     it('should update a snapshotted vector node’s anchor/scale and mark it as resized, without touching the store at all', () => {

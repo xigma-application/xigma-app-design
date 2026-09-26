@@ -11,8 +11,8 @@ describe('rotateSnapshotPoint', () => {
       deltaDegrees: 0,
       facesByPaint: [],
       pivot: { x: 0, y: 0 },
-      strokeColor: '#0d99ff',
       strokeVertices: [],
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // result
@@ -25,8 +25,8 @@ describe('rotateSnapshotPoint', () => {
       deltaDegrees: 90,
       facesByPaint: [],
       pivot: { x: 0, y: 0 },
-      strokeColor: '#0d99ff',
       strokeVertices: [],
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // before
@@ -43,8 +43,8 @@ describe('rotateSnapshotPoint', () => {
       deltaDegrees: 90,
       facesByPaint: [],
       pivot: { x: 100, y: 50 },
-      strokeColor: '#0d99ff',
       strokeVertices: [],
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // before

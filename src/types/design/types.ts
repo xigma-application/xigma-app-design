@@ -469,7 +469,6 @@ export type TVectorNode = {
   strokeBrushRotation?: number;
   strokeBrushSizeJitter?: number;
   strokeBrushWiggle?: number;
-  strokeColor: string;
   strokeDash?: number;
   strokeDashCap?: StrokeDashCap;
   strokeDashes?: number[];
@@ -482,6 +481,7 @@ export type TVectorNode = {
   strokeProfileFlipped?: boolean;
   strokeStyle?: StrokeStyle;
   strokeWidth: number;
+  strokes: TPaint[];
   type: NodeType.vector;
   vertexHandleModes: Record<string, TVertexHandleMode>;
   vertices: Record<string, TVectorVertex>;

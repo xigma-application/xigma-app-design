@@ -13,6 +13,7 @@ export const drawVectorRoundedCaps = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   node: TVectorNode,
+  color: string,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -27,7 +28,7 @@ export const drawVectorRoundedCaps = (
         program,
         buffer,
         {
-          fill: node.strokeColor,
+          fill: color,
           fillAlpha: alpha,
           height: PENCIL_CAP_RADIUS_PX * 2,
           width: PENCIL_CAP_RADIUS_PX * 2,

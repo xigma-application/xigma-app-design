@@ -5498,6 +5498,27 @@ explicit rotate (checks the committed `start`/`end` match the rotated angle and 
 changed), one reproducing the tab-switch bug above directly (open Gradient, close immediately, paint
 — still a real gradient).
 
+## 80. Vector strokes become paints — `strokes: TPaint[]` replaces `strokeColor`
+
+`TVectorNode.strokeColor: string` is gone; vectors carry `strokes: TPaint[]` like every other shape (an empty
+list means no stroke; `strokeWidth`/`strokeAlign` stay). Every creator writes a list: the pen and pencil
+`[solid]`, cut/erase/loop builders `[]`, and the shape conversions (Edit object, Flatten, Offset vector,
+boolean result) copy the shape's own `strokes`, so a gradient stroke survives Flatten instead of collapsing
+to its first stop. Offset vector of a line without strokes keeps its old black fallback
+(`LINE_OFFSET_FALLBACK_STROKE`).
+
+Rendering (`drawVectorNode`): `utils/canvas/vector/stroke/getVectorStrokeFillShape` returns the stroke as
+polygons when it already needs them (aligned, dashed, profile, brush) or when any visible stroke paint is not
+solid (then even a plain centred stroke is outlined via `getVectorPathStrokeShape(..., 'uniform')`); those
+polygons go through `drawVectorFillGroup` with the whole stroke stack and the vector bounds, exactly like a
+fill, so gradients/images/patterns span the whole vector. Otherwise each visible solid paint draws the fast
+triangle stroke (`drawVectorSolidStroke`: width-profile or thick vertices, then round caps in that color).
+Snapshots keep `strokes: TSolidPaint[]` for the triangle path and get polygon strokes appended to
+`facesByPaint` through `getVectorStrokeShapeFaces`. SVG/PDF export mirrors this (`drawSvgVectorStroke` is now
+async), and `canExportVectorNodeAsSvgVector`/`canExportVectorNodeAsVector` also require every visible stroke
+paint to be exportable, falling back to raster otherwise. `canOutlineNodeStroke` reads the list for vectors.
+Known limit: a non-solid paint on a width-profile stroke is outlined at the uniform width.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

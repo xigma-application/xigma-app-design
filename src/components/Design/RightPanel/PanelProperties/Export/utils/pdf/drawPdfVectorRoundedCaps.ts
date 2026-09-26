@@ -11,6 +11,7 @@ import { TVectorNode } from 'types/design/types';
 import { drawPdfPolygons } from './drawPdfPolygons';
 import { getEllipsePoints } from 'utils/canvas/shapes/getEllipsePoints';
 import { getOpenVectorEndpoints } from 'utils/canvas/vectorNetwork/getOpenVectorEndpoints';
+import { getVisibleSolidStrokePaints } from 'utils/canvas/vector/stroke/getVisibleSolidStrokePaints';
 
 const CAP_SEGMENTS = 16;
 
@@ -37,7 +38,9 @@ export const drawPdfVectorRoundedCaps = (
     });
 
     if (polygons.length > 0) {
-      drawPdfPolygons(page, polygons, renderedNode.strokeColor, opacity, bounds, graphicsStates);
+      getVisibleSolidStrokePaints(renderedNode.strokes).forEach((paint) =>
+        drawPdfPolygons(page, polygons, paint.color, (opacity * paint.opacity) / 100, bounds, graphicsStates),
+      );
     }
   }
 };

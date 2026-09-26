@@ -138,7 +138,12 @@ test.describe('Flatten — shapes', () => {
       const state = await readDesignState(page);
       const [id] = state.rootOrder;
 
-      expect(state.nodes[id]).toMatchObject({ strokeAlign: 'inside', strokeColor: '#ff0000', strokeWidth: 12, type: 'vector' });
+      expect(state.nodes[id]).toMatchObject({
+        strokeAlign: 'inside',
+        strokeWidth: 12,
+        strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+        type: 'vector',
+      });
     });
   }
 

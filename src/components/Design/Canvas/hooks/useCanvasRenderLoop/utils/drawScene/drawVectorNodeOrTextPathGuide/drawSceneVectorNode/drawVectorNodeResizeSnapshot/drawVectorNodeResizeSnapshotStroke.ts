@@ -16,16 +16,18 @@ export const drawVectorNodeResizeSnapshotStroke = (context: TDrawSceneContext, s
   const scaledSegments = scaleFlattenedSegments(snapshot.flattenedSegments, snapshot);
   const strokeVertices = getThickVectorPathVertices(scaledSegments, snapshot.strokeWidth / 2);
 
-  drawVectorThickStrokeVertices(
-    gl,
-    program,
-    buffer,
-    null,
-    strokeVertices,
-    snapshot.strokeColor,
-    canvasWidth,
-    canvasHeight,
-    viewport,
-    opacity,
+  snapshot.strokes.forEach((paint) =>
+    drawVectorThickStrokeVertices(
+      gl,
+      program,
+      buffer,
+      null,
+      strokeVertices,
+      paint.color,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      (paint.opacity / 100) * opacity,
+    ),
   );
 };

@@ -11,6 +11,7 @@ import { buildVectorNetworkFromPoints } from '../../../../useDrawPencilTool/util
 import { drawVectorRoundedCaps } from 'utils/canvas/drawVectorNode/drawVectorRoundedCaps';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 
 export const drawSmoothedPencilPreview = (
   gl: WebGL2RenderingContext,
@@ -32,8 +33,8 @@ export const drawSmoothedPencilPreview = (
       parentId: null,
       rotation: 0,
       segments,
-      strokeColor: PENCIL_STROKE,
       strokeWidth: PENCIL_STROKE_WIDTH,
+      strokes: [makeSolidPaint(PENCIL_STROKE)],
       type: NodeType.vector,
       vertexHandleModes,
       vertices,
@@ -50,6 +51,6 @@ export const drawSmoothedPencilPreview = (
       canvasHeight,
       viewport,
     );
-    drawVectorRoundedCaps(gl, program, buffer, previewNode, canvasWidth, canvasHeight, viewport);
+    drawVectorRoundedCaps(gl, program, buffer, previewNode, PENCIL_STROKE, canvasWidth, canvasHeight, viewport);
   }
 };

@@ -47,8 +47,8 @@ export const getPolygonOffsetVector = (polygon: TPolygonNode | TStarNode, distan
     name: 'Vector',
     parentId: polygon.parentId,
     rotation: 0,
-    strokeColor: '',
     strokeWidth: 0,
+    strokes: [],
     type: NodeType.vector,
     vertexHandleModes: {},
   };

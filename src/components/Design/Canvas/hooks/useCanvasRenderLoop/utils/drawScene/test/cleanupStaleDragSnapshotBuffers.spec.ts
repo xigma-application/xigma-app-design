@@ -27,8 +27,8 @@ const buildSnapshot = (facePoints: TPoint[], strokeVertices: number[]): TVectorN
   deltaX: 0,
   deltaY: 0,
   facesByPaint: [{ paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }], points: [facePoints] }],
-  strokeColor: '#0d99ff',
   strokeVertices,
+  strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
 });
 
 describe('cleanupStaleDragSnapshotBuffers', () => {
@@ -158,8 +158,8 @@ describe('cleanupStaleDragSnapshotBuffers', () => {
         { paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }], points: [faceA] },
         { paint: [{ color: '#00ff00', opacity: 100, type: 'solid' }], points: [faceB] },
       ],
-      strokeColor: '#0d99ff',
       strokeVertices: [],
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
     const bufferA = {} as WebGLBuffer;
     const bufferB = {} as WebGLBuffer;

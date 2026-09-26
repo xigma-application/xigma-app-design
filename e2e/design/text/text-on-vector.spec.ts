@@ -66,8 +66,8 @@ const injectVector = (
           segments: Object.fromEntries(
             Object.entries(segments).map(([id, { endId, startId }]) => [id, { endId, id, startId, tangentEnd: null, tangentStart: null }]),
           ),
-          strokeColor: '#000000',
           strokeWidth: 1,
+          strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
           type: 'vector',
           vertexHandleModes: {},
           vertices: Object.fromEntries(Object.entries(vertices).map(([id, point]) => [id, { id, ...point }])),
@@ -575,8 +575,8 @@ test('undoing a shape-to-vector text attach peels back the text commit first, th
   await expect(designPage.canvas).toBeVisible();
 
   await designPage.drawRectangle(900, 300, 1100, 450);
-  const originalFill = Object.values(await readNodes(page))[0].fill;
-  expect(originalFill).toBeTruthy(); // sanity: the freshly drawn rectangle really does start out filled
+  const originalFills = Object.values(await readNodes(page))[0].fills;
+  expect(originalFills).toHaveLength(1); // sanity: the freshly drawn rectangle really does start out filled
 
   await designPage.attachTextOnPath(1000, 375);
   await designPage.typeText('Hi');
@@ -596,7 +596,7 @@ test('undoing a shape-to-vector text attach peels back the text commit first, th
   const afterSecondUndo = await readNodes(page);
   const restored = Object.values(afterSecondUndo)[0];
   expect(restored.type).toBe('rectangle'); // back to being a plain rectangle
-  expect(restored.fill).toBe(originalFill); // its original fill is back
+  expect(restored.fills).toEqual(originalFills); // its original fill is back
 });
 
 test('resizing the source vector node updates the attached text live, since they are bound by pathId', async ({ page }) => {

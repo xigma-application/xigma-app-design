@@ -25,8 +25,8 @@ const splitRectangleNode: TVectorNode = {
     rightUpper: { endId: 'f', id: 'rightUpper', startId: 'b', tangentEnd: null, tangentStart: null },
     top: { endId: 'b', id: 'top', startId: 'a', tangentEnd: null, tangentStart: null },
   },
-  strokeColor: '#000000',
   strokeWidth: 1,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {
@@ -66,8 +66,8 @@ const crossingRectanglesNode: TVectorNode = {
     'r2Top#0': { endId: 'y', id: 'r2Top#0', startId: 'r2a', tangentEnd: null, tangentStart: null },
     'r2Top#1': { endId: 'r2b', id: 'r2Top#1', startId: 'y', tangentEnd: null, tangentStart: null },
   },
-  strokeColor: '#000000',
   strokeWidth: 1,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {

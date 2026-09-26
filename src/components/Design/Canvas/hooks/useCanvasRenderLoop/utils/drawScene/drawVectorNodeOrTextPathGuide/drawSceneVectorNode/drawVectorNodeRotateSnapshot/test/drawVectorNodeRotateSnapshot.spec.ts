@@ -41,8 +41,8 @@ describe('drawVectorNodeRotateSnapshot', () => {
       deltaDegrees: 90,
       facesByPaint: [{ paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }], points: [[{ x: 10, y: 0 }]] }],
       pivot: { x: 0, y: 0 },
-      strokeColor: '#0d99ff',
       strokeVertices: [],
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // before
@@ -76,8 +76,8 @@ describe('drawVectorNodeRotateSnapshot', () => {
       deltaDegrees: 0,
       facesByPaint: [{ paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }], points: [[{ x: 10, y: 5 }]] }],
       pivot: { x: 0, y: 0 },
-      strokeColor: '#0d99ff',
       strokeVertices: [],
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // before
@@ -107,8 +107,8 @@ describe('drawVectorNodeRotateSnapshot', () => {
       deltaDegrees: 90,
       facesByPaint: [],
       pivot: { x: 0, y: 0 },
-      strokeColor: '#0d99ff',
       strokeVertices: [10, 0, 0, 10],
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // before

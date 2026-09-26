@@ -62,14 +62,18 @@ const getArcCutEdges = (node: TEllipseNode, arcStartAngle: number, arcEndAngle: 
   }));
 };
 
-export const convertEllipseToVector = (node: TEllipseNode): TVectorNode => {
+const getEllipseEdges = (node: TEllipseNode): TLoopEdge[] => {
   const arcStartAngle = node.arcStartAngle ?? 90;
   const arcEndAngle = node.arcEndAngle ?? 90;
   const isFullEllipse = !hasEllipseArc(arcStartAngle, arcEndAngle) && (node.arcRatio ?? 0) <= 0;
-  const edges = isFullEllipse
+
+  return isFullEllipse
     ? getFullEllipseEdges(node.x + node.width / 2, node.y + node.height / 2, node.width / 2, node.height / 2)
     : getArcCutEdges(node, arcStartAngle, arcEndAngle);
-  const { segments, vertices } = buildClosedLoopFromEdges(edges);
+};
+
+export const convertEllipseToVector = (node: TEllipseNode): TVectorNode => {
+  const { segments, vertices } = buildClosedLoopFromEdges(getEllipseEdges(node));
   const fillColor = getSolidPaintColor(node.fills) ?? '';
   const base: TVectorNode = {
     defaultFill: node.fills,
@@ -79,8 +83,8 @@ export const convertEllipseToVector = (node: TEllipseNode): TVectorNode => {
     parentId: node.parentId,
     rotation: node.rotation,
     segments,
-    strokeColor: fillColor,
     strokeWidth: SHAPE_VECTOR_STROKE_WIDTH,
+    strokes: [],
     type: NodeType.vector,
     vertexHandleModes: {},
     vertices,

@@ -42,8 +42,8 @@ const snapshot: TVectorNodeRotateSnapshot = {
   deltaDegrees: 90,
   facesByPaint: [],
   pivot: { x: 0, y: 0 },
-  strokeColor: '#0d99ff',
   strokeVertices: [],
+  strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
 };
 
 describe('drawVectorNodeRotateSnapshotFace', () => {

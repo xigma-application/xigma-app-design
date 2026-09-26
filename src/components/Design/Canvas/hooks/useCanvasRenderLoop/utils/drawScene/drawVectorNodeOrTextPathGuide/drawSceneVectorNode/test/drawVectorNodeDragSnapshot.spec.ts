@@ -74,7 +74,7 @@ describe('drawVectorNodeDragSnapshot', () => {
 
     (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockReturnValue(translateLocation);
 
-    const snapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeColor: '#0d99ff', strokeVertices: [] };
+    const snapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeVertices: [], strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }] };
 
     // before
     drawVectorNodeDragSnapshot(buildContext(gl, buffer, program, faceBufferCache, strokeBufferCache), snapshot);
@@ -105,8 +105,8 @@ describe('drawVectorNodeDragSnapshot', () => {
         { paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }], points: [faceA] },
         { paint: [{ color: '#00ff00', opacity: 100, type: 'solid' }], points: [faceB] },
       ],
-      strokeColor: '#0d99ff',
       strokeVertices: [],
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // before
@@ -166,7 +166,7 @@ describe('drawVectorNodeDragSnapshot', () => {
     const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
     const strokeVertices = [0, 0, 10, 0, 10, 1, 0, 1];
-    const snapshot: TVectorNodeDragSnapshot = { deltaX: 3, deltaY: 4, facesByPaint: [], strokeColor: '#0d99ff', strokeVertices };
+    const snapshot: TVectorNodeDragSnapshot = { deltaX: 3, deltaY: 4, facesByPaint: [], strokeVertices, strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }] };
 
     // before
     drawVectorNodeDragSnapshot(buildContext(gl, buffer, program, faceBufferCache, strokeBufferCache), snapshot);

@@ -29,8 +29,8 @@ const addVectorNode = (): string => {
       parentId: null,
       rotation: 0,
       segments: ORIGIN.segments,
-      strokeColor: '#000000',
       strokeWidth: 2,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: {

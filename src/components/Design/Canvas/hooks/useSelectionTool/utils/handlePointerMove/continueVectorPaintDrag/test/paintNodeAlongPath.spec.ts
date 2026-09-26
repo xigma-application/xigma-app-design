@@ -28,8 +28,8 @@ const buildSplitSquareVectorNode = (filledFaceKeys: string[] = [], fillByKey: Re
     s3: { endId: 'd', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
     s4: { endId: 'a', id: 's4', startId: 'd', tangentEnd: null, tangentStart: null },
   },
-  strokeColor: '#000000',
   strokeWidth: 1,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {
@@ -56,8 +56,8 @@ const buildSquareWithVirtualCrossingVectorNode = (): TVectorNode => ({
     s3: { endId: 'd', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
     s4: { endId: 'a', id: 's4', startId: 'd', tangentEnd: null, tangentStart: null },
   },
-  strokeColor: '#000000',
   strokeWidth: 1,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {

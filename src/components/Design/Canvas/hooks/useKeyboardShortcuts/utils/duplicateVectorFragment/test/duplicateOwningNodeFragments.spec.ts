@@ -21,8 +21,8 @@ const addVectorNode = (idSuffix: string): string => {
       segments: {
         [`s${idSuffix}`]: { endId: `v2${idSuffix}`, id: `s${idSuffix}`, startId: `v1${idSuffix}`, tangentEnd: null, tangentStart: null },
       },
-      strokeColor: '#000000',
       strokeWidth: 1,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: {

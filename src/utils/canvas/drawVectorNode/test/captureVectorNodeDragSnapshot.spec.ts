@@ -38,8 +38,8 @@ const baseNode: TVectorNode = {
   parentId: null,
   rotation: 0,
   segments: {},
-  strokeColor: '#00ff00',
   strokeWidth: 4,
+  strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {},
@@ -56,7 +56,7 @@ describe('captureVectorNodeDragSnapshot', () => {
     getThickVectorPathVerticesMock.mockReturnValue([]);
   });
 
-  it('should capture a zeroed delta, the grouped fill faces, and the stroke color/vertices from the node as given', () => {
+  it('should capture a zeroed delta, the grouped fill faces, and the stroke paints/vertices from the node as given', () => {
     // mock
     const points = [[{ x: 0, y: 0 }]];
 
@@ -77,8 +77,8 @@ describe('captureVectorNodeDragSnapshot', () => {
       deltaX: 0,
       deltaY: 0,
       facesByPaint: [{ paint, points }],
-      strokeColor: '#00ff00',
       strokeVertices: [0, 0, 10, 0, 10, 1],
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
     });
   });
 

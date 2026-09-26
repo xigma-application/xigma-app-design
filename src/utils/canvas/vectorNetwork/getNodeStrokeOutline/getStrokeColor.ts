@@ -11,6 +11,7 @@ export const getStrokeColor = (node: TStrokeableNode): string => {
     case NodeType.line:
     case NodeType.polygon:
     case NodeType.star:
+    case NodeType.vector:
       return getBooleanStrokeColor(node) ?? '';
     default:
       return node.strokeColor ?? '';

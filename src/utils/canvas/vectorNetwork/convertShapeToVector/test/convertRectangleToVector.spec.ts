@@ -48,7 +48,7 @@ describe('convertRectangleToVector', () => {
     const result = convertRectangleToVector(node);
 
     // result
-    expect(result.strokeColor).toBe('');
+    expect(result.strokes).toEqual([]);
   });
 
   it('should round every corner into a curve when cornerRadius is set', () => {
@@ -91,6 +91,6 @@ describe('convertRectangleToVector', () => {
     const result = convertRectangleToVector(node);
 
     // result
-    expect(result).toMatchObject({ strokeAlign: StrokeAlign.outside, strokeColor: '#ff0000', strokeWidth: 6 });
+    expect(result).toMatchObject({ strokeAlign: StrokeAlign.outside, strokeWidth: 6, strokes: [expect.objectContaining({ color: '#ff0000' })] });
   });
 });

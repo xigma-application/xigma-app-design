@@ -21,3 +21,5 @@ export const LINE_VECTOR_STROKE_SETTING_KEYS: (keyof TLineNode & keyof TVectorNo
   'strokeProfileFlipped',
   'strokeStyle',
 ];
+
+export const LINE_OFFSET_FALLBACK_STROKE = '#000000';

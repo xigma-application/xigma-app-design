@@ -42,8 +42,8 @@ const baseNode: TVectorNode = {
   parentId: null,
   rotation: 30,
   segments: {},
-  strokeColor: '#00ff00',
   strokeWidth: 4,
+  strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {},
@@ -62,7 +62,7 @@ describe('captureVectorNodeRotateSnapshot', () => {
     getVectorNodeBoundsMock.mockReturnValue({ height: 0, width: 0, x: 0, y: 0 });
   });
 
-  it('should capture a zeroed delta, the pivot from the node’s own local bounds, the grouped fill faces, and the stroke color/vertices derived from the already-rendered (baked) node', () => {
+  it('should capture a zeroed delta, the pivot from the node’s own local bounds, the grouped fill faces, and the stroke paints/vertices derived from the already-rendered (baked) node', () => {
     // mock
     const renderedNode: TVectorNode = { ...baseNode, rotation: 0 };
     const points = [[{ x: 0, y: 0 }]];
@@ -86,8 +86,8 @@ describe('captureVectorNodeRotateSnapshot', () => {
       deltaDegrees: 0,
       facesByPaint: [{ paint, points }],
       pivot: { x: 30, y: 20 },
-      strokeColor: '#00ff00',
       strokeVertices: [0, 0, 10, 0, 10, 1],
+      strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
     });
   });
 

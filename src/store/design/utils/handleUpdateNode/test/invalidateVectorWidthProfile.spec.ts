@@ -21,8 +21,8 @@ const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => (
   parentId: null,
   rotation: 0,
   segments: {},
-  strokeColor: '#000',
   strokeWidth: 4,
+  strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: {},
@@ -66,7 +66,7 @@ describe('invalidateVectorWidthProfile', () => {
     });
 
     // action
-    invalidateVectorWidthProfile(vectorNode, { strokeColor: '#fff' });
+    invalidateVectorWidthProfile(vectorNode, { strokeWidth: 3 });
 
     // result — branching network, but untouched since the patch never mentioned segments
     expect(vectorNode.widthProfile).toEqual({ points: {} });

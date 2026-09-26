@@ -50,8 +50,8 @@ describe('computeFlattenVectorNode', () => {
       filledFaceKeys: ['k1'],
       rotation: 0,
       segments: { s: 'segment' },
-      strokeColor: '',
       strokeWidth: 0,
+      strokes: [],
       type: NodeType.vector,
       vertexHandleModes: {},
       vertices: { v: 'vertex' },
@@ -61,14 +61,14 @@ describe('computeFlattenVectorNode', () => {
     expect(isInside({ x: 50, y: 5 })).toBe(false);
   });
 
-  it('should keep a visible solid stroke with its width, defaulting to 1', () => {
+  it('should keep the strokes with their width, defaulting to 1', () => {
     // mock
     const strokes = [{ color: '#000000', opacity: 100, type: 'solid' as const }];
 
     // result
     expect(computeFlattenVectorNode(base, [filled], { fills, strokeWidth: 3, strokes })).toMatchObject({
-      strokeColor: '#000000',
       strokeWidth: 3,
+      strokes,
     });
     expect(computeFlattenVectorNode(base, [filled], { fills, strokes })).toMatchObject({ strokeWidth: 1 });
   });

@@ -6,6 +6,7 @@ import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
 import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
 import { getVectorStrokeShapeFaces } from '../vector/stroke/getVectorStrokeShapeFaces';
+import { getVisibleSolidStrokePaints } from '../vector/stroke/getVisibleSolidStrokePaints';
 import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';
 
 const getFacesByPaint = (
@@ -37,7 +38,7 @@ export const captureVectorNodeResizeSnapshot = (node: TVectorNode, rotation: num
     scaleX: 1,
     scaleY: 1,
     scaledCenter: center,
-    strokeColor: node.strokeColor,
     strokeWidth: node.strokeWidth,
+    strokes: getVisibleSolidStrokePaints(node.strokes),
   };
 };

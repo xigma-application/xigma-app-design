@@ -75,7 +75,7 @@ describe('getPolygonOffsetVector', () => {
 
     // result
     expect(getXRange(vector)[0]).toBeCloseTo(0);
-    expect(vector).toMatchObject({ strokeAlign: StrokeAlign.outside, strokeColor: '#ff0000', strokeWidth: 2 });
+    expect(vector).toMatchObject({ strokeAlign: StrokeAlign.outside, strokeWidth: 2, strokes: [expect.objectContaining({ color: '#ff0000' })] });
   });
 
   it('should follow a flipped and turned polygon', () => {

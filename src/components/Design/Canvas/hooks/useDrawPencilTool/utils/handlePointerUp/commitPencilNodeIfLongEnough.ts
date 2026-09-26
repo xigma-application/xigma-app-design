@@ -12,6 +12,7 @@ import { TPoint } from 'types/canvas';
 // utils
 import { buildVectorNetworkFromPoints } from './buildVectorNetworkFromPoints';
 import { getPathLength } from '../getPathLength';
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 import { selectLastCreatedNode } from '../../../../utils/selectLastCreatedNode';
 
 export const commitPencilNodeIfLongEnough = (dispatch: AppDispatch, appStore: AppStore, finalPoints: TPoint[]): void => {
@@ -27,8 +28,8 @@ export const commitPencilNodeIfLongEnough = (dispatch: AppDispatch, appStore: Ap
         parentId: null,
         rotation: 0,
         segments,
-        strokeColor: PENCIL_STROKE,
         strokeWidth: PENCIL_STROKE_WIDTH,
+        strokes: [makeSolidPaint(PENCIL_STROKE)],
         type: NodeType.vector,
         vertexHandleModes,
         vertices,

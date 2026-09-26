@@ -36,8 +36,8 @@ describe('drawVectorNodeRotateSnapshotStroke', () => {
       deltaDegrees: 90,
       facesByPaint: [],
       pivot: { x: 0, y: 0 },
-      strokeColor: '#0d99ff',
       strokeVertices: [10, 0, 0, 10],
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // before
@@ -72,8 +72,8 @@ describe('drawVectorNodeRotateSnapshotStroke', () => {
       deltaDegrees: 45,
       facesByPaint: [],
       pivot: { x: 0, y: 0 },
-      strokeColor: '#0d99ff',
       strokeVertices: [],
+      strokes: [{ color: '#0d99ff', opacity: 100, type: 'solid' }],
     };
 
     // before

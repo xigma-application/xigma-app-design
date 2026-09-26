@@ -38,7 +38,7 @@ describe('getLineOffsetVector', () => {
     // result
     expect(getBounds(vector)).toEqual([-20, -20, 120, 20]);
     expect(Object.keys(vector.segments)).toHaveLength(4);
-    expect(vector).toMatchObject({ defaultFill: null, filledFaceKeys: [], parentId: 'frame', strokeColor: '#ff0000', strokeWidth: 3 });
+    expect(vector).toMatchObject({ defaultFill: null, filledFaceKeys: [], parentId: 'frame', strokeWidth: 3, strokes: [expect.objectContaining({ color: '#ff0000' })] });
   });
 
   it('should round the ends off into a capsule for a round join', () => {
@@ -49,9 +49,9 @@ describe('getLineOffsetVector', () => {
     expect(Object.values(vector.segments).some((segment) => segment.tangentStart !== null)).toBe(true);
   });
 
-  it('should fall back to a black stroke for a line without a solid stroke', () => {
+  it('should fall back to a black stroke for a line without strokes', () => {
     // result
-    expect(getLineOffsetVector({ ...line, strokes: [] }, 10, StrokeJoin.miter).strokeColor).toBe('#000000');
+    expect(getLineOffsetVector({ ...line, strokes: [] }, 10, StrokeJoin.miter).strokes).toEqual([{ color: '#000000', opacity: 100, type: 'solid' }]);
   });
 
   it('should keep the line stroke mode and its settings on the vector', () => {
