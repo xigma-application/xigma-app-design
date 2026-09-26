@@ -1116,6 +1116,21 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
   disabled and empty. Next: the selected points move from `selectedVectorVertexIdsRef` into the store, X/Y show
   and move their bounds, Mirroring sets their handle mode, and Alignment/Tidy up/distribute work on groups
   (selected points of one connected piece move together) and only with at least two groups.
+  The panel reads the selected points from `design.vectorPointSelection` (`vector-network.md` §86) through
+  `useSelectedVectorPoints`; every edit goes through `useVectorPointsHistory` (one undo step with the canvas
+  point selection, and it drops the cached multi-select box). With points selected:
+  - X/Y (`useVectorEditPosition`) show the top left corner of the points (two decimals, relative to the parent
+    like a node's position) and move all of them (`commitVectorPointsPosition`).
+  - Mirroring (`useVectorEditMirroring`) shows the mode the points share (none pressed when they differ) and sets
+    it on all of them; existing handles are not reshaped until they are dragged.
+  - Corner radius (`VectorEditCornerRadius`, icon `BorderRadiusT`) shows and sets `cornerRadiusByVertexId` of the
+    points; without points it uses `Corners`, sets `cornerRadius` and clears the per-point radii, Mixed when they
+    differ (`getVectorCornerRadii`, also used by the Vector path panel through `getShapeCornerRadii`).
+  - Alignment (`useVectorEditAlignment`) and the distribute menu (`useVectorEditDistributeMenu`, rendered with
+    `DistributeMenuButton`, the props-only half of `DistributeMenu`) work on `getVectorPointGroups`: selected points
+    grouped by connected piece, each with its box. Align needs 2 groups, Distribute 3, Tidy up 2 that it would move;
+    the group deltas come from `getAlignmentOffset`, `getAxisSpan` and `getTidyUpTargets`, and
+    `translateVectorPointGroups` moves only the selected points, so a partly selected piece is pulled apart.
 
 ## `ImageCrop/`
 

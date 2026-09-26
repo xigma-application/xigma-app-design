@@ -133,7 +133,10 @@ export type TDesignState = {
   preferences: TPreferences;
   revealedMinMax: TRevealedMinMax;
   vectorEditingNodeIds: string[];
+  vectorPointSelection: TVectorPointSelection;
 };
+
+export type TVectorPointSelection = { segmentIds: string[]; vertexIds: string[] };
 
 export type TDesignSnapshot = {
   activePageId: string;

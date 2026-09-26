@@ -449,6 +449,7 @@ export type TVectorNode = {
   blendMode?: BlendMode;
   capStyle?: 'round';
   cornerRadius?: number;
+  cornerRadiusByVertexId?: Record<string, number>;
   defaultFill: TPaint[] | null;
   effects?: TEffect[];
   fillByKey?: Record<string, TPaint[]>;

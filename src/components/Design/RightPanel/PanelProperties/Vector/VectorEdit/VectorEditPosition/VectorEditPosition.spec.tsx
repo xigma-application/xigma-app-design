@@ -5,15 +5,20 @@ import { Provider } from 'react-redux';
 import VectorEditPosition from './VectorEditPosition';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { store } from 'store';
 
 const renderVectorEditPosition = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <VectorEditPosition />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <VectorEditPosition />
+        </TooltipProvider>
+      </CanvasRefsProvider>
     </Provider>,
   );
 

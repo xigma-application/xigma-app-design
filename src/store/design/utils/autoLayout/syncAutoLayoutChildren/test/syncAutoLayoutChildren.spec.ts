@@ -90,6 +90,7 @@ const buildState = (page: Partial<TDesignPage>): TDesignState => ({
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
+  vectorPointSelection: { segmentIds: [], vertexIds: [] },
 });
 
 describe('syncAutoLayoutChildren', () => {

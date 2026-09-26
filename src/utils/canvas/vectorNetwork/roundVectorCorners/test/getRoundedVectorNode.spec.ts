@@ -31,6 +31,19 @@ describe('getRoundedVectorNode', () => {
     expect(group.polygons[0]).not.toContainEqual({ x: 0, y: 0 });
   });
 
+  it('should round a vector whose only radius is on one of its points and drop the per-point radii', () => {
+    // mock
+    const square = makeSquareVector();
+    const [vertexId] = Object.keys(square.vertices);
+
+    // before
+    const rounded = getRoundedVectorNode({ ...square, cornerRadiusByVertexId: { [vertexId]: 10 } });
+
+    // result
+    expect(Object.keys(rounded.segments)).toHaveLength(5);
+    expect(rounded.cornerRadiusByVertexId).toBeUndefined();
+  });
+
   it('should return the vector itself without a radius or without corners to round', () => {
     // mock
     const plain = makeSquareVector();

@@ -79,6 +79,7 @@ import {
   selectSmartSelectionNodes,
   selectTopLevelFrameNodes,
   selectVectorEditingNodeIds,
+  selectVectorPointSelection,
   selectViewport,
   selectZoom,
 } from '../selectors';
@@ -150,6 +151,7 @@ const state = {
       areRulersVisible: true,
     },
     vectorEditingNodeIds: [node.id],
+    vectorPointSelection: { segmentIds: [], vertexIds: ['point'] },
   },
 } as any;
 
@@ -378,6 +380,11 @@ describe('design selectors', () => {
   it('should select the vector editing node ids', () => {
     // result
     expect(selectVectorEditingNodeIds(state)).toEqual([node.id]);
+  });
+
+  it('should select the selected points of the vector in edit mode', () => {
+    // result
+    expect(selectVectorPointSelection(state)).toEqual({ segmentIds: [], vertexIds: ['point'] });
   });
 
   it('should select the nodes record', () => {

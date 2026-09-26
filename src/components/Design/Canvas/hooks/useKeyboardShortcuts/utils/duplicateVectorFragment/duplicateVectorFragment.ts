@@ -11,6 +11,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { duplicateOwningNodeFragments } from './duplicateOwningNodeFragments';
 import { getOwningSegmentNodes } from '../handleDeleteSelection/getOwningSegmentNodes';
 import { getOwningVertexNodes } from '../handleDeleteSelection/getOwningVertexNodes';
+import { syncVectorPointSelection } from '../../../../utils/syncVectorPointSelection';
 
 export const duplicateVectorFragment = (
   dispatch: AppDispatch,
@@ -32,4 +33,5 @@ export const duplicateVectorFragment = (
   refs.vectorEdit.selectedVectorHandlesRef.current = [];
   refs.vectorEdit.selectedVectorSegmentIdsRef.current = newSegmentIds;
   refs.vectorEdit.selectedVectorVertexIdsRef.current = newVertexIds;
+  syncVectorPointSelection(refs.vectorEdit);
 };

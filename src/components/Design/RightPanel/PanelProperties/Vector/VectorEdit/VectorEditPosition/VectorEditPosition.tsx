@@ -1,44 +1,47 @@
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { noop } from 'lodash';
 
 // components
 import ColumnPositionField from '../../../Common/PositionSection/ColumnPosition/ColumnPositionField/ColumnPositionField';
 import { UITools } from 'shared';
+
+// hooks
+import { useVectorEditPosition } from '../hooks/useVectorEditPosition';
 
 // others
 import { translationNameSpace } from '../../../Common/PositionSection/ColumnPosition/constants';
 
 const VectorEditPosition: FC = () => {
   const { t } = useTranslation();
+  const { disabled, displayX, displayY, onBlurX, onBlurY, onDragEnd, onDragStart, onScrubX, onScrubY, x, y } = useVectorEditPosition();
 
   return (
     <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
       <ColumnPositionField
         ariaLabel={t(`${translationNameSpace}.ariaLabelX`)}
-        disabled
-        displayValue=""
+        disabled={disabled}
+        displayValue={displayX}
         e2eValue="x"
         label="X"
-        onBlur={noop}
-        onDragEnd={noop}
-        onDragStart={noop}
-        onScrub={noop}
+        onBlur={onBlurX}
+        onDragEnd={onDragEnd}
+        onDragStart={onDragStart}
+        onScrub={onScrubX}
         tooltip={t(`${translationNameSpace}.tooltipX`)}
-        value={0}
+        value={x}
       />
       <ColumnPositionField
         ariaLabel={t(`${translationNameSpace}.ariaLabelY`)}
-        disabled
-        displayValue=""
+        disabled={disabled}
+        displayValue={displayY}
         e2eValue="y"
         label="Y"
-        onBlur={noop}
-        onDragEnd={noop}
-        onDragStart={noop}
-        onScrub={noop}
+        onBlur={onBlurY}
+        onDragEnd={onDragEnd}
+        onDragStart={onDragStart}
+        onScrub={onScrubY}
         tooltip={t(`${translationNameSpace}.tooltipY`)}
-        value={0}
+        value={y}
       />
     </UITools.SectionColumn>
   );

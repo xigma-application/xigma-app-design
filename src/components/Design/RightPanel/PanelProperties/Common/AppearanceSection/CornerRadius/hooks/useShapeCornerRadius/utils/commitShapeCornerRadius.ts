@@ -6,6 +6,7 @@ import { AppDispatch } from 'store';
 import { updateNode } from 'store/design/slice';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TShapeOrVectorNode } from '../../../../../types';
 
 // utils
@@ -18,5 +19,12 @@ export const commitShapeCornerRadius = (
   getValue: TFunc<[TShapeOrVectorNode], number>,
 ): void =>
   commitOnNodes(dispatch, nodes, (node) => {
-    dispatch(updateNode({ changes: { cornerRadius: clamp(getValue(node), CORNER_RADIUS_MIN, CORNER_RADIUS_MAX) }, id: node.id }));
+    const cornerRadius = clamp(getValue(node), CORNER_RADIUS_MIN, CORNER_RADIUS_MAX);
+
+    dispatch(
+      updateNode({
+        changes: node.type === NodeType.vector ? { cornerRadius, cornerRadiusByVertexId: undefined } : { cornerRadius },
+        id: node.id,
+      }),
+    );
   });

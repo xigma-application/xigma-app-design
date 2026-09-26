@@ -14,6 +14,7 @@ import { TVectorFragment } from '../types';
 
 // utils
 import { mergeClonedVectorFragment } from './mergeClonedVectorFragment';
+import { syncVectorPointSelection } from '../../../utils/syncVectorPointSelection';
 
 export const pasteVectorFragment = (
   dispatch: AppDispatch,
@@ -33,4 +34,5 @@ export const pasteVectorFragment = (
   refs.vectorEdit.selectedVectorHandlesRef.current = [];
   refs.vectorEdit.selectedVectorSegmentIdsRef.current = merged.newSegmentIds;
   refs.vectorEdit.selectedVectorVertexIdsRef.current = merged.newVertexIds;
+  syncVectorPointSelection(refs.vectorEdit);
 };

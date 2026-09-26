@@ -1,6 +1,6 @@
 // types
 import { BooleanOperation, ToolName } from 'types/design/enums';
-import { TResolvedTheme } from './types';
+import { TResolvedTheme, TVectorPointSelection } from './types';
 import { TSolidPaint } from 'types/design/paint/types';
 import { TViewport } from 'types/design/types';
 
@@ -51,3 +51,5 @@ export const TOOL_DEFAULT_NODE_NAMES: ReadonlySet<string> = new Set([
 ]);
 
 export const EMPTY_SELECTED_INDICES: number[] = [];
+
+export const EMPTY_VECTOR_POINT_SELECTION: TVectorPointSelection = { segmentIds: [], vertexIds: [] };

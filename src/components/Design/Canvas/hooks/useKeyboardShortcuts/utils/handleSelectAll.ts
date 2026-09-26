@@ -9,6 +9,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { getVectorEditingNode } from '../../../utils/getVectorEditingNode';
+import { syncVectorPointSelection } from '../../../utils/syncVectorPointSelection';
 
 export const handleSelectAll = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const state = store.getState();
@@ -22,6 +23,7 @@ export const handleSelectAll = (dispatch: AppDispatch, refs: TCanvasRefs): void 
     refs.vectorEdit.selectedVectorVertexIdsRef.current = editingNodes.flatMap((node) => Object.keys(node.vertices));
     refs.vectorEdit.selectedVectorSegmentIdsRef.current = editingNodes.flatMap((node) => Object.keys(node.segments));
     refs.vectorEdit.selectedVectorHandlesRef.current = [];
+    syncVectorPointSelection(refs.vectorEdit);
   } else {
     dispatch(setSelection(selectOrderedNodes(state).map((node) => node.id)));
   }

@@ -12,7 +12,7 @@ describe('getRoundedVectorFillData', () => {
     const square = makeSquareVector();
     const filled = { ...square, ...getVectorFillsChange(square, red) };
     const [key] = filled.filledFaceKeys;
-    const network = roundVectorNetworkCorners(filled, 10)!;
+    const network = roundVectorNetworkCorners({ ...filled, cornerRadius: 10 })!;
 
     // before
     const data = getRoundedVectorFillData({ ...filled, holeParentByKey: { [key]: key, gone: key, other: 'gone' } }, network);
@@ -32,7 +32,7 @@ describe('getRoundedVectorFillData', () => {
 
     // result
     expect(
-      getRoundedVectorFillData({ ...filled, holeParentByKey: { [key]: 'gone' } }, roundVectorNetworkCorners(filled, 10)!).holeParentByKey,
+      getRoundedVectorFillData({ ...filled, holeParentByKey: { [key]: 'gone' } }, roundVectorNetworkCorners({ ...filled, cornerRadius: 10 })!).holeParentByKey,
     ).toEqual({});
   });
 
@@ -41,7 +41,7 @@ describe('getRoundedVectorFillData', () => {
     const square = makeSquareVector();
 
     // result
-    expect(getRoundedVectorFillData(square, roundVectorNetworkCorners(square, 10)!)).toEqual({
+    expect(getRoundedVectorFillData(square, roundVectorNetworkCorners({ ...square, cornerRadius: 10 })!)).toEqual({
       fillByKey: {},
       filledFaceKeys: [],
       holeParentByKey: {},
@@ -53,6 +53,6 @@ describe('getRoundedVectorFillData', () => {
     const square = makeSquareVector({ fillByKey: { gone: red }, filledFaceKeys: ['gone'] });
 
     // result
-    expect(getRoundedVectorFillData(square, roundVectorNetworkCorners(square, 10)!).filledFaceKeys).toEqual([]);
+    expect(getRoundedVectorFillData(square, roundVectorNetworkCorners({ ...square, cornerRadius: 10 })!).filledFaceKeys).toEqual([]);
   });
 });

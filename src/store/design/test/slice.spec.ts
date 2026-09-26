@@ -40,6 +40,7 @@ import slice, {
   setSelection,
   setTemporaryActiveTool,
   setVectorEditingNodeIds,
+  setVectorPointSelection,
   setViewport,
   startAutoLayoutPaddingEdit,
   startCommentDraft,
@@ -153,6 +154,7 @@ describe('design slice', () => {
       },
       revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
+      vectorPointSelection: { segmentIds: [], vertexIds: [] },
     });
   });
 
@@ -634,6 +636,14 @@ describe('design slice', () => {
 
     // result
     expect(state.vectorEditingNodeIds).toEqual(['node-1']);
+  });
+
+  it('should set the selected points of the vector in edit mode', () => {
+    // before
+    const state = slice(undefined, setVectorPointSelection({ segmentIds: ['s'], vertexIds: ['v'] }));
+
+    // result
+    expect(state.vectorPointSelection).toEqual({ segmentIds: ['s'], vertexIds: ['v'] });
   });
 
   it('should start editing a text box', () => {

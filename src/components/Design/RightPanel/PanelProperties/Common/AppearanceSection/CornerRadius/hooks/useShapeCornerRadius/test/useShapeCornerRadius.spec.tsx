@@ -189,4 +189,26 @@ describe('useShapeCornerRadius', () => {
     // result
     expect([first.id, second.id].map((id) => (selectActivePage(store.getState()).nodes[id] as TVectorNode).cornerRadius)).toEqual([12, 12]);
   });
+
+  it('should show Mixed for one vector whose points have different radii and drop them when a radius is set', () => {
+    // mock
+    const vector = makeSquareVector({ cornerRadius: 4, id: 'cornerVectorPoints' });
+    const [vertexId] = Object.keys(vector.vertices);
+
+    store.dispatch(addNodes({ nodes: [{ ...vector, cornerRadiusByVertexId: { [vertexId]: 9 } }], rootIds: [vector.id] }));
+    store.dispatch(setSelection([vector.id]));
+
+    // before
+    const { result } = renderHook(() => useShapeCornerRadius(NodeType.vector), { wrapper });
+
+    // result
+    expect(result.current.valueLabel).toBe('Mixed');
+
+    // action
+    act(() => result.current.onCommit('6'));
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[vector.id]).toMatchObject({ cornerRadius: 6, cornerRadiusByVertexId: undefined });
+    expect(result.current.valueLabel).toBe(6);
+  });
 });

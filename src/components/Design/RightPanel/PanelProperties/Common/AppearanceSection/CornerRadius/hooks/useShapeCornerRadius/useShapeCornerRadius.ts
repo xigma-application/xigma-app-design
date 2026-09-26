@@ -11,14 +11,16 @@ import { TUseShapeCornerRadiusResult } from './types';
 
 // utils
 import { commitShapeCornerRadius } from './utils/commitShapeCornerRadius';
+import { getShapeCornerRadii } from './utils/getShapeCornerRadii';
 import { handleShapeCornerRadiusCommit } from './utils/handleShapeCornerRadiusCommit';
 import { hasShapeCorners } from './utils/hasShapeCorners';
 
 export const useShapeCornerRadius = (type: TShapeOrVectorNodeType): TUseShapeCornerRadiusResult => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectSelectedNodes).filter((node): node is TShapeOrVectorNode => node?.type === type);
-  const value = nodes[0]?.cornerRadius ?? 0;
-  const isMixed = nodes.some((node) => (node.cornerRadius ?? 0) !== value);
+  const radii = nodes.flatMap(getShapeCornerRadii);
+  const value = radii[0] ?? 0;
+  const isMixed = radii.some((radius) => radius !== value);
 
   return {
     isDisabled: !nodes.some(hasShapeCorners),

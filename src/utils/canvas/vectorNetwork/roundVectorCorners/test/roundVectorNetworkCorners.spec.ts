@@ -8,7 +8,7 @@ describe('roundVectorNetworkCorners', () => {
     const square = makeSquareVector();
 
     // before
-    const network = roundVectorNetworkCorners(square, 10);
+    const network = roundVectorNetworkCorners({ ...square, cornerRadius: 10 });
 
     // result
     expect(Object.keys(network?.vertices ?? {})).toHaveLength(8);
@@ -20,6 +20,20 @@ describe('roundVectorNetworkCorners', () => {
     ).toEqual(['0,10', '0,90', '10,0', '10,100', '100,10', '100,90', '90,0', '90,100'].sort());
   });
 
+  it('should round a point with its own radius and leave a point whose own radius is 0 sharp', () => {
+    // mock
+    const square = makeSquareVector();
+    const [topLeft, topRight] = Object.values(square.vertices).filter(({ y }) => y === 0).sort((a, b) => a.x - b.x);
+
+    // before
+    const network = roundVectorNetworkCorners({ ...square, cornerRadiusByVertexId: { [topLeft.id]: 20, [topRight.id]: 0 } });
+
+    // result
+    expect(Object.keys(network?.vertices ?? {})).toHaveLength(5);
+    expect(network?.vertices[topRight.id]).toEqual(topRight);
+    expect(network?.vertices[topLeft.id]).toBeUndefined();
+  });
+
   it('should leave a network without sharp straight corners alone', () => {
     // mock
     const line = {
@@ -28,6 +42,6 @@ describe('roundVectorNetworkCorners', () => {
     };
 
     // result
-    expect(roundVectorNetworkCorners(line, 10)).toBeNull();
+    expect(roundVectorNetworkCorners({ ...line, cornerRadius: 10 })).toBeNull();
   });
 });

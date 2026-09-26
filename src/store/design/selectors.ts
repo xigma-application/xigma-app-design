@@ -20,6 +20,7 @@ import {
   TPatternSourcePickTarget,
   TResolvedTheme,
   TRevealedMinMax,
+  TVectorPointSelection,
 } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import {
@@ -237,6 +238,8 @@ export const selectDescendantIdsOfSelected = createSelector([selectSelectedNodes
 );
 
 export const selectVectorEditingNodeIds = (state: RootState): string[] => state.design.vectorEditingNodeIds;
+
+export const selectVectorPointSelection = (state: RootState): TVectorPointSelection => state.design.vectorPointSelection;
 
 export const selectViewport = createSelector([selectActivePage], (page): TViewport => page.viewport);
 

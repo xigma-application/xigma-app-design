@@ -13,6 +13,7 @@ import { deleteSelectedSegments } from './deleteSelectedSegments';
 import { deleteSelectedVertices } from './deleteSelectedVertices';
 import { getOwningSegmentNodes } from './getOwningSegmentNodes';
 import { getOwningVertexNodes } from './getOwningVertexNodes';
+import { syncVectorPointSelection } from '../../../../utils/syncVectorPointSelection';
 
 export const handleDeleteSelection = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const { selectedVectorHandlesRef, selectedVectorSegmentIdsRef, selectedVectorVertexIdsRef } = refs.vectorEdit;
@@ -28,6 +29,7 @@ export const handleDeleteSelection = (dispatch: AppDispatch, refs: TCanvasRefs):
     deleteSelectedVertices(dispatch, owningNodes, selectedVertexIds);
     dispatch(endHistoryGesture());
     selectedVectorVertexIdsRef.current = [];
+    syncVectorPointSelection(refs.vectorEdit);
   } else if (selectedSegmentIds.length > 0) {
     const owningNodes = getOwningSegmentNodes(
       vectorEditingNodeIds,
@@ -39,6 +41,7 @@ export const handleDeleteSelection = (dispatch: AppDispatch, refs: TCanvasRefs):
     deleteSelectedSegments(dispatch, owningNodes, selectedSegmentIds);
     dispatch(endHistoryGesture());
     selectedVectorSegmentIdsRef.current = [];
+    syncVectorPointSelection(refs.vectorEdit);
   } else if (selectedVectorHandlesRef.current.length === 0) {
     dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
     selectSelectedIds(state).forEach((id) => dispatch(deleteNode(id)));

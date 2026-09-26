@@ -3,20 +3,21 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { getRoundedVectorFillData } from './getRoundedVectorFillData';
+import { hasVectorCornerRadius } from './hasVectorCornerRadius';
 import { roundVectorNetworkCorners } from './roundVectorNetworkCorners';
 
 const cache = new WeakMap<TVectorNode, TVectorNode>();
 
-const computeRoundedVectorNode = (node: TVectorNode, radius: number): TVectorNode => {
-  const network = roundVectorNetworkCorners(node, radius);
-  return network ? { ...node, ...network, ...getRoundedVectorFillData(node, network), cornerRadius: undefined } : node;
+const computeRoundedVectorNode = (node: TVectorNode): TVectorNode => {
+  const network = roundVectorNetworkCorners(node);
+  return network
+    ? { ...node, ...network, ...getRoundedVectorFillData(node, network), cornerRadius: undefined, cornerRadiusByVertexId: undefined }
+    : node;
 };
 
 export const getRoundedVectorNode = (node: TVectorNode): TVectorNode => {
-  const radius = node.cornerRadius ?? 0;
-
-  if (radius > 0) {
-    const cached = cache.get(node) ?? computeRoundedVectorNode(node, radius);
+  if (hasVectorCornerRadius(node)) {
+    const cached = cache.get(node) ?? computeRoundedVectorNode(node);
 
     cache.set(node, cached);
     return cached;

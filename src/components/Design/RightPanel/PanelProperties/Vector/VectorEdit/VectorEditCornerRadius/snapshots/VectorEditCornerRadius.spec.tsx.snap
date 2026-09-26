@@ -1,0 +1,76 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VectorEditCornerRadius snapshots > should render the corner radius of the whole vector 1`] = `
+<DocumentFragment>
+  <div
+    class="_SectionColumn_84b4eb"
+    data-test-section=""
+  >
+    <div
+      class="_SectionColumnLabels_ed28d5"
+      style="width: calc(100% - 32px);"
+    >
+      <span
+        class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+        style="font-size: 9px;"
+      >
+        Corner radius
+      </span>
+    </div>
+    <div
+      class="_SectionColumn__row_84b4eb"
+    >
+      <div
+        class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
+        style="width: calc(100% - 32px);"
+      >
+        <div
+          class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+          data-test-text-field="corner-radius"
+        >
+          <div
+            class="ScrubbableInput"
+          >
+            <div
+              class="_InputAdornment_bfc2de"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-2);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  d="M6.5 14a.5.5 0 0 1 .5.5v.6c0 .428 0 .72.019.945.017.219.05.331.09.41.096.187.249.34.437.436.078.04.19.073.41.09.224.019.516.019.944.019h.6a.5.5 0 0 1 0 1h-.621c-.402 0-.734 0-1.005-.023-.281-.022-.54-.071-.782-.195a2 2 0 0 1-.874-.874c-.124-.242-.173-.501-.196-.782A13 13 0 0 1 6 15.121V14.5a.5.5 0 0 1 .5-.5m11 0a.5.5 0 0 1 .5.5v.621c0 .402 0 .734-.023 1.005-.022.281-.071.54-.195.782a2 2 0 0 1-.874.874c-.242.124-.501.173-.782.195-.27.023-.603.023-1.005.023H14.5a.5.5 0 0 1 0-1h.6c.428 0 .72 0 .945-.019.219-.018.331-.05.41-.09a1 1 0 0 0 .436-.437c.04-.078.073-.19.09-.41.019-.224.019-.516.019-.944v-.6a.5.5 0 0 1 .5-.5m-8-8a.5.5 0 0 1 0 1h-.6c-.428 0-.719 0-.944.019-.22.017-.332.05-.41.09a1 1 0 0 0-.437.437c-.04.078-.073.19-.09.41C7 8.18 7 8.471 7 8.9v.6a.5.5 0 0 1-1 0v-.621c0-.402 0-.734.022-1.005.023-.281.072-.54.196-.782a2 2 0 0 1 .874-.874c.242-.124.501-.173.782-.196C8.144 6 8.477 6 8.88 6zm5.621 0c.402 0 .734 0 1.005.022.281.023.54.072.782.196a2 2 0 0 1 .874.874c.124.242.173.501.195.782.023.27.023.603.023 1.005V9.5a.5.5 0 0 1-1 0v-.6c0-.428 0-.72-.019-.945-.018-.219-.05-.33-.09-.41a1 1 0 0 0-.437-.436c-.078-.04-.19-.073-.41-.09A13 13 0 0 0 15.1 7h-.6a.5.5 0 0 1 0-1z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </div>
+          </div>
+          <input
+            aria-label="Corner radius"
+            class="_TextFieldWrapper__input_9a3a67"
+            data-state="closed"
+            data-test-bypass-global-shortcuts="true"
+            data-test-text-field-input="corner-radius"
+            type="text"
+            value="3"
+          />
+          <span
+            class="_TextFieldWrapper__endAdornment_9a3a67"
+          />
+        </div>
+      </div>
+      <div>
+        <div
+          class="_SectionColumnButtonIcons_71f71e"
+        />
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

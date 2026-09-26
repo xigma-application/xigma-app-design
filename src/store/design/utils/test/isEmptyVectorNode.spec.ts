@@ -56,6 +56,7 @@ const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
+  vectorPointSelection: { segmentIds: [], vertexIds: [] },
 });
 
 const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({

@@ -501,3 +501,157 @@ test('a vector in vector edit mode shows the Vector edit panel with Alignment, P
   await expect(page.getByText('Vector path', { exact: true })).toBeVisible();
   await expect(vectorEdit).toHaveCount(0);
 });
+
+type TEditedVector = {
+  cornerRadius?: number;
+  cornerRadiusByVertexId?: Record<string, number>;
+  vertexHandleModes: Record<string, string>;
+  vertices: Record<string, { id: string; x: number; y: number }>;
+};
+
+const readEditedVector = async (page: Page): Promise<TEditedVector> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages, vectorEditingNodeIds } = store.getState().design;
+
+    return pages[activePageId].nodes[vectorEditingNodeIds[0]] as unknown as TEditedVector;
+  });
+
+test('a point selected on the canvas in vector edit mode shows its position, mirroring and own corner radius in the panel, and each one edits only that point', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-panel-edit-point');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — a 200x200 square from the pen, opened in vector edit mode
+  await designPage.drawVectorPath([
+    { x: 800, y: 300 },
+    { x: 1000, y: 300 },
+    { x: 1000, y: 500 },
+    { x: 800, y: 500 },
+    { x: 800, y: 300 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await designPage.click(900, 300);
+  await page.locator('[data-test-component-header="vector"]').getByLabel('Edit object').click();
+
+  const vectorEdit = page.locator('[data-test-section="vector-edit"]');
+  const x = vectorEdit.getByLabel('X position');
+
+  await expect(x).toHaveValue('');
+
+  // action — select the top right point
+  await designPage.click(1000, 300);
+
+  // result
+  const before = await readEditedVector(page);
+  const [pointId, point] = Object.entries(before.vertices).reduce((best, entry) =>
+    entry[1].x - entry[1].y > best[1].x - best[1].y ? entry : best,
+  );
+
+  await expect(x).toHaveValue(String(point.x));
+  await expect(vectorEdit.getByLabel('Y position')).toHaveValue(String(point.y));
+  await expect(vectorEdit.getByRole('button', { name: 'Mirror angle and length' })).toBeEnabled();
+
+  // action — move it by X
+  await x.fill(String(point.x + 50));
+  await x.press('Tab');
+
+  // result — only that point moved
+  await expect.poll(async () => (await readEditedVector(page)).vertices[pointId].x).toBe(point.x + 50);
+
+  const moved = await readEditedVector(page);
+
+  Object.entries(before.vertices)
+    .filter(([id]) => id !== pointId)
+    .forEach(([id, vertex]) => expect(moved.vertices[id]).toEqual(vertex));
+
+  // action — mirroring and corner radius of that point
+  await vectorEdit.getByRole('button', { name: 'Mirror angle and length' }).click();
+
+  const cornerRadius = vectorEdit.getByLabel('Corner radius');
+
+  await cornerRadius.fill('30');
+  await cornerRadius.press('Tab');
+
+  // result
+  await expect.poll(async () => (await readEditedVector(page)).vertexHandleModes[pointId]).toBe('symmetric');
+  await expect.poll(async () => (await readEditedVector(page)).cornerRadiusByVertexId).toEqual({ [pointId]: 30 });
+  expect((await readEditedVector(page)).cornerRadius).toBeUndefined();
+});
+
+test('with points from two pieces of a vector selected, Align left moves each piece as a whole to the left edge', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-panel-edit-align');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — one vector made of two squares, open in vector edit mode
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { addNodes, setSelection, setVectorEditingNodeIds } = await import('/src/store/design/slice.ts');
+    const corners = (prefix: string, x: number, y: number): [string, { id: string; x: number; y: number }][] =>
+      [
+        [0, 0],
+        [100, 0],
+        [100, 100],
+        [0, 100],
+      ].map(([dx, dy], index) => [`${prefix}${index}`, { id: `${prefix}${index}`, x: x + dx, y: y + dy }]);
+    const sides = (prefix: string): [string, Record<string, unknown>][] =>
+      [0, 1, 2, 3].map((index) => [
+        `${prefix}s${index}`,
+        { endId: `${prefix}${(index + 1) % 4}`, id: `${prefix}s${index}`, startId: `${prefix}${index}`, tangentEnd: null, tangentStart: null },
+      ]);
+
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            defaultFill: null,
+            filledFaceKeys: [],
+            id: 'two-pieces',
+            name: 'Two pieces',
+            parentId: null,
+            rotation: 0,
+            segments: Object.fromEntries([...sides('a'), ...sides('b')]),
+            strokeWidth: 1,
+            strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+            type: 'vector',
+            vertexHandleModes: {},
+            vertices: Object.fromEntries([...corners('a', 800, 300), ...corners('b', 1000, 450)]),
+          },
+        ] as never,
+        rootIds: ['two-pieces'],
+      }),
+    );
+    store.dispatch(setSelection(['two-pieces']));
+    store.dispatch(setVectorEditingNodeIds(['two-pieces']));
+  });
+
+  const alignLeft = page.locator('[data-test-section="vector-edit"]').getByRole('button', { name: 'Align left' });
+
+  await expect(alignLeft).toBeDisabled();
+
+  // action — select every point, then align them left
+  await designPage.canvas.hover();
+  await page.keyboard.press('Control+a');
+  await expect(alignLeft).toBeEnabled();
+  await alignLeft.click();
+
+  // result — the second square keeps its shape and starts at the left edge of the first
+  await expect
+    .poll(async () => {
+      const { vertices } = await readEditedVector(page);
+
+      return [vertices.b0, vertices.b2, vertices.a0];
+    })
+    .toEqual([
+      { id: 'b0', x: 800, y: 450 },
+      { id: 'b2', x: 900, y: 550 },
+      { id: 'a0', x: 800, y: 300 },
+    ]);
+});

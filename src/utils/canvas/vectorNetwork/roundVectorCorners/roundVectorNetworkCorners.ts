@@ -8,18 +8,22 @@ import { TVectorNode } from 'types/design/types';
 import { getVectorCornerArc } from './getVectorCornerArc';
 import { getVectorRoundableCorner } from './getVectorRoundableCorner';
 import { getVectorSegmentIdsByVertex } from './getVectorSegmentIdsByVertex';
+import { getVectorVertexCornerRadius } from './getVectorVertexCornerRadius';
 import { replaceVectorSegmentEnd } from './replaceVectorSegmentEnd';
 
 export type TRoundedVectorNetwork = Pick<TVectorNode, 'segments' | 'vertices'>;
 
-export const roundVectorNetworkCorners = (node: TRoundedVectorNetwork, radius: number): TRoundedVectorNetwork | null => {
+type TRoundedVectorSource = TRoundedVectorNetwork & Pick<TVectorNode, 'cornerRadius' | 'cornerRadiusByVertexId'>;
+
+export const roundVectorNetworkCorners = (node: TRoundedVectorSource): TRoundedVectorNetwork | null => {
   const segmentIdsByVertex = getVectorSegmentIdsByVertex(node.segments);
   const segments = { ...node.segments };
   const vertices = { ...node.vertices };
   let isRounded = false;
 
   Object.values(node.vertices).forEach((vertex) => {
-    const corner = getVectorRoundableCorner(node, vertex.id, segmentIdsByVertex.get(vertex.id) ?? []);
+    const radius = getVectorVertexCornerRadius(node, vertex.id);
+    const corner = radius > 0 ? getVectorRoundableCorner(node, vertex.id, segmentIdsByVertex.get(vertex.id) ?? []) : null;
     const arc = corner && getVectorCornerArc(vertex, corner.firstEnd, corner.secondEnd, radius);
 
     if (corner && arc) {

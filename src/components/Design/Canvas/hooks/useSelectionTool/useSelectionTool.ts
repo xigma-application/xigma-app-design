@@ -27,6 +27,7 @@ import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 import { handleShiftKeyChange } from './utils/handleShiftKeyChange/handleShiftKeyChange';
 import { shouldUseCanvasCaretEditing } from '../../utils/shouldUseCanvasCaretEditing';
+import { syncVectorPointSelection } from '../../utils/syncVectorPointSelection';
 
 export const useSelectionTool = (refs: TCanvasRefs): void => {
   const { setClassName } = useClassNames();
@@ -44,6 +45,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     } else {
       lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
       handlePointerDown(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+      syncVectorPointSelection(canvasRefs.vectorEdit);
     }
   };
 
@@ -51,12 +53,14 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     if (!isPatternSourcePicking) {
       lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
       handlePointerMove(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+      syncVectorPointSelection(canvasRefs.vectorEdit);
     }
   };
 
   const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
     if (!isPatternSourcePicking) {
       handlePointerUp(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+      syncVectorPointSelection(canvasRefs.vectorEdit);
     }
   };
 

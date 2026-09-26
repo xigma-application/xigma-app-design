@@ -3,15 +3,14 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import FillSection from '../../Common/FillSection/FillSection';
-import ShapeCornerRadiusInput from '../../Common/AppearanceSection/CornerRadius/ShapeCornerRadiusInput';
 import ShapeStrokeSettings from '../../Common/ShapeStrokeSettings/ShapeStrokeSettings';
 import VectorEditAlignment from './VectorEditAlignment/VectorEditAlignment';
+import VectorEditCornerRadius from './VectorEditCornerRadius/VectorEditCornerRadius';
 import VectorEditMirroring from './VectorEditMirroring/VectorEditMirroring';
 import VectorEditPosition from './VectorEditPosition/VectorEditPosition';
 import { UITools } from 'shared';
 
 // others
-import { translationNameSpace as commonNameSpace } from '../../Common/constants';
 import { translationNameSpace } from './constants';
 
 // styles
@@ -29,12 +28,7 @@ const VectorEdit: FC = () => {
         <VectorEditAlignment />
         <VectorEditPosition />
         <VectorEditMirroring />
-        <UITools.SectionColumn
-          gridColumnType={UITools.GridColumnType.twoInputs}
-          labels={[t(`${commonNameSpace}.appearanceSection.cornerRadius.ariaLabel`)]}
-        >
-          <ShapeCornerRadiusInput type={NodeType.vector} />
-        </UITools.SectionColumn>
+        <VectorEditCornerRadius />
       </UITools.Section>
       <FillSection />
       <FillSection footer={<ShapeStrokeSettings type={NodeType.vector} />} property="strokes" />

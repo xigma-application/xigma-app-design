@@ -259,10 +259,11 @@ exports[`VectorEdit snapshots > should render the Vector section, fill and strok
             class="_SectionColumnButtonIcons_71f71e"
           >
             <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
               aria-label="More actions"
-              aria-pressed="false"
-              class="_ButtonIcon_2062db _ButtonIcon--disabled_2062db"
-              disabled=""
+              class="_ButtonMenu_7516ba"
+              data-state="closed"
               type="button"
             >
               <svg

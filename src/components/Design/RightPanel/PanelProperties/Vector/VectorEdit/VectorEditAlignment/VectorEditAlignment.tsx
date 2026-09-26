@@ -1,17 +1,16 @@
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { noop } from 'lodash';
 
 // components
+import DistributeMenuButton from '../../../Common/PositionSection/ColumnAlignment/DistributeMenu/DistributeMenuButton';
 import { UITools } from 'shared';
 
+// hooks
+import { useVectorEditAlignment } from '../hooks/useVectorEditAlignment';
+import { useVectorEditDistributeMenu } from '../hooks/useVectorEditDistributeMenu';
+
 // others
-import {
-  DISTRIBUTE_MENU_TRIGGER_ICON,
-  HORIZONTAL_ALIGNMENT_OPTIONS,
-  translationNameSpace,
-  VERTICAL_ALIGNMENT_OPTIONS,
-} from '../../../Common/PositionSection/ColumnAlignment/constants';
+import { HORIZONTAL_ALIGNMENT_OPTIONS, translationNameSpace, VERTICAL_ALIGNMENT_OPTIONS } from '../../../Common/PositionSection/ColumnAlignment/constants';
 
 // styles
 import styles from '../../../Common/PositionSection/ColumnAlignment/column-alignment.module.scss';
@@ -21,28 +20,23 @@ import { buildAlignmentButtons } from '../../../Common/PositionSection/ColumnAli
 
 const VectorEditAlignment: FC = () => {
   const { t } = useTranslation();
+  const { disabled, onSelectHorizontal, onSelectVertical } = useVectorEditAlignment();
+  const distributeMenu = useVectorEditDistributeMenu();
 
   return (
     <UITools.SectionColumn
-      buttonsIcon={[
-        <UITools.ButtonIcon
-          ariaLabel={t(`${translationNameSpace}.moreActions`)}
-          disabled
-          key="distribute"
-          name={DISTRIBUTE_MENU_TRIGGER_ICON}
-        />,
-      ]}
+      buttonsIcon={[<DistributeMenuButton key="distribute" {...distributeMenu} />]}
       gridColumnType={UITools.GridColumnType.twoInputs}
       labels={[t(`${translationNameSpace}.label`)]}
       withBottomMargin
     >
       <UITools.ButtonGroup
-        buttons={buildAlignmentButtons(HORIZONTAL_ALIGNMENT_OPTIONS, true, undefined, noop, t)}
+        buttons={buildAlignmentButtons(HORIZONTAL_ALIGNMENT_OPTIONS, disabled, undefined, onSelectHorizontal, t)}
         className={styles.ColumnAlignment__buttons}
         e2eValue="horizontal-alignment"
       />
       <UITools.ButtonGroup
-        buttons={buildAlignmentButtons(VERTICAL_ALIGNMENT_OPTIONS, true, undefined, noop, t)}
+        buttons={buildAlignmentButtons(VERTICAL_ALIGNMENT_OPTIONS, disabled, undefined, onSelectVertical, t)}
         className={styles.ColumnAlignment__buttons}
         e2eValue="vertical-alignment"
       />

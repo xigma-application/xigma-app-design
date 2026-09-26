@@ -11,6 +11,7 @@ import {
   DEFAULT_TOOL,
   DEFAULT_VECTOR_PAINT,
   DEFAULT_VIEWPORT,
+  EMPTY_VECTOR_POINT_SELECTION,
 } from './constants';
 
 // types
@@ -37,6 +38,7 @@ import {
   TTextEditSelection,
   TUpdateGuidePayload,
   TUpdateNodesPayload,
+  TVectorPointSelection,
 } from './types';
 import { BlendMode, BooleanOperation, ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState, TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
@@ -165,6 +167,7 @@ const initialState: TDesignState = {
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
+  vectorPointSelection: EMPTY_VECTOR_POINT_SELECTION,
 };
 
 const designSlice = createSlice({
@@ -312,6 +315,9 @@ const designSlice = createSlice({
       state.activeTool = action.payload;
     },
     setVectorEditingNodeIds: (state, action: PayloadAction<string[]>) => handleSetVectorEditingNodeIds(state, action.payload),
+    setVectorPointSelection: (state, action: PayloadAction<TVectorPointSelection>) => {
+      state.vectorPointSelection = action.payload;
+    },
     setViewport: (state, action: PayloadAction<TViewport>) => handleSetViewport(state, action.payload),
     startAutoLayoutPaddingEdit: (state, action: PayloadAction<TAutoLayoutPaddingEditState>) => {
       state.editingAutoLayoutPadding = action.payload;
@@ -426,6 +432,7 @@ export const {
   setSelection,
   setTemporaryActiveTool,
   setVectorEditingNodeIds,
+  setVectorPointSelection,
   setViewport,
   startAutoLayoutPaddingEdit,
   startCommentDraft,

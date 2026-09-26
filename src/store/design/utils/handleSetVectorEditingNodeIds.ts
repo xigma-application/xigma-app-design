@@ -1,3 +1,6 @@
+// others
+import { EMPTY_VECTOR_POINT_SELECTION } from '../constants';
+
 // types
 import { TDesignState } from '../types';
 
@@ -10,6 +13,7 @@ export const handleSetVectorEditingNodeIds = (state: TDesignState, nextVectorEdi
   const previousVectorEditingNodeIds = state.vectorEditingNodeIds;
 
   state.vectorEditingNodeIds = nextVectorEditingNodeIds;
+  state.vectorPointSelection = EMPTY_VECTOR_POINT_SELECTION;
   bakeEnteringVectorRotations(
     state,
     nextVectorEditingNodeIds.filter((id) => !previousVectorEditingNodeIds.includes(id)),

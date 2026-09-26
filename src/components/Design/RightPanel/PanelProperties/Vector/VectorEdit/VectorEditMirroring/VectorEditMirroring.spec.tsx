@@ -5,15 +5,20 @@ import { Provider } from 'react-redux';
 import VectorEditMirroring from './VectorEditMirroring';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { store } from 'store';
 
 const renderVectorEditMirroring = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <VectorEditMirroring />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <VectorEditMirroring />
+        </TooltipProvider>
+      </CanvasRefsProvider>
     </Provider>,
   );
 

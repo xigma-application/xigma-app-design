@@ -5611,6 +5611,24 @@ turned rectangle stretched along the screen axes is no longer a rectangle. Cut p
 now copy the whole style of the original (opacity, blend mode, effects, corner radius, stroke settings,
 `fillRotation`) instead of only fills and strokes.
 
+## 86. Selected points reach the store, and each point can have its own corner radius
+
+The point selection of vector edit mode lives in canvas refs (`selectedVectorVertexIdsRef`,
+`selectedVectorSegmentIdsRef`), which every canvas tool reads synchronously. The right panel needs it too, so
+`syncVectorPointSelection` copies it into `design.vectorPointSelection` (`{ segmentIds, vertexIds }`, dispatched only
+when it changed) at the end of every selection-tool pointer handler (`useSelectionTool`) and of the keyboard actions
+that change it (undo, redo, select all, delete, paste, duplicate). `handleSetVectorEditingNodeIds` clears it
+whenever the edited vectors change, matching the refs being cleared in `useVectorEditOnDoubleClick`. It is not
+undoable on its own. The panel reads the selected points as the vertices plus the ends of selected segments
+(`getSelectedVectorPointIds`).
+
+`TVectorNode.cornerRadiusByVertexId` holds per-point radii next to `cornerRadius`, on the node rather than on the
+vertex (move, resize and rotate rebuild vertices as `{ id, x, y }`). A point's radius is its own or the vector's
+(`getVectorVertexCornerRadius`); `roundVectorNetworkCorners` reads it per vertex and skips a point at 0, and
+`getRoundedVectorNode` rounds when any radius is above 0 (`hasVectorCornerRadius`) and drops both fields from the
+baked node. Setting the radius without selected points (edit panel, or the Vector path panel through
+`commitShapeCornerRadius`) writes `cornerRadius` and clears the per-point radii; differing radii show Mixed.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows
