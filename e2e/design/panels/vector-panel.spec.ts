@@ -465,3 +465,39 @@ test('with two vectors selected, Edit objects in the header menu opens both in v
     )
     .toEqual(['edit-a', 'edit-b']);
 });
+
+test('a vector in vector edit mode shows the Vector edit panel with Alignment, Position, Mirroring, Corner radius, Fill and Stroke, and leaving it brings back the Vector path panel', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-panel-edit-mode');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — a selected triangle outside of vector edit mode
+  await drawSelectedTriangle(designPage, page);
+  await expect(page.getByText('Vector path', { exact: true })).toBeVisible();
+
+  // action
+  await page.locator('[data-test-component-header="vector"]').getByLabel('Edit object').click();
+
+  // result — the Vector section with nothing selected, then only Fill and Stroke
+  const vectorEdit = page.locator('[data-test-section="vector-edit"]');
+
+  await expect(vectorEdit.getByText('Vector', { exact: true })).toBeVisible();
+  await expect(vectorEdit.getByText('Mirroring', { exact: true })).toBeVisible();
+  await expect(vectorEdit.getByRole('button', { name: 'Mirror angle and length' })).toBeDisabled();
+  await expect(vectorEdit.getByRole('textbox', { name: 'X position' })).toHaveValue('');
+  await expect(vectorEdit.getByRole('textbox', { name: 'Corner radius' })).toBeEnabled();
+  await expect(page.locator('[data-test-section="fill"]')).toBeVisible();
+  await expect(page.locator('[data-test-section="stroke"]')).toBeVisible();
+  await expect(page.locator('[data-test-section="effects"]')).toHaveCount(0);
+  await expect(page.getByText('Vector path', { exact: true })).toHaveCount(0);
+
+  // action
+  await page.keyboard.press('Escape');
+
+  // result
+  await expect(page.getByText('Vector path', { exact: true })).toBeVisible();
+  await expect(vectorEdit).toHaveCount(0);
+});

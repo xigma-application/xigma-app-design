@@ -47,6 +47,32 @@ describe('ToggleButtonGroup labels', () => {
 });
 
 describe('ToggleButtonGroup behaviors', () => {
+  it('should disable every button and not call onChange when disabled', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    renderToggleButtonGroup({
+      disabled: true,
+      onChange,
+      toggleButtons: [
+        { ariaLabel: 'Free form', icon: 'FlowDefault', value: 'freeForm' },
+        { ariaLabel: 'Vertical', icon: 'FlowVertical', value: 'vertical' },
+      ],
+      value: 'freeForm',
+    });
+
+    // find
+    const button = screen.getByRole('button', { name: 'Vertical' });
+
+    // action
+    fireEvent.click(button);
+
+    // result
+    expect(button).toBeDisabled();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it('should mark the button matching the current value as selected', () => {
     // before
     renderToggleButtonGroup({

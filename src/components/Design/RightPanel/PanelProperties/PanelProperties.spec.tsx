@@ -17,6 +17,7 @@ import {
   setGridSettingsPanelOpen,
   setImageEditor,
   setSelection,
+  setVectorEditingNodeIds,
   updateNode,
 } from 'store/design/slice';
 import { selectActivePage, selectIsGridSettingsPanelOpen } from 'store/design/selectors';
@@ -482,6 +483,28 @@ describe('PanelProperties behaviors', () => {
     // result
     expect(screen.getByText('Vector path')).toBeInTheDocument();
     expect(screen.getByLabelText('Width')).toHaveValue(100);
+  });
+
+  it('should show the vector edit panel while a single selected vector is in vector edit mode', () => {
+    // mock
+    store.dispatch(addNodes({ nodes: [makeSquareVector({ id: 'routing-edit-vector' })], rootIds: ['routing-edit-vector'] }));
+    store.dispatch(setSelection(['routing-edit-vector']));
+    store.dispatch(setVectorEditingNodeIds(['routing-edit-vector']));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Mirroring')).toBeInTheDocument();
+    expect(screen.queryByText('Vector path')).not.toBeInTheDocument();
+
+    // action
+    act(() => {
+      store.dispatch(setVectorEditingNodeIds([]));
+    });
+
+    // result
+    expect(screen.getByText('Vector path')).toBeInTheDocument();
   });
 
   it('should show the Line panel with a stroke and no fill section while a line is selected', () => {

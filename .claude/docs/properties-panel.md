@@ -1106,6 +1106,16 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
 - Effects: `Common/EffectsSection` takes vectors (`useEffectsSection` filters with `isStyledOrVectorNode`, which
   also replaced the identical `isOpacityPanelNode` and `isStrokeSettingsNode`). Rendering is described in
   `canvas-rendering-pipeline.md` ("Vector effects").
+- Edit mode: `PanelProperties` routes a single selected vector with `vectorEditingNodeIds.length === 1` to
+  `Vector/VectorEdit/VectorEdit.tsx` ahead of `Vector`. It is one `Section` titled "Vector" (13px title span, no
+  header buttons) holding `VectorEditAlignment` (the alignment buttons plus the distribute trigger),
+  `VectorEditPosition` (X/Y), `VectorEditMirroring` (`ToggleButtonGroup`, now with `disabled`, over
+  `MIRRORING_OPTIONS`: No mirroring / Mirror angle / Mirror angle and length = the vertex handle modes
+  `corner` / `smooth` / `symmetric`) and the whole-vector `ShapeCornerRadiusInput`; then Fill and Stroke and
+  nothing else. So far only the state with no points selected exists: alignment, position and mirroring are
+  disabled and empty. Next: the selected points move from `selectedVectorVertexIdsRef` into the store, X/Y show
+  and move their bounds, Mirroring sets their handle mode, and Alignment/Tidy up/distribute work on groups
+  (selected points of one connected piece move together) and only with at least two groups.
 
 ## `ImageCrop/`
 

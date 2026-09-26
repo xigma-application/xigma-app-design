@@ -17,6 +17,7 @@ import Section from './Section/Section';
 import Slice from './Slice/Slice';
 import Star from './Star/Star';
 import Vector from './Vector/Vector';
+import VectorEdit from './Vector/VectorEdit/VectorEdit';
 
 // hooks
 import { useCloseGridSettingsPanelOnReselect } from './hooks/useCloseGridSettingsPanelOnReselect';
@@ -24,7 +25,12 @@ import { useIsEditingImageCrop } from './Common/hooks/useIsEditingImageCrop';
 import { useIsNoSelection } from '../hooks/useIsNoSelection';
 
 // store
-import { selectActiveTool, selectIsGridSettingsPanelOpen, selectSelectedNodes } from 'store/design/selectors';
+import {
+  selectActiveTool,
+  selectIsGridSettingsPanelOpen,
+  selectSelectedNodes,
+  selectVectorEditingNodeIds,
+} from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
@@ -37,6 +43,7 @@ const PanelProperties: FC = () => {
   const activeTool = useAppSelector(selectActiveTool);
   const selectedNodes = useAppSelector(selectSelectedNodes);
   const isGridSettingsPanelOpen = useAppSelector(selectIsGridSettingsPanelOpen);
+  const vectorEditingNodeIds = useAppSelector(selectVectorEditingNodeIds);
   const isNoSelection = useIsNoSelection();
   const selectedNode = selectedNodes.length === 1 ? selectedNodes[0] : undefined;
   const isGridFrameSelected = selectedNode?.type === NodeType.frame && selectedNode.layoutMode === LayoutMode.grid;
@@ -50,6 +57,7 @@ const PanelProperties: FC = () => {
   const isEveryPolygonSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.polygon);
   const isEveryStarSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.star);
   const isEveryVectorSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.vector);
+  const isEditingSingleVector = selectedNode?.type === NodeType.vector && vectorEditingNodeIds.length === 1;
   const isEverySliceSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.slice);
 
   useCloseGridSettingsPanelOnReselect(selectedNodes.length > 0, isGridSettingsPanelOpen);
@@ -83,6 +91,8 @@ const PanelProperties: FC = () => {
       return <Polygon />;
     case isEveryStarSelected:
       return <Star />;
+    case isEditingSingleVector:
+      return <VectorEdit />;
     case isEveryVectorSelected:
       return <Vector />;
     case isPanelTypeSelection(selectedNodes):

@@ -1,0 +1,279 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VectorEditAlignment snapshots > should render the alignment buttons and the more actions button 1`] = `
+<DocumentFragment>
+  <div
+    class="_SectionColumn_84b4eb _SectionColumn--with-bottom-margin_84b4eb"
+    data-test-section=""
+  >
+    <div
+      class="_SectionColumnLabels_ed28d5"
+      style="width: calc(100% - 32px);"
+    >
+      <span
+        class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+        style="font-size: 9px;"
+      >
+        Alignment
+      </span>
+    </div>
+    <div
+      class="_SectionColumn__row_84b4eb"
+    >
+      <div
+        class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
+        style="width: calc(100% - 32px);"
+      >
+        <div
+          class="_ButtonGroup_f86a5c _ColumnAlignment__buttons_f0a340"
+          data-test-button-group="horizontal-alignment"
+        >
+          <button
+            aria-label="Align left"
+            aria-pressed="false"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+            data-state="closed"
+            disabled=""
+            type="button"
+          >
+            <svg
+              class="Icon"
+              data-fpl-icon-size="24"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 24 24"
+              width="24"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M17.25 10a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-8.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75zm-4 5a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75z"
+                data-svg-fill-one="fill"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+              <path
+                d="M6 17.5a.5.5 0 0 1-1 0v-12a.5.5 0 0 1 1 0z"
+                data-svg-fill-two="fill"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+          <button
+            aria-label="Align horizontal centers"
+            aria-pressed="false"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+            data-state="closed"
+            disabled=""
+            type="button"
+          >
+            <svg
+              class="Icon"
+              data-fpl-icon-size="24"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 24 24"
+              width="24"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M17.25 10a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-9.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75zm-2 5a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-5.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75z"
+                data-svg-fill-one="fill"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+              <path
+                clip-rule="evenodd"
+                d="M13 17.5a.5.5 0 0 1-1 0V15h1zm0-4.5v-3h-1v3zm0-7.5V8h-1V5.5a.5.5 0 0 1 1 0"
+                data-svg-fill-two="fill"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <button
+            aria-label="Align right"
+            aria-pressed="false"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+            data-state="closed"
+            disabled=""
+            type="button"
+          >
+            <svg
+              class="Icon"
+              data-fpl-icon-size="24"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 24 24"
+              width="24"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M6.75 10A.75.75 0 0 1 6 9.25v-.5A.75.75 0 0 1 6.75 8h8.5a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75zm4 5a.75.75 0 0 1-.75-.75v-.5a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75z"
+                data-svg-fill-one="fill"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+              <path
+                d="M18 17.5a.5.5 0 0 0 1 0v-12a.5.5 0 0 0-1 0z"
+                data-svg-fill-two="fill"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
+          class="_ButtonGroup_f86a5c _ColumnAlignment__buttons_f0a340"
+          data-test-button-group="vertical-alignment"
+        >
+          <button
+            aria-label="Align top"
+            aria-pressed="false"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+            data-state="closed"
+            disabled=""
+            type="button"
+          >
+            <svg
+              class="Icon"
+              data-fpl-icon-size="24"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 24 24"
+              width="24"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M10 17.25a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1-.75-.75v-8.5A.75.75 0 0 1 8.75 8h.5a.75.75 0 0 1 .75.75zm5-4a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 .75-.75h.5a.75.75 0 0 1 .75.75z"
+                data-svg-fill-one="fill"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+              <path
+                d="M17.5 6a.5.5 0 0 0 0-1h-12a.5.5 0 0 0 0 1z"
+                data-svg-fill-two="fill"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+          <button
+            aria-label="Align vertical centers"
+            aria-pressed="false"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+            data-state="closed"
+            disabled=""
+            type="button"
+          >
+            <svg
+              class="Icon"
+              data-fpl-icon-size="24"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 24 24"
+              width="24"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M10 6.75A.75.75 0 0 0 9.25 6h-.5a.75.75 0 0 0-.75.75v9.5c0 .414.336.75.75.75h.5a.75.75 0 0 0 .75-.75zm5 2a.75.75 0 0 0-.75-.75h-.5a.75.75 0 0 0-.75.75v5.5c0 .414.336.75.75.75h.5a.75.75 0 0 0 .75-.75z"
+                data-svg-fill-one="fill"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+              <path
+                clip-rule="evenodd"
+                d="M17.5 11a.5.5 0 0 1 0 1H15v-1zM13 11h-3v1h3zm-7.5 0H8v1H5.5a.5.5 0 0 1 0-1"
+                data-svg-fill-two="fill"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <button
+            aria-label="Align bottom"
+            aria-pressed="false"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+            data-state="closed"
+            disabled=""
+            type="button"
+          >
+            <svg
+              class="Icon"
+              data-fpl-icon-size="24"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 24 24"
+              width="24"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M10 6.75A.75.75 0 0 0 9.25 6h-.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h.5a.75.75 0 0 0 .75-.75zm5 4a.75.75 0 0 0-.75-.75h-.5a.75.75 0 0 0-.75.75v4.5c0 .414.336.75.75.75h.5a.75.75 0 0 0 .75-.75z"
+                data-svg-fill-one="fill"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+              <path
+                d="M17.5 18a.5.5 0 0 1 0 1h-12a.5.5 0 0 1 0-1z"
+                data-svg-fill-two="fill"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div>
+        <div
+          class="_SectionColumnButtonIcons_71f71e"
+        >
+          <button
+            aria-label="More actions"
+            aria-pressed="false"
+            class="_ButtonIcon_2062db _ButtonIcon--disabled_2062db"
+            disabled=""
+            type="button"
+          >
+            <svg
+              class="Icon"
+              data-fpl-icon-size="24"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 24 24"
+              width="24"
+            >
+              <path
+                d="M9 12.25c0 .414.336.75.75.75h5.5a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-5.5a.75.75 0 0 0-.75.75z"
+                data-svg-property="fill"
+                fill="white"
+              />
+              <path
+                clip-rule="evenodd"
+                d="M19 6.5a.5.5 0 0 0-.5-.5h-12a.5.5 0 0 0 0 1h12a.5.5 0 0 0 .5-.5m0 11a.5.5 0 0 0-.5-.5h-12a.5.5 0 0 0 0 1h12a.5.5 0 0 0 .5-.5"
+                data-svg-property="fill-ramp-400"
+                fill="#fff6"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

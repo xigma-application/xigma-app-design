@@ -1,0 +1,1000 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VectorEdit snapshots > should render the Vector section, fill and stroke 1`] = `
+<DocumentFragment>
+  <div
+    class="_Section_5940d2"
+    data-test-section="vector-edit"
+  >
+    <div
+      class="_Section__header_5940d2"
+    >
+      <span
+        class="_Section__label_5940d2"
+      >
+        <span
+          class="_VectorEdit__title_088595"
+        >
+          Vector
+        </span>
+      </span>
+    </div>
+    <div
+      class="_SectionColumn_84b4eb _SectionColumn--with-bottom-margin_84b4eb"
+      data-test-section=""
+    >
+      <div
+        class="_SectionColumnLabels_ed28d5"
+        style="width: calc(100% - 32px);"
+      >
+        <span
+          class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+          style="font-size: 9px;"
+        >
+          Alignment
+        </span>
+      </div>
+      <div
+        class="_SectionColumn__row_84b4eb"
+      >
+        <div
+          class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
+          style="width: calc(100% - 32px);"
+        >
+          <div
+            class="_ButtonGroup_f86a5c _ColumnAlignment__buttons_f0a340"
+            data-test-button-group="horizontal-alignment"
+          >
+            <button
+              aria-label="Align left"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M17.25 10a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-8.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75zm-4 5a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75z"
+                  data-svg-fill-one="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  d="M6 17.5a.5.5 0 0 1-1 0v-12a.5.5 0 0 1 1 0z"
+                  data-svg-fill-two="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="Align horizontal centers"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M17.25 10a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-9.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75zm-2 5a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-5.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75z"
+                  data-svg-fill-one="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  clip-rule="evenodd"
+                  d="M13 17.5a.5.5 0 0 1-1 0V15h1zm0-4.5v-3h-1v3zm0-7.5V8h-1V5.5a.5.5 0 0 1 1 0"
+                  data-svg-fill-two="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="Align right"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M6.75 10A.75.75 0 0 1 6 9.25v-.5A.75.75 0 0 1 6.75 8h8.5a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75zm4 5a.75.75 0 0 1-.75-.75v-.5a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75z"
+                  data-svg-fill-one="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  d="M18 17.5a.5.5 0 0 0 1 0v-12a.5.5 0 0 0-1 0z"
+                  data-svg-fill-two="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </div>
+          <div
+            class="_ButtonGroup_f86a5c _ColumnAlignment__buttons_f0a340"
+            data-test-button-group="vertical-alignment"
+          >
+            <button
+              aria-label="Align top"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M10 17.25a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1-.75-.75v-8.5A.75.75 0 0 1 8.75 8h.5a.75.75 0 0 1 .75.75zm5-4a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 .75-.75h.5a.75.75 0 0 1 .75.75z"
+                  data-svg-fill-one="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  d="M17.5 6a.5.5 0 0 0 0-1h-12a.5.5 0 0 0 0 1z"
+                  data-svg-fill-two="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="Align vertical centers"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M10 6.75A.75.75 0 0 0 9.25 6h-.5a.75.75 0 0 0-.75.75v9.5c0 .414.336.75.75.75h.5a.75.75 0 0 0 .75-.75zm5 2a.75.75 0 0 0-.75-.75h-.5a.75.75 0 0 0-.75.75v5.5c0 .414.336.75.75.75h.5a.75.75 0 0 0 .75-.75z"
+                  data-svg-fill-one="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  clip-rule="evenodd"
+                  d="M17.5 11a.5.5 0 0 1 0 1H15v-1zM13 11h-3v1h3zm-7.5 0H8v1H5.5a.5.5 0 0 1 0-1"
+                  data-svg-fill-two="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="Align bottom"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M10 6.75A.75.75 0 0 0 9.25 6h-.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h.5a.75.75 0 0 0 .75-.75zm5 4a.75.75 0 0 0-.75-.75h-.5a.75.75 0 0 0-.75.75v4.5c0 .414.336.75.75.75h.5a.75.75 0 0 0 .75-.75z"
+                  data-svg-fill-one="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  d="M17.5 18a.5.5 0 0 1 0 1h-12a.5.5 0 0 1 0-1z"
+                  data-svg-fill-two="fill"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div>
+          <div
+            class="_SectionColumnButtonIcons_71f71e"
+          >
+            <button
+              aria-label="More actions"
+              aria-pressed="false"
+              class="_ButtonIcon_2062db _ButtonIcon--disabled_2062db"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  d="M9 12.25c0 .414.336.75.75.75h5.5a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-5.5a.75.75 0 0 0-.75.75z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+                <path
+                  clip-rule="evenodd"
+                  d="M19 6.5a.5.5 0 0 0-.5-.5h-12a.5.5 0 0 0 0 1h12a.5.5 0 0 0 .5-.5m0 11a.5.5 0 0 0-.5-.5h-12a.5.5 0 0 0 0 1h12a.5.5 0 0 0 .5-.5"
+                  data-svg-property="fill-ramp-400"
+                  fill="#fff6"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="_SectionColumn_84b4eb _SectionColumn--with-bottom-margin_84b4eb"
+      data-test-section=""
+    >
+      <div
+        class="_SectionColumnLabels_ed28d5"
+        style="width: calc(100% - 32px);"
+      >
+        <span
+          class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+          style="font-size: 9px;"
+        >
+          Position
+        </span>
+      </div>
+      <div
+        class="_SectionColumn__row_84b4eb"
+      >
+        <div
+          class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
+          style="width: calc(100% - 32px);"
+        >
+          <div
+            class="_TextField_bd2800"
+          >
+            <div
+              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67 _TextFieldWrapper--disabled_9a3a67"
+              data-test-text-field="x"
+            >
+              <div
+                class="ScrubbableInput ScrubbableInput--disabled"
+              >
+                <div
+                  class="_InputAdornment_bfc2de"
+                >
+                  X
+                </div>
+              </div>
+              <input
+                aria-label="X position"
+                class="_TextFieldWrapper__input_9a3a67"
+                data-state="closed"
+                data-test-bypass-global-shortcuts="true"
+                data-test-text-field-input="x"
+                disabled=""
+                type="text"
+                value=""
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
+              />
+            </div>
+          </div>
+          <div
+            class="_TextField_bd2800"
+          >
+            <div
+              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67 _TextFieldWrapper--disabled_9a3a67"
+              data-test-text-field="y"
+            >
+              <div
+                class="ScrubbableInput ScrubbableInput--disabled"
+              >
+                <div
+                  class="_InputAdornment_bfc2de"
+                >
+                  Y
+                </div>
+              </div>
+              <input
+                aria-label="Y position"
+                class="_TextFieldWrapper__input_9a3a67"
+                data-state="closed"
+                data-test-bypass-global-shortcuts="true"
+                data-test-text-field-input="y"
+                disabled=""
+                type="text"
+                value=""
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
+              />
+            </div>
+          </div>
+        </div>
+        <div>
+          <div
+            class="_SectionColumnButtonIcons_71f71e"
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      class="_SectionColumn_84b4eb _SectionColumn--with-bottom-margin_84b4eb"
+      data-test-section=""
+    >
+      <div
+        class="_SectionColumnLabels_ed28d5"
+        style="width: calc(100% - 32px);"
+      >
+        <span
+          class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+          style="font-size: 9px;"
+        >
+          Mirroring
+        </span>
+      </div>
+      <div
+        class="_SectionColumn__row_84b4eb"
+      >
+        <div
+          class="_SectionColumnContent_e7fe0a _SectionColumnContent--single_e7fe0a"
+          style="width: calc(100% - 32px);"
+        >
+          <div
+            class="_ToggleButtonGroup_d11681"
+            data-test-toggle-button-group="mirroring"
+          >
+            <button
+              aria-label="No mirroring"
+              aria-pressed="false"
+              class="_ToggleButtonGroup__button_d11681"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  d="M9 7a2 2 0 0 1 1.935 1.5H18a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5h-7.065A2 2 0 0 1 9 11c-.37 0-.717-.103-1.015-.28L6 12.708v.793a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h.793l1.985-1.986A2 2 0 0 1 9 7m0 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+                <path
+                  clip-rule="evenodd"
+                  d="M6.734 11.973a16 16 0 0 0-.223.922 28 28 0 0 0-.398 2.452 31 31 0 0 0-.105 1.034l-.005.061-.001.016v.003L6 16.463l.499.037-.5-.035a.5.5 0 0 0 .981.17l.018-.1v-.017l.003-.022.003-.034v-.003l.018-.214a27 27 0 0 1 .466-3.14c.183-.854.42-1.672.715-2.27a2 2 0 0 1-.22-.112zM10.937 9.5c-.08.313-.235.597-.444.83.41.17.826.4 1.245.68.94.626 1.848 1.47 2.646 2.33a28 28 0 0 1 2.647 3.357l.021.032.016.024.009.014.002.003.063.08a.5.5 0 0 0 .825-.53l-.046-.09-.002-.003h-.001l-.002-.003-.003-.006-.007-.011-.018-.027-.023-.035-.003-.004q-.052-.08-.15-.224a29 29 0 0 0-2.596-3.257c-.827-.89-1.794-1.796-2.823-2.482A8.6 8.6 0 0 0 11.09 9.5z"
+                  data-svg-property="fill-ramp-400"
+                  fill="#fff6"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="Mirror angle"
+              aria-pressed="false"
+              class="_ToggleButtonGroup__button_d11681"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  d="M9 7a2 2 0 0 1 1.935 1.5H18a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5h-7.065a1.999 1.999 0 0 1-3.87 0H6a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5h1.065A2 2 0 0 1 9 7m0 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+                <path
+                  clip-rule="evenodd"
+                  d="M6.218 9.5q-.15.21-.269.44c-.41.779-.641 1.784-.775 2.74a21 21 0 0 0-.186 2.642 24 24 0 0 0 .015 1.17v.01l.002.018v.005l.499-.025-.5.026a.5.5 0 0 0 .995.05l.005-.102-.001-.004v-.015l-.001-.016L6 16.396l-.007-.231c-.005-.2-.009-.487-.005-.831.008-.691.048-1.606.176-2.515.129-.918.341-1.788.67-2.415q.173-.327.366-.531a2 2 0 0 1-.137-.373zm4.72 0q-.043.16-.109.31c2.52.589 4.19 1.928 5.284 3.257.735.894 1.213 1.79 1.507 2.461a9 9 0 0 1 .376 1.024l.015.053.003.012v.002l.034.095A.5.5 0 0 0 19 16.48l-.015-.1v-.003l-.002-.007-.005-.02-.011-.04-.01-.032a7 7 0 0 0-.077-.256 10 10 0 0 0-.344-.895 11.6 11.6 0 0 0-1.65-2.695 10.4 10.4 0 0 0-3.84-2.933z"
+                  data-svg-property="fill-ramp-400"
+                  fill="#fff6"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="Mirror angle and length"
+              aria-pressed="false"
+              class="_ToggleButtonGroup__button_d11681"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  d="M12 7a2 2 0 0 1 1.935 1.5H18a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5h-4.065a1.999 1.999 0 0 1-3.87 0H6a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5h4.065A2 2 0 0 1 12 7m0 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+                <path
+                  clip-rule="evenodd"
+                  d="M8.616 9.5c-1.158.785-1.95 1.927-2.483 3.033a12.7 12.7 0 0 0-.918 2.686 13 13 0 0 0-.201 1.136l-.005.038-.004.032-.002.018v.006l-.001.002.498.049-.498-.048a.5.5 0 0 0 .996.096v-.016l.004-.028.004-.027q.009-.077.031-.224c.03-.195.078-.477.154-.816.153-.679.413-1.577.843-2.47.637-1.322 1.616-2.584 3.139-3.152a2 2 0 0 1-.11-.315zm5.321 0a2 2 0 0 1-.11.315c1.523.569 2.502 1.83 3.139 3.152.43.893.69 1.791.842 2.47a12 12 0 0 1 .186 1.04l.003.027.004.028v.016l.021.1a.5.5 0 0 0 .976-.196l-.498.048.498-.049-.001-.002v-.006l-.002-.018q0-.014-.004-.032l-.005-.038-.034-.253a13 13 0 0 0-.167-.883 12.7 12.7 0 0 0-.918-2.686c-.533-1.106-1.325-2.248-2.483-3.033z"
+                  data-svg-property="fill-ramp-400"
+                  fill="#fff6"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div>
+          <div
+            class="_SectionColumnButtonIcons_71f71e"
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      class="_SectionColumn_84b4eb"
+      data-test-section=""
+    >
+      <div
+        class="_SectionColumnLabels_ed28d5"
+        style="width: calc(100% - 32px);"
+      >
+        <span
+          class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+          style="font-size: 9px;"
+        >
+          Corner radius
+        </span>
+      </div>
+      <div
+        class="_SectionColumn__row_84b4eb"
+      >
+        <div
+          class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
+          style="width: calc(100% - 32px);"
+        >
+          <div
+            class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+            data-test-text-field="corner-radius"
+          >
+            <div
+              class="ScrubbableInput"
+            >
+              <div
+                class="_InputAdornment_bfc2de"
+              >
+                <svg
+                  class="Icon"
+                  data-fpl-icon-size="24"
+                  fill="none"
+                  height="24"
+                  style="color: var(--color-neutral-2);"
+                  viewBox="0 0 24 24"
+                  width="24"
+                >
+                  <path
+                    d="M6.5 14a.5.5 0 0 1 .5.5v.6c0 .428 0 .72.019.945.017.219.05.331.09.41.096.187.249.34.437.436.078.04.19.073.41.09.224.019.516.019.944.019h.6a.5.5 0 0 1 0 1h-.621c-.402 0-.734 0-1.005-.023-.281-.022-.54-.071-.782-.195a2 2 0 0 1-.874-.874c-.124-.242-.173-.501-.196-.782A13 13 0 0 1 6 15.121V14.5a.5.5 0 0 1 .5-.5m11 0a.5.5 0 0 1 .5.5v.621c0 .402 0 .734-.023 1.005-.022.281-.071.54-.195.782a2 2 0 0 1-.874.874c-.242.124-.501.173-.782.195-.27.023-.603.023-1.005.023H14.5a.5.5 0 0 1 0-1h.6c.428 0 .72 0 .945-.019.219-.018.331-.05.41-.09a1 1 0 0 0 .436-.437c.04-.078.073-.19.09-.41.019-.224.019-.516.019-.944v-.6a.5.5 0 0 1 .5-.5m-8-8a.5.5 0 0 1 0 1h-.6c-.428 0-.719 0-.944.019-.22.017-.332.05-.41.09a1 1 0 0 0-.437.437c-.04.078-.073.19-.09.41C7 8.18 7 8.471 7 8.9v.6a.5.5 0 0 1-1 0v-.621c0-.402 0-.734.022-1.005.023-.281.072-.54.196-.782a2 2 0 0 1 .874-.874c.242-.124.501-.173.782-.196C8.144 6 8.477 6 8.88 6zm5.621 0c.402 0 .734 0 1.005.022.281.023.54.072.782.196a2 2 0 0 1 .874.874c.124.242.173.501.195.782.023.27.023.603.023 1.005V9.5a.5.5 0 0 1-1 0v-.6c0-.428 0-.72-.019-.945-.018-.219-.05-.33-.09-.41a1 1 0 0 0-.437-.436c-.078-.04-.19-.073-.41-.09A13 13 0 0 0 15.1 7h-.6a.5.5 0 0 1 0-1z"
+                    data-svg-property="fill"
+                    fill="white"
+                  />
+                </svg>
+              </div>
+            </div>
+            <input
+              aria-label="Corner radius"
+              class="_TextFieldWrapper__input_9a3a67"
+              data-state="closed"
+              data-test-bypass-global-shortcuts="true"
+              data-test-text-field-input="corner-radius"
+              type="text"
+              value="0"
+            />
+            <span
+              class="_TextFieldWrapper__endAdornment_9a3a67"
+            />
+          </div>
+        </div>
+        <div>
+          <div
+            class="_SectionColumnButtonIcons_71f71e"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="_Section_5940d2 _Section--empty_5940d2 _Section--muted_5940d2"
+    data-test-section="fill"
+  >
+    <div
+      class="_Section__header_5940d2"
+    >
+      <span
+        class="_Section__label_5940d2"
+      >
+        Fill
+      </span>
+      <div
+        class="_Section__component_5940d2"
+      >
+        <button
+          aria-label="Apply styles and variables"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-section-idle-hidden="true"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M8.5 10a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m7-1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5M14 15.5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0m-1 0a2.5 2.5 0 1 0 5 0 2.5 2.5 0 0 0-5 0M8.5 17a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+        <button
+          aria-label="Add fill"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div
+      class="_FillSection__rows_172b23"
+    />
+  </div>
+  <div
+    class="_Section_5940d2"
+    data-test-section="stroke"
+  >
+    <div
+      class="_Section__header_5940d2"
+    >
+      <span
+        class="_Section__label_5940d2"
+      >
+        Stroke
+      </span>
+      <div
+        class="_Section__component_5940d2"
+      >
+        <button
+          aria-label="Apply stroke styles and variables"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-section-idle-hidden="true"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M8.5 10a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m7-1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5M14 15.5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0m-1 0a2.5 2.5 0 1 0 5 0 2.5 2.5 0 0 0-5 0M8.5 17a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+        <button
+          aria-label="Add stroke"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div
+      class="_FillSection__rows_172b23"
+    >
+      <div
+        class="_FillRow_8d2ea8"
+      >
+        <span
+          data-no-select="true"
+          style="display: contents;"
+        >
+          <div
+            class="_ColorPickerInput_2cba41 _FillRow__color_8d2ea8"
+          >
+            <div
+              class="_FieldGroup_6b82ec _ColorPickerInput__fields_2cba41"
+            >
+              <div
+                class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+                data-test-text-field="-color"
+              >
+                <button
+                  aria-label="Stroke color"
+                  class="_ColorPickerInput__trigger_2cba41"
+                  type="button"
+                >
+                  <div
+                    class="_Color_a21594 _Color--cursor-default_a21594"
+                  >
+                    <div
+                      class="_Color__wrapper_a21594"
+                    >
+                      <div
+                        class="_Color__picker_a21594"
+                        style="background-color: rgb(255, 0, 0);"
+                      />
+                      <div
+                        class="_Color__picker-alpha_a21594"
+                        style="--color-alpha-preview: rgba(255, 0, 0, 1);"
+                      />
+                    </div>
+                  </div>
+                </button>
+                <input
+                  class="_TextFieldWrapper__input_9a3a67"
+                  data-test-bypass-global-shortcuts="true"
+                  data-test-text-field-input="-color"
+                  maxlength="6"
+                  value="ff0000"
+                />
+                <span
+                  class="_TextFieldWrapper__endAdornment_9a3a67"
+                />
+              </div>
+              <div
+                class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67 _ColorPickerInput__alpha_2cba41"
+                data-test-text-field="-alpha"
+              >
+                <input
+                  class="_TextFieldWrapper__input_9a3a67"
+                  data-test-bypass-global-shortcuts="true"
+                  data-test-text-field-input="-alpha"
+                  max="100"
+                  min="0"
+                  type="number"
+                  value="100"
+                />
+                <span
+                  class="_TextFieldWrapper__endAdornment_9a3a67 _TextFieldWrapper__endAdornment--keepOnFocus_9a3a67"
+                >
+                  <div
+                    class="ScrubbableInput"
+                  >
+                    <span
+                      class="_ColorPickerInput__unit_2cba41"
+                    >
+                      %
+                    </span>
+                  </div>
+                </span>
+              </div>
+            </div>
+            <button
+              aria-label="Hide stroke"
+              aria-pressed="false"
+              class="_ButtonIcon_2062db"
+              data-state="closed"
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M6 12c0-.066.054-.358.313-.825a5.9 5.9 0 0 1 1.12-1.414C8.443 8.816 9.956 8 12 8s3.558.816 4.566 1.76c.508.477.88.98 1.121 1.415.258.467.313.76.313.825 0 .066-.055.358-.313.825-.24.435-.613.938-1.12 1.414C15.557 15.184 14.044 16 12 16s-3.558-.816-4.566-1.76a5.9 5.9 0 0 1-1.121-1.415C6.055 12.358 6 12.065 6 12m-1 0c0-1.25 2.333-5 7-5s7 3.75 7 5-2.333 5-7 5-7-3.75-7-5m8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m1 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        </span>
+        <button
+          aria-label="Delete stroke"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24L"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M6 12a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11A.5.5 0 0 1 6 12"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div
+      class="_SectionColumn_84b4eb _SectionColumn--with-top-margin_84b4eb"
+      data-test-section=""
+    >
+      <div
+        class="_SectionColumnLabels_ed28d5"
+        style="width: calc(100% - 32px);"
+      >
+        <span
+          class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+          style="font-size: 9px;"
+        >
+          Position
+        </span>
+        <span
+          class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+          style="font-size: 9px;"
+        >
+          Weight
+        </span>
+      </div>
+      <div
+        class="_SectionColumn__row_84b4eb _SectionColumn__row--top-aligned_84b4eb"
+      >
+        <div
+          class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
+          style="width: calc(100% - 32px);"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="dialog"
+            class="_Dropdown_cc217a _Dropdown--outline_cc217a"
+            data-state="closed"
+            type="button"
+          >
+            <span
+              class="_Dropdown__label_cc217a _Dropdown__label--left_cc217a _Dropdown__label--no-truncate_cc217a"
+            >
+              Center
+            </span>
+            <svg
+              class="Icon"
+              data-fpl-icon-size="24"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 24 24"
+              width="24"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <div
+            class="_TextField_bd2800"
+          >
+            <div
+              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+              data-test-text-field="stroke-weight"
+            >
+              <div
+                class="ScrubbableInput"
+              >
+                <div
+                  class="_InputAdornment_bfc2de"
+                >
+                  <svg
+                    class="Icon"
+                    data-fpl-icon-size="24"
+                    fill="none"
+                    height="24"
+                    style="color: var(--color-neutral-2);"
+                    viewBox="0 0 24 24"
+                    width="24"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M6 6.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5M7 10v1h10v-1zm-.25-1a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h10.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zM7 17v-2h10v2zm-1-2.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-.75.75H6.75a.75.75 0 0 1-.75-.75z"
+                      data-svg-property="fill"
+                      fill="white"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <input
+                aria-label="Stroke weight"
+                class="_TextFieldWrapper__input_9a3a67"
+                data-test-bypass-global-shortcuts="true"
+                data-test-text-field-input="stroke-weight"
+                type="text"
+                value="10"
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
+              />
+            </div>
+          </div>
+        </div>
+        <div>
+          <div
+            class="_SectionColumnButtonIcons_71f71e"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              aria-label="Advanced stroke settings"
+              aria-pressed="false"
+              class="_ButtonIcon_2062db"
+              data-state="closed"
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  d="M8.5 18a.5.5 0 0 0 .5-.5v-1.55a2.5 2.5 0 0 0 0-4.9V6.5a.5.5 0 0 0-1 0v4.55a2.501 2.501 0 0 0 0 4.9v1.55a.5.5 0 0 0 .5.5m7 0a.5.5 0 0 0 .5-.5v-4.55a2.501 2.501 0 0 0 0-4.9V6.5a.5.5 0 0 0-1 0v1.55a2.5 2.5 0 0 0 0 4.9v4.55a.5.5 0 0 0 .5.5m0-6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m-7 3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

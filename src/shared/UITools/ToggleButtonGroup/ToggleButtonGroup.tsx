@@ -17,6 +17,7 @@ import { TToggleButton } from './types';
 
 export type TToggleButtonGroupProps = {
   className?: string;
+  disabled?: boolean;
   e2eValue?: TE2EValue;
   onChange: TFunc<[string]>;
   onHoverOption?: TFunc<[string | null]>;
@@ -26,6 +27,7 @@ export type TToggleButtonGroupProps = {
 
 export const ToggleButtonGroup: FC<TToggleButtonGroupProps> = ({
   className = '',
+  disabled = false,
   e2eValue = '',
   onChange,
   onHoverOption,
@@ -39,6 +41,7 @@ export const ToggleButtonGroup: FC<TToggleButtonGroupProps> = ({
           <button
             aria-label={ariaLabel}
             aria-pressed={value === buttonValue}
+            disabled={disabled}
             className={cx(styles.ToggleButtonGroup__button, { [styles['ToggleButtonGroup__button--selected']]: value === buttonValue })}
             onClick={() => onChange(buttonValue)}
             onMouseEnter={() => onHoverOption?.(buttonValue)}
