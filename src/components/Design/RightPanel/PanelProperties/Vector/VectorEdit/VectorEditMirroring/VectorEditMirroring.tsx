@@ -15,7 +15,11 @@ const VectorEditMirroring: FC = () => {
   const { disabled, onChange, value } = useVectorEditMirroring();
 
   return (
-    <UITools.SectionColumn gridColumnType={UITools.GridColumnType.single} labels={[t(`${translationNameSpace}.mirroring.label`)]} withBottomMargin>
+    <UITools.SectionColumn
+      gridColumnType={UITools.GridColumnType.single}
+      labels={[t(`${translationNameSpace}.mirroring.label`)]}
+      withBottomMargin
+    >
       <UITools.ToggleButtonGroup
         disabled={disabled}
         e2eValue="mirroring"

@@ -7,8 +7,8 @@ import { AppDispatch, store } from 'store';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { getNodeAbsoluteFromParentPosition } from 'store/design/utils/getNodeAbsoluteFromParentPosition';
 import { getVectorPointsPosition } from './getVectorPointsPosition';
+import { getVectorPointsPositionTarget } from './getVectorPointsPositionTarget';
 import { translateVectorVertices } from 'components/Design/Canvas/utils/translateVectorVertices';
 
 export const commitVectorPointsPosition = (
@@ -20,11 +20,10 @@ export const commitVectorPointsPosition = (
 ): void => {
   const nodes = selectNodes(store.getState());
   const node = nodes[nodeId] as TVectorNode;
-  const position = getVectorPointsPosition(node, vertexIds, nodes);
-  const local = { ...position, [axis]: value };
-  const target = position.parent ? getNodeAbsoluteFromParentPosition(local, position.parent) : local;
   const origins = Object.fromEntries(vertexIds.map((vertexId) => [vertexId, node.vertices[vertexId]]));
-  const vertices = translateVectorVertices(origins, target.x - position.origin.x, target.y - position.origin.y);
+  const position = getVectorPointsPosition(node, Object.values(origins), nodes);
+  const delta = getVectorPointsPositionTarget(position, axis, value);
+  const vertices = translateVectorVertices(origins, delta.x, delta.y);
 
   dispatch(updateNode({ changes: { vertices: { ...node.vertices, ...vertices } }, id: nodeId }));
 };

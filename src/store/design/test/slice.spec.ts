@@ -154,7 +154,7 @@ describe('design slice', () => {
       },
       revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
-      vectorPointSelection: { segmentIds: [], vertexIds: [] },
+      vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
     });
   });
 
@@ -640,10 +640,10 @@ describe('design slice', () => {
 
   it('should set the selected points of the vector in edit mode', () => {
     // before
-    const state = slice(undefined, setVectorPointSelection({ segmentIds: ['s'], vertexIds: ['v'] }));
+    const state = slice(undefined, setVectorPointSelection({ handles: [], segmentIds: ['s'], vertexIds: ['v'] }));
 
     // result
-    expect(state.vectorPointSelection).toEqual({ segmentIds: ['s'], vertexIds: ['v'] });
+    expect(state.vectorPointSelection).toEqual({ handles: [], segmentIds: ['s'], vertexIds: ['v'] });
   });
 
   it('should start editing a text box', () => {

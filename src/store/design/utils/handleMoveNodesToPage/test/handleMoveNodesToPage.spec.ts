@@ -88,7 +88,7 @@ const buildState = (source: Partial<TDesignPage>, target: Partial<TDesignPage> =
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
-  vectorPointSelection: { segmentIds: [], vertexIds: [] },
+  vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
 });
 
 describe('handleMoveNodesToPage', () => {

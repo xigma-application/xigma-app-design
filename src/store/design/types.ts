@@ -8,6 +8,7 @@ import {
   TGridTrackModeMenuRequest,
   TGridTrackSelection,
   TGridTrackValueEditRequest,
+  TVectorHandleHover,
 } from 'types/design/canvas/types';
 import { TGuide, TGuideAxis } from 'types/design/guides/types';
 import { TPaint, TPaintProperty, TSolidPaint } from 'types/design/paint/types';
@@ -136,7 +137,7 @@ export type TDesignState = {
   vectorPointSelection: TVectorPointSelection;
 };
 
-export type TVectorPointSelection = { segmentIds: string[]; vertexIds: string[] };
+export type TVectorPointSelection = { handles: TVectorHandleHover[]; segmentIds: string[]; vertexIds: string[] };
 
 export type TDesignSnapshot = {
   activePageId: string;

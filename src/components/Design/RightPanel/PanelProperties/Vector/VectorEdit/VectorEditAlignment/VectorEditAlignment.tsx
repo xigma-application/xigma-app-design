@@ -10,7 +10,11 @@ import { useVectorEditAlignment } from '../hooks/useVectorEditAlignment';
 import { useVectorEditDistributeMenu } from '../hooks/useVectorEditDistributeMenu';
 
 // others
-import { HORIZONTAL_ALIGNMENT_OPTIONS, translationNameSpace, VERTICAL_ALIGNMENT_OPTIONS } from '../../../Common/PositionSection/ColumnAlignment/constants';
+import {
+  HORIZONTAL_ALIGNMENT_OPTIONS,
+  translationNameSpace,
+  VERTICAL_ALIGNMENT_OPTIONS,
+} from '../../../Common/PositionSection/ColumnAlignment/constants';
 
 // styles
 import styles from '../../../Common/PositionSection/ColumnAlignment/column-alignment.module.scss';

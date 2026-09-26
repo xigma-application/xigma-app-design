@@ -58,7 +58,7 @@ const editVector = (vector: Partial<TVectorNode> = {}): void => {
 
 const selectPoints = (vertexIds: string[], segmentIds: string[] = []): void => {
   act(() => {
-    store.dispatch(setVectorPointSelection({ segmentIds, vertexIds }));
+    store.dispatch(setVectorPointSelection({ handles: [], segmentIds, vertexIds }));
   });
 };
 
@@ -102,5 +102,27 @@ describe('useVectorEditMirroring', () => {
     // result
     expect(readVector().vertexHandleModes).toEqual({ a1: 'symmetric', a2: 'symmetric', b1: 'symmetric' });
     expect(result.current.value).toBe('symmetric');
+  });
+
+  it('should set the mirroring of the point the selected handle comes out of', () => {
+    // mock
+    editVector({
+      segments: { ...twoSquares.segments, s0: { ...twoSquares.segments.s0, tangentEnd: { x: -2, y: 6 }, tangentStart: { x: 3, y: -4 } } },
+    });
+
+    // before
+    const { result } = renderHook(() => useVectorEditMirroring(), { wrapper });
+
+    act(() => {
+      store.dispatch(setVectorPointSelection({ handles: [{ end: 'start', segmentId: 's0' }], segmentIds: [], vertexIds: [] }));
+    });
+
+    // action
+    act(() => {
+      result.current.onChange('smooth');
+    });
+
+    // result
+    expect(readVector().vertexHandleModes).toEqual({ a1: 'smooth' });
   });
 });

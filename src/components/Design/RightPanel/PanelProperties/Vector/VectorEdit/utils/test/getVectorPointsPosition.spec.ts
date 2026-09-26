@@ -32,7 +32,12 @@ const twoSquares = makeNetworkVector(
 describe('getVectorPointsPosition', () => {
   it('should return the top left corner of the points of a vector on the canvas', () => {
     // result
-    expect(getVectorPointsPosition(twoSquares, ['b3', 'a2'], {})).toEqual({ origin: { x: 10, y: 0 }, parent: undefined, x: 10, y: 0 });
+    expect(getVectorPointsPosition(twoSquares, [twoSquares.vertices.b3, twoSquares.vertices.a2], {})).toEqual({
+      origin: { x: 10, y: 0 },
+      parent: undefined,
+      x: 10,
+      y: 0,
+    });
   });
 
   it('should return the corner relative to the parent frame', () => {
@@ -40,7 +45,7 @@ describe('getVectorPointsPosition', () => {
     const frame = { height: 100, id: 'frame', rotation: 0, type: NodeType.frame, width: 100, x: 5, y: 8 } as unknown as TSceneNode;
 
     // before
-    const position = getVectorPointsPosition({ ...twoSquares, parentId: 'frame' }, ['b1'], { frame });
+    const position = getVectorPointsPosition({ ...twoSquares, parentId: 'frame' }, [twoSquares.vertices.b1], { frame });
 
     // result
     expect({ x: position.x, y: position.y }).toEqual({ x: 25, y: 12 });

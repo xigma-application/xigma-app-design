@@ -55,7 +55,7 @@ const buildState = (pageNames: string[], activePageId: string): TDesignState => 
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
-  vectorPointSelection: { segmentIds: [], vertexIds: [] },
+  vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
 });
 
 describe('handleDeletePage', () => {

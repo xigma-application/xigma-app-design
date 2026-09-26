@@ -151,7 +151,7 @@ const state = {
       areRulersVisible: true,
     },
     vectorEditingNodeIds: [node.id],
-    vectorPointSelection: { segmentIds: [], vertexIds: ['point'] },
+    vectorPointSelection: { handles: [], segmentIds: [], vertexIds: ['point'] },
   },
 } as any;
 
@@ -384,7 +384,7 @@ describe('design selectors', () => {
 
   it('should select the selected points of the vector in edit mode', () => {
     // result
-    expect(selectVectorPointSelection(state)).toEqual({ segmentIds: [], vertexIds: ['point'] });
+    expect(selectVectorPointSelection(state)).toEqual({ handles: [], segmentIds: [], vertexIds: ['point'] });
   });
 
   it('should select the nodes record', () => {

@@ -58,7 +58,7 @@ const buildState = (nodes: TDesignPage['nodes'], overrides: Partial<TDesignState
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
-  vectorPointSelection: { segmentIds: [], vertexIds: [] },
+  vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
   ...overrides,
 });
 
@@ -97,13 +97,13 @@ describe('handleSetVectorEditingNodeIds', () => {
     const node = buildVectorNode();
     const state = buildState({ [node.id]: node });
 
-    state.vectorPointSelection = { segmentIds: ['s'], vertexIds: ['v1'] };
+    state.vectorPointSelection = { handles: [], segmentIds: ['s'], vertexIds: ['v1'] };
 
     // before
     handleSetVectorEditingNodeIds(state, [node.id]);
 
     // result
-    expect(state.vectorPointSelection).toEqual({ segmentIds: [], vertexIds: [] });
+    expect(state.vectorPointSelection).toEqual({ handles: [], segmentIds: [], vertexIds: [] });
   });
 
   it('should reset the last More tool when exiting Vector Edit Mode entirely', () => {

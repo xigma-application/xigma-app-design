@@ -1131,6 +1131,10 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
     grouped by connected piece, each with its box. Align needs 2 groups, Distribute 3, Tidy up 2 that it would move;
     the group deltas come from `getAlignmentOffset`, `getAxisSpan` and `getTidyUpTargets`, and
     `translateVectorPointGroups` moves only the selected points, so a partly selected piece is pulled apart.
+  - With handles selected and no point (`vectorPointSelection.handles`, `getSelectedVectorHandles`), X/Y show the
+    top left corner of the handle ends (`getVectorHandlePoint`) and move them through `getMirroredVectorSegments`
+    like a drag (`commitVectorHandlesPosition`); Mirroring and Corner radius work on `pointIds`, the points the
+    handles come out of (a curved point keeps its radius without being rounded, as in Figma); Alignment stays off.
 
 ## `ImageCrop/`
 

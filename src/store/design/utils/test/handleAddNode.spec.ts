@@ -28,7 +28,7 @@ const buildState = (page: TDesignPage): TDesignState =>
     },
     revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
     vectorEditingNodeIds: [],
-    vectorPointSelection: { segmentIds: [], vertexIds: [] },
+    vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
   }) as unknown as TDesignState;
 
 const node: TSceneNode = {
@@ -118,7 +118,7 @@ describe('handleAddNode', () => {
       },
       revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
-      vectorPointSelection: { segmentIds: [], vertexIds: [] },
+      vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
     };
 
     // before
@@ -181,7 +181,7 @@ describe('handleAddNode', () => {
       },
       revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
-      vectorPointSelection: { segmentIds: [], vertexIds: [] },
+      vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
     };
 
     // before
@@ -243,7 +243,7 @@ describe('handleAddNode', () => {
       },
       revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
-      vectorPointSelection: { segmentIds: [], vertexIds: [] },
+      vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
     };
 
     // before
@@ -306,7 +306,7 @@ describe('handleAddNode', () => {
       },
       revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
-      vectorPointSelection: { segmentIds: [], vertexIds: [] },
+      vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
     };
 
     // before
@@ -371,7 +371,7 @@ describe('handleAddNode', () => {
       },
       revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
-      vectorPointSelection: { segmentIds: [], vertexIds: [] },
+      vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
     };
 
     // before — an arrow is also type "line" but drawn with a different base name, so it starts its own count
@@ -433,7 +433,7 @@ describe('handleAddNode', () => {
       },
       revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
-      vectorPointSelection: { segmentIds: [], vertexIds: [] },
+      vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
     };
     const media = {
       flipX: false,
@@ -509,7 +509,7 @@ describe('handleAddNode', () => {
       },
       revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
-      vectorPointSelection: { segmentIds: [], vertexIds: [] },
+      vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
     };
 
     // before

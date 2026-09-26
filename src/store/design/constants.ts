@@ -52,4 +52,4 @@ export const TOOL_DEFAULT_NODE_NAMES: ReadonlySet<string> = new Set([
 
 export const EMPTY_SELECTED_INDICES: number[] = [];
 
-export const EMPTY_VECTOR_POINT_SELECTION: TVectorPointSelection = { segmentIds: [], vertexIds: [] };
+export const EMPTY_VECTOR_POINT_SELECTION: TVectorPointSelection = { handles: [], segmentIds: [], vertexIds: [] };

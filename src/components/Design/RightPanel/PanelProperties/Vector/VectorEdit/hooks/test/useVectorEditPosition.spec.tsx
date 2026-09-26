@@ -58,7 +58,7 @@ const editVector = (vector: Partial<TVectorNode> = {}): void => {
 
 const selectPoints = (vertexIds: string[], segmentIds: string[] = []): void => {
   act(() => {
-    store.dispatch(setVectorPointSelection({ segmentIds, vertexIds }));
+    store.dispatch(setVectorPointSelection({ handles: [], segmentIds, vertexIds }));
   });
 };
 
@@ -66,6 +66,14 @@ const blurEvent = (value: string): Parameters<ReturnType<typeof useVectorEditPos
   ({ target: { value } }) as Parameters<ReturnType<typeof useVectorEditPosition>['onBlurX']>[0];
 
 describe('useVectorEditPosition', () => {
+  it('should be empty and disabled while no vector is edited', () => {
+    // before
+    const { result } = renderHook(() => useVectorEditPosition(), { wrapper });
+
+    // result
+    expect(result.current).toMatchObject({ disabled: true, displayX: '', displayY: '' });
+  });
+
   it('should be empty and disabled while no point is selected', () => {
     // mock
     editVector();
@@ -126,5 +134,30 @@ describe('useVectorEditPosition', () => {
 
     // result
     expect(readVector().vertices.b1).toEqual({ id: 'b1', x: 90, y: 5 });
+  });
+
+  it('should show and move the end of the selected handle', () => {
+    // mock
+    editVector({
+      segments: { ...twoSquares.segments, s0: { ...twoSquares.segments.s0, tangentEnd: { x: -2, y: 6 }, tangentStart: { x: 3, y: -4 } } },
+    });
+
+    // before
+    const { result } = renderHook(() => useVectorEditPosition(), { wrapper });
+
+    act(() => {
+      store.dispatch(setVectorPointSelection({ handles: [{ end: 'start', segmentId: 's0' }], segmentIds: [], vertexIds: [] }));
+    });
+
+    // result
+    expect(result.current).toMatchObject({ disabled: false, displayX: 3, displayY: -4 });
+
+    // action
+    act(() => {
+      result.current.onScrubX(13);
+    });
+
+    // result
+    expect(readVector().segments.s0.tangentStart).toEqual({ x: 13, y: -4 });
   });
 });

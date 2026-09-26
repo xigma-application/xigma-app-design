@@ -55,7 +55,7 @@ const editVector = (vector: Partial<TVectorNode> = {}): void => {
 
 const selectPoints = (vertexIds: string[], segmentIds: string[] = []): void => {
   act(() => {
-    store.dispatch(setVectorPointSelection({ segmentIds, vertexIds }));
+    store.dispatch(setVectorPointSelection({ handles: [], segmentIds, vertexIds }));
   });
 };
 
@@ -65,7 +65,7 @@ describe('useSelectedVectorPoints', () => {
     const { result } = renderHook(() => useSelectedVectorPoints(), { wrapper });
 
     // result
-    expect(result.current).toEqual({ node: undefined, vertexIds: [] });
+    expect(result.current).toEqual({ handles: [], node: undefined, pointIds: [], vertexIds: [] });
   });
 
   it('should return the edited vector and its selected points with the ends of its selected segments', () => {
@@ -81,5 +81,29 @@ describe('useSelectedVectorPoints', () => {
     // result
     expect(result.current.node?.id).toBe('edit-vector');
     expect(result.current.vertexIds).toEqual(['b1', 'a1', 'a2']);
+  });
+
+  it('should return the selected handles and the points they come out of while no point is selected', () => {
+    // mock
+    editVector({
+      segments: { ...twoSquares.segments, s0: { ...twoSquares.segments.s0, tangentEnd: { x: -2, y: 6 }, tangentStart: { x: 3, y: -4 } } },
+    });
+
+    // before
+    const { result } = renderHook(() => useSelectedVectorPoints(), { wrapper });
+
+    // action
+    act(() => {
+      store.dispatch(setVectorPointSelection({ handles: [{ end: 'start', segmentId: 's0' }], segmentIds: [], vertexIds: [] }));
+    });
+
+    // result
+    expect(result.current).toMatchObject({ handles: [{ end: 'start', segmentId: 's0' }], pointIds: ['a1'], vertexIds: [] });
+
+    // action
+    selectPoints(['b1']);
+
+    // result
+    expect(result.current).toMatchObject({ handles: [], pointIds: ['b1'], vertexIds: ['b1'] });
   });
 });

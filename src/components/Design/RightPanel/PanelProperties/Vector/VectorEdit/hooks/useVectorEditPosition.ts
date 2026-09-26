@@ -10,7 +10,9 @@ import { selectNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // utils
+import { commitVectorHandlesPosition } from '../utils/commitVectorHandlesPosition';
 import { commitVectorPointsPosition } from '../utils/commitVectorPointsPosition';
+import { getSelectedVectorPositionPoints } from '../utils/getSelectedVectorPositionPoints';
 import { getVectorPointsPosition } from '../utils/getVectorPointsPosition';
 
 export type TUseVectorEditPositionResult = {
@@ -31,8 +33,9 @@ export const useVectorEditPosition = (): TUseVectorEditPositionResult => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const history = useVectorPointsHistory();
-  const { node, vertexIds } = useSelectedVectorPoints();
-  const position = node && vertexIds.length > 0 ? getVectorPointsPosition(node, vertexIds, nodes) : undefined;
+  const { handles, node, vertexIds } = useSelectedVectorPoints();
+  const points = node ? getSelectedVectorPositionPoints(node, vertexIds, handles) : [];
+  const position = points.length > 0 ? getVectorPointsPosition(node!, points, nodes) : undefined;
   const x = position ? Math.round(position.x * 100) / 100 : 0;
   const y = position ? Math.round(position.y * 100) / 100 : 0;
   const displayX = position ? x : '';
@@ -40,8 +43,13 @@ export const useVectorEditPosition = (): TUseVectorEditPositionResult => {
 
   const commit =
     (axis: 'x' | 'y'): TFunc<[number]> =>
-    (value): void =>
-      commitVectorPointsPosition(dispatch, node!.id, vertexIds, axis, value);
+    (value): void => {
+      if (vertexIds.length > 0) {
+        commitVectorPointsPosition(dispatch, node!.id, vertexIds, axis, value);
+      } else {
+        commitVectorHandlesPosition(dispatch, node!.id, handles, axis, value);
+      }
+    };
 
   return {
     disabled: !position,

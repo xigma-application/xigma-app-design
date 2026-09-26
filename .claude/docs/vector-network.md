@@ -5615,8 +5615,8 @@ now copy the whole style of the original (opacity, blend mode, effects, corner r
 
 The point selection of vector edit mode lives in canvas refs (`selectedVectorVertexIdsRef`,
 `selectedVectorSegmentIdsRef`), which every canvas tool reads synchronously. The right panel needs it too, so
-`syncVectorPointSelection` copies it into `design.vectorPointSelection` (`{ segmentIds, vertexIds }`, dispatched only
-when it changed) at the end of every selection-tool pointer handler (`useSelectionTool`) and of the keyboard actions
+`syncVectorPointSelection` copies it into `design.vectorPointSelection` (`{ handles, segmentIds, vertexIds }`, dispatched
+only when it changed) at the end of every selection-tool pointer handler (`useSelectionTool`) and of the keyboard actions
 that change it (undo, redo, select all, delete, paste, duplicate). `handleSetVectorEditingNodeIds` clears it
 whenever the edited vectors change, matching the refs being cleared in `useVectorEditOnDoubleClick`. It is not
 undoable on its own. The panel reads the selected points as the vertices plus the ends of selected segments

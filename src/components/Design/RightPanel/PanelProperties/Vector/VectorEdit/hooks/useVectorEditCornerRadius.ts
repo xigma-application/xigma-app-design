@@ -28,13 +28,13 @@ export type TUseVectorEditCornerRadiusResult = {
 export const useVectorEditCornerRadius = (): TUseVectorEditCornerRadiusResult => {
   const dispatch = useAppDispatch();
   const history = useVectorPointsHistory();
-  const { node, vertexIds } = useSelectedVectorPoints();
-  const radii = node ? getVectorCornerRadii(node, vertexIds) : [0];
+  const { node, pointIds } = useSelectedVectorPoints();
+  const radii = node ? getVectorCornerRadii(node, pointIds) : [0];
   const [value] = radii;
   const isMixed = radii.some((radius) => radius !== value);
 
   const commit = (getValue: TFunc<[number], number>): void => {
-    dispatch(updateNode({ changes: getVectorCornerRadiusChanges(node!, vertexIds, getValue), id: node!.id }));
+    dispatch(updateNode({ changes: getVectorCornerRadiusChanges(node!, pointIds, getValue), id: node!.id }));
   };
 
   const handleCommit = (raw: string): void => {
@@ -46,7 +46,7 @@ export const useVectorEditCornerRadius = (): TUseVectorEditCornerRadiusResult =>
   };
 
   return {
-    iconName: vertexIds.length > 0 ? 'BorderRadiusT' : 'Corners',
+    iconName: pointIds.length > 0 ? 'BorderRadiusT' : 'Corners',
     onCommit: handleCommit,
     onScrub: (next): void => commit((radius) => radius + next - value),
     value,

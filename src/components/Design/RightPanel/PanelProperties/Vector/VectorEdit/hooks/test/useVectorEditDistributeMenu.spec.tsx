@@ -58,7 +58,7 @@ const editVector = (vector: Partial<TVectorNode> = {}): void => {
 
 const selectPoints = (vertexIds: string[], segmentIds: string[] = []): void => {
   act(() => {
-    store.dispatch(setVectorPointSelection({ segmentIds, vertexIds }));
+    store.dispatch(setVectorPointSelection({ handles: [], segmentIds, vertexIds }));
   });
 };
 

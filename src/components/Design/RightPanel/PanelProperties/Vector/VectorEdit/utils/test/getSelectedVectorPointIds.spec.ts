@@ -28,11 +28,11 @@ const twoSquares = makeNetworkVector(
 describe('getSelectedVectorPointIds', () => {
   it('should return the selected points and the ends of the selected segments once each', () => {
     // result
-    expect(getSelectedVectorPointIds(twoSquares, { segmentIds: ['s0'], vertexIds: ['a2', 'b1'] })).toEqual(['a2', 'b1', 'a1']);
+    expect(getSelectedVectorPointIds(twoSquares, { handles: [], segmentIds: ['s0'], vertexIds: ['a2', 'b1'] })).toEqual(['a2', 'b1', 'a1']);
   });
 
   it('should skip points and segments the vector no longer has', () => {
     // result
-    expect(getSelectedVectorPointIds(twoSquares, { segmentIds: ['gone'], vertexIds: ['missing', 'b3'] })).toEqual(['b3']);
+    expect(getSelectedVectorPointIds(twoSquares, { handles: [], segmentIds: ['gone'], vertexIds: ['missing', 'b3'] })).toEqual(['b3']);
   });
 });

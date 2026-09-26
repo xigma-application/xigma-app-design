@@ -57,7 +57,7 @@ const buildState = (nodes: Record<string, TPathNode | TRectangleNode | TTextNode
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
-  vectorPointSelection: { segmentIds: [], vertexIds: [] },
+  vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
 });
 
 const buildPathText = (overrides: Partial<TTextNode> = {}): TTextNode => ({

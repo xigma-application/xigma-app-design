@@ -61,7 +61,7 @@ const editVector = (vector: Partial<TVectorNode> = {}): void => {
 
 const selectPoints = (vertexIds: string[], segmentIds: string[] = []): void => {
   act(() => {
-    store.dispatch(setVectorPointSelection({ segmentIds, vertexIds }));
+    store.dispatch(setVectorPointSelection({ handles: [], segmentIds, vertexIds }));
   });
 };
 
@@ -114,5 +114,33 @@ describe('useVectorEditCornerRadius', () => {
 
     // result
     expect(readVector()).toMatchObject({ cornerRadius: 4, cornerRadiusByVertexId: { a1: 7 } });
+  });
+
+  it('should set the radius of the point the selected handle comes out of', () => {
+    // mock
+    editVector({
+      ...{
+        segments: { ...twoSquares.segments, s0: { ...twoSquares.segments.s0, tangentEnd: { x: -2, y: 6 }, tangentStart: { x: 3, y: -4 } } },
+      },
+      cornerRadius: 2,
+    });
+
+    // before
+    const { result } = renderHook(() => useVectorEditCornerRadius(), { wrapper });
+
+    act(() => {
+      store.dispatch(setVectorPointSelection({ handles: [{ end: 'start', segmentId: 's0' }], segmentIds: [], vertexIds: [] }));
+    });
+
+    // result
+    expect(result.current).toMatchObject({ iconName: 'BorderRadiusT', valueLabel: 2 });
+
+    // action
+    act(() => {
+      result.current.onCommit('8');
+    });
+
+    // result
+    expect(readVector().cornerRadiusByVertexId).toEqual({ a1: 8 });
   });
 });

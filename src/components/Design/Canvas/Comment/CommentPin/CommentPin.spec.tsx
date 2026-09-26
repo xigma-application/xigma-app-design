@@ -68,7 +68,7 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
         },
         revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
         vectorEditingNodeIds: [],
-        vectorPointSelection: { segmentIds: [], vertexIds: [] },
+        vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
       },
     },
     reducer: { design: designReducer },

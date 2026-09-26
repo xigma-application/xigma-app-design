@@ -1,5 +1,9 @@
 // others
-import { TIDY_UP_MAX_LAYERS, TIDY_UP_MIN_LAYERS, TIDY_UP_POSITION_EPSILON } from '../../../Common/PositionSection/ColumnAlignment/constants';
+import {
+  TIDY_UP_MAX_LAYERS,
+  TIDY_UP_MIN_LAYERS,
+  TIDY_UP_POSITION_EPSILON,
+} from '../../../Common/PositionSection/ColumnAlignment/constants';
 
 // types
 import { TVectorPointGroup } from '../types';

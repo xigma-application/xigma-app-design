@@ -24,7 +24,10 @@ const VectorEdit: FC = () => {
 
   return (
     <Fragment>
-      <UITools.Section e2eValue="vector-edit" label={<span className={styles.VectorEdit__title}>{t(`${translationNameSpace}.label`)}</span>}>
+      <UITools.Section
+        e2eValue="vector-edit"
+        label={<span className={styles.VectorEdit__title}>{t(`${translationNameSpace}.label`)}</span>}
+      >
         <VectorEditAlignment />
         <VectorEditPosition />
         <VectorEditMirroring />

@@ -3,7 +3,11 @@ import { useVectorPointGroups } from './useVectorPointGroups';
 import { useVectorPointsHistory } from './useVectorPointsHistory';
 
 // others
-import { DISTRIBUTE_MENU_TRIGGER_ICON, DISTRIBUTE_MIN_CHILDREN, TIDY_UP_ICONS } from '../../../Common/PositionSection/ColumnAlignment/constants';
+import {
+  DISTRIBUTE_MENU_TRIGGER_ICON,
+  DISTRIBUTE_MIN_CHILDREN,
+  TIDY_UP_ICONS,
+} from '../../../Common/PositionSection/ColumnAlignment/constants';
 
 // store
 import { useAppDispatch } from 'store';

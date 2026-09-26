@@ -57,7 +57,7 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[], override
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
-  vectorPointSelection: { segmentIds: [], vertexIds: [] },
+  vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
   ...overrides,
 });
 
@@ -264,7 +264,7 @@ describe('handleSetSelection', () => {
     const state = buildState({ [frame.id]: frame, other }, [frame.id], {
       penActiveVertexId: 'vertex-1',
       vectorEditingNodeIds: [frame.id],
-      vectorPointSelection: { segmentIds: [], vertexIds: [] },
+      vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
     });
 
     // before
@@ -280,7 +280,7 @@ describe('handleSetSelection', () => {
     const other = { ...frame, id: 'other' };
     const state = buildState({ [frame.id]: frame, other }, [frame.id, 'other'], {
       vectorEditingNodeIds: [frame.id, 'other'],
-      vectorPointSelection: { segmentIds: [], vertexIds: [] },
+      vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
     });
 
     // before
@@ -295,7 +295,7 @@ describe('handleSetSelection', () => {
     const other = { ...frame, id: 'other' };
     const state = buildState({ [frame.id]: frame, other }, [frame.id, 'other'], {
       vectorEditingNodeIds: [frame.id, 'other'],
-      vectorPointSelection: { segmentIds: [], vertexIds: [] },
+      vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
     });
 
     // before

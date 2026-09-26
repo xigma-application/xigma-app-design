@@ -10,6 +10,7 @@ import { TVectorEditRefs } from 'types/design/canvas/types';
 
 export const syncVectorPointSelection = (vectorEdit: TVectorEditRefs): void => {
   const selection = {
+    handles: vectorEdit.selectedVectorHandlesRef.current,
     segmentIds: vectorEdit.selectedVectorSegmentIdsRef.current,
     vertexIds: vectorEdit.selectedVectorVertexIdsRef.current,
   };

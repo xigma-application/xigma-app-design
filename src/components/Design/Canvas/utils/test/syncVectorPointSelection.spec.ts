@@ -10,6 +10,7 @@ import { syncVectorPointSelection } from '../syncVectorPointSelection';
 
 const makeVectorEditRefs = (vertexIds: string[], segmentIds: string[]): TVectorEditRefs =>
   ({
+    selectedVectorHandlesRef: { current: [{ end: 'start', segmentId: 'h' }] },
     selectedVectorSegmentIdsRef: { current: segmentIds },
     selectedVectorVertexIdsRef: { current: vertexIds },
   }) as unknown as TVectorEditRefs;
@@ -20,7 +21,11 @@ describe('syncVectorPointSelection', () => {
     syncVectorPointSelection(makeVectorEditRefs(['v1'], ['s1']));
 
     // result
-    expect(selectVectorPointSelection(store.getState())).toEqual({ segmentIds: ['s1'], vertexIds: ['v1'] });
+    expect(selectVectorPointSelection(store.getState())).toEqual({
+      handles: [{ end: 'start', segmentId: 'h' }],
+      segmentIds: ['s1'],
+      vertexIds: ['v1'],
+    });
   });
 
   it('should not dispatch when the store already holds the same selection', () => {

@@ -54,7 +54,7 @@ describe('VectorEditCornerRadius behaviors', () => {
 
     // action
     act(() => {
-      store.dispatch(setVectorPointSelection({ segmentIds: [], vertexIds: [Object.keys(vector.vertices)[0]] }));
+      store.dispatch(setVectorPointSelection({ handles: [], segmentIds: [], vertexIds: [Object.keys(vector.vertices)[0]] }));
     });
 
     // result

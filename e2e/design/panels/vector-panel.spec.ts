@@ -655,3 +655,75 @@ test('with points from two pieces of a vector selected, Align left moves each pi
       { id: 'a0', x: 800, y: 300 },
     ]);
 });
+
+test('a handle selected on the canvas in vector edit mode shows and moves its end in the panel, and Corner radius sets the radius of its point', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-panel-edit-handle');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — one curve whose first point has a handle ending at (860, 220), open in vector edit mode
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { addNodes, setSelection, setVectorEditingNodeIds } = await import('/src/store/design/slice.ts');
+
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            defaultFill: null,
+            filledFaceKeys: [],
+            id: 'curve',
+            name: 'Curve',
+            parentId: null,
+            rotation: 0,
+            segments: { s: { endId: 'b', id: 's', startId: 'a', tangentEnd: { x: -60, y: -80 }, tangentStart: { x: 60, y: -80 } } },
+            strokeWidth: 1,
+            strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+            type: 'vector',
+            vertexHandleModes: {},
+            vertices: { a: { id: 'a', x: 800, y: 300 }, b: { id: 'b', x: 1000, y: 300 } },
+          },
+        ] as never,
+        rootIds: ['curve'],
+      }),
+    );
+    store.dispatch(setSelection(['curve']));
+    store.dispatch(setVectorEditingNodeIds(['curve']));
+  });
+
+  const vectorEdit = page.locator('[data-test-section="vector-edit"]');
+  const x = vectorEdit.getByLabel('X position');
+
+  // action — select the first point, then its handle
+  await designPage.click(800, 300);
+  await expect(x).toHaveValue('800');
+  await designPage.click(860, 220);
+
+  // result — the panel shows the end of the handle
+  await expect(x).toHaveValue('860');
+  await expect(vectorEdit.getByLabel('Y position')).toHaveValue('220');
+
+  // action
+  await x.fill('880');
+  await x.press('Tab');
+
+  const cornerRadius = vectorEdit.getByLabel('Corner radius');
+
+  await cornerRadius.fill('12');
+  await cornerRadius.press('Tab');
+
+  // result
+  await expect
+    .poll(async () => {
+      const vector = await readEditedVector(page);
+
+      return {
+        radius: vector.cornerRadiusByVertexId,
+        tangent: (vector as unknown as { segments: Record<string, { tangentStart: unknown }> }).segments.s.tangentStart,
+      };
+    })
+    .toEqual({ radius: { a: 12 }, tangent: { x: 80, y: -80 } });
+});

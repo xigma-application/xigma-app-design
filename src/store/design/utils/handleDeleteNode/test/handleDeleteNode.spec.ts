@@ -72,7 +72,7 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[] = []): TD
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
-  vectorPointSelection: { segmentIds: [], vertexIds: [] },
+  vectorPointSelection: { handles: [], segmentIds: [], vertexIds: [] },
 });
 
 const buildPathNode = (overrides: Partial<TPathNode> = {}): TPathNode => ({
