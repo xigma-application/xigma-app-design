@@ -1056,8 +1056,8 @@ Stroke with `ShapeStrokeSettings type={NodeType.star}`, Effects and Export. `Cou
 
 ## `Vector/`
 
-`Vector.tsx` (shown while every selected layer is a vector) is being built in stages (A: header, position,
-layout, export; then fill, appearance, stroke, effects, corner radius). A vector has no stored box: its X/Y/W/H
+`Vector.tsx` (shown while every selected layer is a vector) is being built in stages (header, position,
+layout, export, fill, appearance, stroke and selection colors are done; effects and corner radius come next). A vector has no stored box: its X/Y/W/H
 are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
 
 - `VectorHeader`: "Vector path" with matching layers, create component (single selection), mask and boolean;
@@ -1083,7 +1083,22 @@ are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
 - Appearance: `AppearanceSection withCornerRadius={false}` (corner radius comes later). `TVectorNode` now has
   `opacity` and `blendMode`; `Common/AppearanceSection/utils/isOpacityPanelNode` (type `TOpacityPanelNode`) lets
   `useOpacity`, `useBlendModeRow` and `useBlendModeButton` take vectors. Visibility already worked through
-  `hidden`. Selection colors wait for vector strokes to become paints.
+  `hidden`.
+- Stroke: `FillSection property="strokes"` with `ShapeStrokeSettings type={NodeType.vector}` as its footer
+  (`TShapeStrokeNodeType` adds the vector; a vector without `strokeAlign` reads as Center, the way it is drawn).
+  `isFillPanelNode` takes a vector for both properties, but only `fills` goes through `getVectorPanelFills` /
+  `getVectorFillsChange`; strokes use the plain `strokes` list. `getFillTargets` gives a vector Center as the
+  default position and drops a zero `strokeWidth` (shapes flattened without a stroke) so the first stroke gets
+  width 1. The advanced stroke panel (Basic/Dynamic/Brush tabs, width profile) filters its nodes with
+  `Common/AppearanceSection/utils/isStrokeSettingsNode` (styled nodes plus vectors); vectors already draw every
+  mode, dashes and profiles.
+- Selection colors: `isSelectionColorsRootNode` takes a vector and the section always shows for one. An
+  occurrence of a vector area fill carries `faceKey` (`getSelectionColorPaintSources`: one fills source per
+  filled area from `getEffectiveVectorFill`, then the strokes); the identity becomes `nodeId:fills:faceKey:index`
+  and `groupOccurrencesByNodeProperty` keeps areas apart. `getSelectionColorNodeChanges` reads the paints with
+  `getSelectionColorSourcePaints` and writes an area back into `fillByKey[faceKey]` next to the other areas
+  (`getSelectionColorPaintsChange`). Vectors inside a selected frame or group now count too
+  (`isSelectionColorNode`).
 
 ## `ImageCrop/`
 
@@ -1663,7 +1678,9 @@ Sits under Stroke on Frame and Rectangle. The node stores `effects?: TEffect[]` 
 
 Sits under Effects, imported only in `Frame/Frame.tsx` (never `Rectangle.tsx`) — Figma-style Grid / Columns / Rows guides for a frame's own canvas, not the ruler/manual snap guides (`TGuide`/`guides?: TGuide[]`, an unrelated pre-existing field). The node stores `layoutGuides?: TLayoutGuide[]` (`type: LayoutGuideType`, `color`, `opacity`, plus per-type fields read through `getLayoutGuideFieldValue(guide, field)` with defaults from `constant/layoutGuide.ts` so switching type never has to backfill the other type's fields: `size` for Grid; `count`, `gutter`, `margin`, `width`/`height` and `columnsAlign`/`rowsAlign` — `LayoutGuideColumnsAlign` left/right/center/stretch, `LayoutGuideRowsAlign` top/bottom/center/stretch, both default `stretch` via `getLayoutGuideColumnsAlign`/`getLayoutGuideRowsAlign` — for Columns/Rows). The plus adds a Grid guide directly, no menu (`createLayoutGuide(LayoutGuideType.grid)`, mirrors `FillSection`'s plain-add, not Effects' type-menu plus). `useLayoutGuideSection` reuses `FillSection`'s generic hooks unmodified (`useItemsReorderDrag`, `useOpenPickerIndex` keyed `'layoutGuides'`, `useClearFillSelectionOnOutsideClick`, `resolveFillDragIndices`) and only adds the domain-specific `commitLayoutGuides`/`createLayoutGuide`/`toggleLayoutGuideVisibility`, mirroring `useEffectsSection` (no dedicated hook spec either, by the same precedent). `LayoutGuideRow` has three separate controls, not one bordered pill like `EffectRow`: a plain 24px `ButtonIcon` (the guide's type icon, `triggerTooltip` "Layout guide settings") that is the trigger for the full `LayoutGuideSettingsPanel` popover (`selected` only tracks that popover's own `isOpen`, not row selection/dragging); next to it a bordered dropdown-styled button (label from `getLayoutGuideRowLabel` — "Grid {size}px" / "{count} columns" / "{count} rows" — plus a `ChevronDown`) that opens a separate small `LayoutGuideTypeItems` popover and changes `guide.type` directly, no full panel; then the eye and delete `ButtonIcon`s. The row itself carries `--selected` (`var(--color-bg-selected)`) while selected or mid-drag, clickable via a plain `onClick={onSelect}` on the row root (`onSelectRow` just replaces the local selection with `[index]`, no shift/meta range — simpler than `FillSection`'s Redux-backed `useFillSelection`, sufficient since layout guides don't need cross-render-persisted selection). `LayoutGuideSettingsPanel` mirrors `EffectSettingsPanel`'s shape (own `LayoutGuideSettingsHeader` with the same type-Popover-menu + close pattern as `EffectSettingsHeader`) but switches its whole field list per type via a `switch` into three sibling components (`LayoutGuideGridFields`/`ColumnsFields`/`RowsFields`, each still reusing `UITools.Field` and `EffectColorField` straight from `EffectsSection` — both are already effect-agnostic) rather than one generic `fields.map` array, since Width/Height needs a disabled "Auto" placeholder while `stretch`; numeric fields go through `LayoutGuideNumberField` (`ScrubbableEdge`, no icon adornment — Figma's own guide fields are plain numbers) and a `useLayoutGuideSettingsPanel` hook that mirrors `useEffectSettingsPanel`'s blur/scrub handlers 1:1 against `TLayoutGuide` instead of `TEffect`. Canvas: `drawLayoutGuides` (`drawScene/drawLayoutGuides/`, called right after `drawGridSlots`) draws every visible frame's guides — not just the selected one — gated by the `design.preferences.areLayoutGuidesVisible` pref (default **on**; `toggleLayoutGuidesVisible`, wired to the `Shift+G` shortcut and the two previously-disabled "Layout guides" stub `MenuItem`s in `ViewMenu`/`ZoomMenu`, same recipe as `areRulersVisible`/`toggleRulers`/`handleToggleRulers`, minus the on-screen hint toast). `utils/canvas/layoutGuides/getLayoutGuideRects(guide, frame, lineWidth)` (`switch` on type) returns plain `TDrawableRect[]` — Grid as thin (`1 / viewport.zoom`-wide) horizontal+vertical rects from 0 to width/height in `size` steps; Columns/Rows as `count` bands whose width/height is either evenly stretched across `frame.width|height - 2*margin - gutter*(count-1)` or the guide's own fixed `width`/`height`, positioned per `columnsAlign`/`rowsAlign` (`left`/`top` = after margin, `right`/`bottom` = before margin, `center` = centered, `stretch` = from the margin) — then every rect is run through `clampRectToFrameBounds` (intersect against `[frame.x, frame.x+width] x [frame.y, frame.y+height]`, drop empty results) **before** rotation, since `drawRect` rotates whatever it's given around the frame's own center (`getAutoLayoutFrameCenter`) the same way `drawGridSlots` does — this is what stops a guide (e.g. a fixed pixel size that doesn't divide evenly, or a `left`/`top`-anchored set wider than the frame) from ever painting outside the frame's own bounds, matching Figma. Icons (`LayoutGuideGrid`/`LayoutGuideColumns`/`LayoutGuideRows`) live in `@xigma/components` (`xigma-app-shared`), added there and pulled in, per [[xigma-icons]]'s workflow.
 
-### Selection colors section (`Common/SelectionColorsSection`), Frame only
+### Selection colors section (`Common/SelectionColorsSection`)
+
+Shown in the Frame, Group, Section, Mixed and Vector panels; for vectors see `Vector/` above (area fills carry a `faceKey`). The notes below were written for frames.
 
 Sits between Effects and Layout guide, imported only in `Frame/Frame.tsx` — a purely derived, read-through-and-write-back view (nothing new is stored on the node), listing every distinct solid/gradient color used anywhere inside the selected frame: its own `fills`/`strokes` plus every descendant's, walked with `getGroupSubtreeNodes(frame, nodesById)` (self at index 0, then every child recursively — the same subtree walker `collectDescendantIdsOfSelected` uses) filtered to `isAppearanceNode` (only Frame and Rectangle carry `fills`/`strokes` in this codebase so far) and `!node.hidden`. `useSelectionColorsSection` also returns `hasChildren = (node?.childIds.length ?? 0) > 0`; `SelectionColorsSection` renders nothing at all (not even a muted empty header) when it's false, so a leaf frame with no children never shows this section, even if the frame itself has its own colors — it would just duplicate what Fill/Stroke already show.
 

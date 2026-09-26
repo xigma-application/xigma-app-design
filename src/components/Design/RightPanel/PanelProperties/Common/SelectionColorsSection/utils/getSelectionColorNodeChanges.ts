@@ -4,10 +4,10 @@ import { TSceneNode, TSceneNodeChanges } from 'types/design/types';
 import { TSelectionColorOccurrence } from '../types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
-import { getPaintsChange } from 'utils/design/paint/getPaintsChange';
+import { getSelectionColorPaintsChange } from './getSelectionColorPaintsChange';
+import { getSelectionColorSourcePaints } from './getSelectionColorSourcePaints';
 import { groupOccurrencesByNodeProperty } from './groupOccurrencesByNodeProperty';
-import { isAppearanceNode } from '../../AppearanceSection/types';
+import { isSelectionColorNode } from './isSelectionColorNode';
 
 export type TSelectionColorNodeChange = { changes: TSceneNodeChanges; nodeId: string };
 
@@ -18,15 +18,16 @@ export const getSelectionColorNodeChanges = (
 ): TSelectionColorNodeChange[] => {
   const changesByNode = new Map<string, TSceneNodeChanges>();
 
-  groupOccurrencesByNodeProperty(occurrences).forEach(({ indices, nodeId, property }) => {
+  groupOccurrencesByNodeProperty(occurrences).forEach(({ faceKey, indices, nodeId, property }) => {
     const node = nodesById[nodeId];
 
-    if (node && isAppearanceNode(node)) {
-      const paints = getNodePaints(node, property).map((paint, index) =>
+    if (isSelectionColorNode(node)) {
+      const previousChanges = changesByNode.get(nodeId);
+      const paints = getSelectionColorSourcePaints(node, property, faceKey).map((paint, index) =>
         indices.has(index) ? { ...nextPaint, visible: paint.visible } : paint,
       );
 
-      changesByNode.set(nodeId, { ...changesByNode.get(nodeId), ...getPaintsChange(property, paints) });
+      changesByNode.set(nodeId, { ...previousChanges, ...getSelectionColorPaintsChange(node, previousChanges, property, paints, faceKey) });
     }
   });
 

@@ -13,6 +13,11 @@ describe('getPanelPaints', () => {
     expect(getPanelPaints(makeSquareVector({ fillByKey: { a: red }, filledFaceKeys: ['a'] }), 'fills')).toEqual(red);
   });
 
+  it('should read the stroke paints of a vector', () => {
+    // result
+    expect(getPanelPaints(makeSquareVector({ strokes: red }), 'strokes')).toEqual(red);
+  });
+
   it('should read the paints of any other node', () => {
     // mock
     const node = { fills: red, type: 'rectangle' } as unknown as TAppearanceNode;

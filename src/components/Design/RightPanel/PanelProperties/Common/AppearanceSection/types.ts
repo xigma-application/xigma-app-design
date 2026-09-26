@@ -19,5 +19,7 @@ export type TStyledNode = TAppearanceNode | TEllipseNode | TLineNode | TPolygonN
 
 export type TOpacityPanelNode = TStyledNode | TVectorNode;
 
+export type TStrokeSettingsNode = TStyledNode | TVectorNode;
+
 export const isAppearanceNode = (node: TSceneNode | undefined): node is TAppearanceNode =>
   node?.type === NodeType.boolean || node?.type === NodeType.frame || node?.type === NodeType.rectangle || node?.type === NodeType.section;

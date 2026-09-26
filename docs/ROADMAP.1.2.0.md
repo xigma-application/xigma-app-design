@@ -158,6 +158,6 @@ and Export. The Paint tool keeps painting single areas; the Fill section changes
 - [x] the header says Vector path, and position, rotation, flips, width and height (with a ratio lock) work
 - [x] Fill for the whole vector, "Click + to replace mixed content" when areas differ
 - [x] opacity and blend mode, also inside a see-through frame
-- [ ] strokes with colors, gradients and images, position and weight, and selection colors
+- [x] strokes with colors, gradients and images, position and weight, and selection colors
 - [ ] effects
 - [ ] corner radius

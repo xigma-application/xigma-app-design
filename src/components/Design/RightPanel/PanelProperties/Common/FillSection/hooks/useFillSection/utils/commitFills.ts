@@ -36,9 +36,10 @@ export const commitFills = (
   property: TPaintProperty = 'fills',
 ): void => {
   const updates = targets.map(({ id, vector, ...stroke }) => ({
-    changes: vector
-      ? getVectorFillsChange(vector, nextFills)
-      : { ...getPaintsChange(property, nextFills), ...getStrokeDefaults(property, stroke) },
+    changes:
+      vector && property === 'fills'
+        ? getVectorFillsChange(vector, nextFills)
+        : { ...getPaintsChange(property, nextFills), ...getStrokeDefaults(property, stroke) },
     id,
   }));
 

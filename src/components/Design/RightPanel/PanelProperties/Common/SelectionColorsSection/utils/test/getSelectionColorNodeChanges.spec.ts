@@ -5,6 +5,7 @@ import { TSelectionColorOccurrence } from '../../types';
 
 // utils
 import { getSelectionColorNodeChanges } from '../getSelectionColorNodeChanges';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const child: TRectangleNode = {
   fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
@@ -109,5 +110,24 @@ describe('getSelectionColorNodeChanges', () => {
 
     // result
     expect(getSelectionColorNodeChanges({ line }, occurrences, nextPaint)).toEqual([]);
+  });
+
+  it('should write a vector area color back into that area and its stroke color into its strokes', () => {
+    // mock
+    const red = [{ color: '#ff0000', opacity: 100, type: 'solid' as const }];
+    const vector = makeSquareVector({ fillByKey: { f1: red, f2: red }, filledFaceKeys: ['f1', 'f2'], strokes: red });
+    const occurrences: TSelectionColorOccurrence[] = [
+      { faceKey: 'f1', index: 0, nodeId: 'vector', property: 'fills' },
+      { faceKey: 'f2', index: 0, nodeId: 'vector', property: 'fills' },
+      { index: 0, nodeId: 'vector', property: 'strokes' },
+    ];
+
+    // result
+    expect(getSelectionColorNodeChanges({ vector }, occurrences, nextPaint)).toEqual([
+      {
+        changes: { fillByKey: { f1: [{ ...nextPaint }], f2: [{ ...nextPaint }] }, strokes: [{ ...nextPaint }] },
+        nodeId: 'vector',
+      },
+    ]);
   });
 });

@@ -15,12 +15,12 @@ import { translationNameSpace as strokeNameSpace } from '../StrokeSection/consta
 
 // types
 import { StrokeAlign } from 'types/design/enums';
-import { TShapeNodeType } from '../types';
+import { TShapeStrokeNodeType } from '../types';
 
 // utils
 import { getStrokeAlignOptions } from '../StrokeSection/StrokeSettingsRow/utils/getStrokeAlignOptions';
 
-export type TShapeStrokeSettingsProps = { type: TShapeNodeType };
+export type TShapeStrokeSettingsProps = { type: TShapeStrokeNodeType };
 
 const ShapeStrokeSettings: FC<TShapeStrokeSettingsProps> = ({ type }) => {
   const { t } = useTranslation();

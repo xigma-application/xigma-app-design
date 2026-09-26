@@ -8,9 +8,9 @@ import { updateNodes } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { StrokeAlign, StrokeMode } from 'types/design/enums';
+import { NodeType, StrokeAlign, StrokeMode } from 'types/design/enums';
 import { TSceneNodeChanges } from 'types/design/types';
-import { TShapeNode, TShapeNodeType } from '../../types';
+import { TShapeStrokeNode, TShapeStrokeNodeType } from '../../types';
 
 // utils
 import { clampStrokeWeight } from '../../StrokeSection/StrokeSettingsRow/utils/clampStrokeWeight';
@@ -30,19 +30,20 @@ export type TUseShapeStrokeSettingsResult = {
   weight: number;
 };
 
-export const useShapeStrokeSettings = (type: TShapeNodeType): TUseShapeStrokeSettingsResult => {
+export const useShapeStrokeSettings = (type: TShapeStrokeNodeType): TUseShapeStrokeSettingsResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter((node): node is TShapeNode => node?.type === type);
+  const nodes = useAppSelector(selectSelectedNodes).filter((node): node is TShapeStrokeNode => node?.type === type);
+  const defaultPosition = type === NodeType.vector ? StrokeAlign.center : StrokeAlign.inside;
   const weights = nodes.map((node) => node.strokeWidth ?? 1);
   const weight = weights[0] ?? 1;
   const sharedWeight = getSharedValue(weights);
   const modes = nodes.map((node) => node.strokeMode ?? StrokeMode.basic);
 
-  const commitEach = (getChanges: TFunc<[TShapeNode], TSceneNodeChanges>): void => {
+  const commitEach = (getChanges: TFunc<[TShapeStrokeNode], TSceneNodeChanges>): void => {
     dispatch(updateNodes(nodes.map((node) => ({ changes: getChanges(node), id: node.id }))));
   };
 
-  const commitEachWithHistory = (getChanges: TFunc<[TShapeNode], TSceneNodeChanges>): void => {
+  const commitEachWithHistory = (getChanges: TFunc<[TShapeStrokeNode], TSceneNodeChanges>): void => {
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
     commitEach(getChanges);
     dispatch(endHistoryGesture());
@@ -57,7 +58,7 @@ export const useShapeStrokeSettings = (type: TShapeNodeType): TUseShapeStrokeSet
     onWeightDragEnd: () => dispatch(endHistoryGesture()),
     onWeightDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
     onWeightScrub: (value) => commitEach((node) => ({ strokeWidth: clampStrokeWeight((node.strokeWidth ?? 1) + value - weight) })),
-    position: getSharedValue(nodes.map((node) => node.strokeAlign ?? StrokeAlign.inside)),
+    position: getSharedValue(nodes.map((node) => node.strokeAlign ?? defaultPosition)),
     weight,
   };
 };

@@ -5,6 +5,7 @@ import { TRectangleNode } from 'types/design/types';
 
 // utils
 import { getSelectionColorOccurrenceEntries } from '../getSelectionColorOccurrenceEntries';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const RECTANGLE_BASE: Omit<TRectangleNode, 'fills'> = {
   height: 10,
@@ -64,6 +65,18 @@ describe('getSelectionColorOccurrenceEntries', () => {
 
     // result
     expect(getSelectionColorOccurrenceEntries([node])).toEqual([]);
+  });
+
+  it('should list the fill of every vector area with its area key and the vector strokes', () => {
+    // mock
+    const red = [{ color: '#ff0000', opacity: 100, type: 'solid' as const }];
+    const vector = makeSquareVector({ fillByKey: { f1: red }, filledFaceKeys: ['f1'], strokes: red });
+
+    // result
+    expect(getSelectionColorOccurrenceEntries([vector])).toEqual([
+      { occurrence: { faceKey: 'f1', index: 0, nodeId: 'vector', property: 'fills' }, paint: red[0] },
+      { occurrence: { index: 0, nodeId: 'vector', property: 'strokes' }, paint: red[0] },
+    ]);
   });
 
   it('should return no entries for a node with no fills or strokes', () => {

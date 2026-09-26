@@ -8,4 +8,4 @@ import { TStyledNode } from '../../../../AppearanceSection/types';
 import { isPaintPropertyNode } from './isPaintPropertyNode';
 
 export const isFillPanelNode = (node: TSceneNode | undefined, property: TPaintProperty): node is TStyledNode | TVectorNode =>
-  isPaintPropertyNode(node, property) || (property === 'fills' && node?.type === NodeType.vector);
+  isPaintPropertyNode(node, property) || node?.type === NodeType.vector;

@@ -9,4 +9,4 @@ import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getVectorPanelFills } from 'utils/canvas/vectorNetwork/getVectorPanelFills';
 
 export const getPanelPaints = (node: TStyledNode | TVectorNode, property: TPaintProperty): TPaint[] | null =>
-  node.type === NodeType.vector ? getVectorPanelFills(node) : getNodePaints(node, property);
+  node.type === NodeType.vector && property === 'fills' ? getVectorPanelFills(node) : getNodePaints(node, property);

@@ -20,7 +20,15 @@ describe('getFillTargets', () => {
     const vector = makeSquareVector();
 
     // result
-    expect(getFillTargets([vector])).toEqual([{ id: 'vector', strokeWidth: 10, vector }]);
+    expect(getFillTargets([vector])).toEqual([{ id: 'vector', strokeAlign: StrokeAlign.center, strokeWidth: 10, vector }]);
+  });
+
+  it('should keep the stroke position of a vector and leave out a zero stroke width so a first stroke gets the default one', () => {
+    // mock
+    const vector = { ...makeSquareVector(), strokeAlign: StrokeAlign.outside, strokeWidth: 0 };
+
+    // result
+    expect(getFillTargets([vector])).toEqual([{ id: 'vector', strokeAlign: StrokeAlign.outside, strokeWidth: undefined, vector }]);
   });
 
   it('should mark a line stroke as centered', () => {

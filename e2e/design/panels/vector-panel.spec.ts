@@ -261,3 +261,65 @@ test('a vector stroke with a gradient paint is drawn with the gradient across th
     })
     .toBe(true);
 });
+
+test('the vector Stroke section sets its weight and position, and Selection colors change an area fill where it comes from', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-panel-stroke');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — a pen triangle with a stroke and one filled area
+  await drawSelectedTriangle(designPage, page);
+
+  const fillSection = page.locator('[data-test-section="fill"]');
+  const strokeSection = page.locator('[data-test-section="stroke"]');
+  const weight = strokeSection.getByLabel('Stroke weight');
+  const readStroke = async (): Promise<{ strokeAlign?: string; strokeWidth: number }> =>
+    page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const { nodes, rootOrder } = pages[activePageId];
+
+      return nodes[rootOrder[rootOrder.length - 1]] as unknown as { strokeAlign?: string; strokeWidth: number };
+    });
+
+  await fillSection.getByLabel('Add fill').click();
+  await fillSection.getByText('Fill', { exact: true }).click();
+
+  // action — a thicker stroke
+  await weight.fill('10');
+  await weight.press('Enter');
+  await weight.blur();
+
+  // result
+  await expect.poll(async () => (await readStroke()).strokeWidth).toBe(10);
+
+  // action — move the stroke outside
+  await strokeSection.locator('[class*="SectionColumn"] [class*="Dropdown"]').first().click();
+  await page.locator('[class*="DropdownOption__label"]', { hasText: 'Outside' }).click();
+
+  // result
+  await expect.poll(async () => (await readStroke()).strokeAlign).toBe('outside');
+
+  // action — recolor the fill from Selection colors
+  const { fillByKey, filledFaceKeys } = await readVectorFill(page);
+  const [areaFill] = fillByKey[filledFaceKeys[0]] as { color: string }[];
+  const selectionColors = page.locator('[data-test-section="selectionColors"]');
+  const hex = selectionColors.getByRole('textbox').first();
+
+  await expect(hex).toHaveValue(areaFill.color.replace('#', '').toUpperCase());
+  await hex.fill('00ff00');
+  await hex.press('Enter');
+
+  // result — the area now has the new color, painted on the canvas
+  await expect
+    .poll(async () => {
+      const state = await readVectorFill(page);
+
+      return (state.fillByKey[state.filledFaceKeys[0]] as { color: string }[])[0].color.toLowerCase();
+    })
+    .toBe('#00ff00');
+  await expect.poll(async () => readPixelColor(page, 900, 360)).toEqual([0, 255, 0]);
+});

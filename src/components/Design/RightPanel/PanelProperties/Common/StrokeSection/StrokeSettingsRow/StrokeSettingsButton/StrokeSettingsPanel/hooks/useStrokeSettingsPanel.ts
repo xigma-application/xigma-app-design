@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 import { StrokeMode } from 'types/design/enums';
 
 // utils
-import { isStyledNode } from '../../../../../AppearanceSection/utils/isStyledNode';
+import { isStrokeSettingsNode } from '../../../../../AppearanceSection/utils/isStrokeSettingsNode';
 import { getStrokeModeChange } from 'utils/design/stroke/getStrokeModeChange';
 
 export type TUseStrokeSettingsPanelResult = {
@@ -19,7 +19,7 @@ export type TUseStrokeSettingsPanelResult = {
 
 export const useStrokeSettingsPanel = (): TUseStrokeSettingsPanelResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStrokeSettingsNode);
   const modes = nodes.map((node) => node.strokeMode ?? StrokeMode.basic);
   const activeTab = modes.every((mode) => mode === modes[0]) ? (modes[0] ?? StrokeMode.basic) : undefined;
 

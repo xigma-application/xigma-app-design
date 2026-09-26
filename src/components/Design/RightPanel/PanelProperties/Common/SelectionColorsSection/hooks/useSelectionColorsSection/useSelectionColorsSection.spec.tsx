@@ -6,13 +6,16 @@ import { ReactNode } from 'react';
 import { useSelectionColorsSection } from './useSelectionColorsSection';
 
 // store
-import { addNode, moveNodes, setSelection } from 'store/design/slice';
+import { addNode, addNodes, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TVectorNode } from 'types/design/types';
+
+// utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -204,5 +207,38 @@ describe('useSelectionColorsSection', () => {
       { color: '#123456', opacity: 100, type: 'solid' },
       { color: '#123456', opacity: 100, type: 'solid' },
     ]);
+  });
+
+  it('should show the section for one vector and change its area color in that area', () => {
+    // mock
+    const vector = makeSquareVector({
+      fillByKey: { f1: [{ color: '#00ff00', opacity: 100, type: 'solid' }] },
+      filledFaceKeys: ['f1'],
+      id: 'selectionColorsVector',
+      strokes: [],
+    });
+
+    store.dispatch(addNodes({ nodes: [vector], rootIds: [vector.id] }));
+    store.dispatch(setSelection([vector.id]));
+
+    // before
+    const { result } = renderHook(() => useSelectionColorsSection(), { wrapper });
+
+    // action
+    act(() => result.current.onChange(result.current.groups[0].occurrences, { color: '#123456', opacity: 100, type: 'solid' }));
+
+    // result
+    expect(result.current.hasChildren).toBe(true);
+    expect((selectActivePage(store.getState()).nodes[vector.id] as TVectorNode).fillByKey).toEqual({
+      f1: [{ color: '#123456', opacity: 100, type: 'solid' }],
+    });
+    // action
+    const [{ occurrences }] = result.current.groups;
+
+    act(() => store.dispatch(setSelection([])));
+    act(() => result.current.onSelectNodes(occurrences));
+
+    // result
+    expect(selectActivePage(store.getState()).selectedIds).toEqual([vector.id]);
   });
 });

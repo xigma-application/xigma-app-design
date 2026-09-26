@@ -4,6 +4,7 @@ import { TFrameNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { collectSelectionColorGroups } from '../collectSelectionColorGroups';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const child: TRectangleNode = {
   fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
@@ -66,5 +67,21 @@ describe('collectSelectionColorGroups', () => {
     const groups = collectSelectionColorGroups([frame], nodesById, [{ index: 0, nodeId: 'frame', property: 'fills' }]);
 
     expect(groups).toHaveLength(2);
+  });
+
+  it('should collect the area fills and strokes of a selected vector', () => {
+    // mock
+    const red = [{ color: '#ff0000', opacity: 100, type: 'solid' as const }];
+    const vector = makeSquareVector({ fillByKey: { f1: red }, filledFaceKeys: ['f1'], strokes: red });
+
+    // before
+    const groups = collectSelectionColorGroups([vector], { vector });
+
+    // result
+    expect(groups).toHaveLength(1);
+    expect(groups[0].occurrences).toEqual([
+      { faceKey: 'f1', index: 0, nodeId: 'vector', property: 'fills' },
+      { index: 0, nodeId: 'vector', property: 'strokes' },
+    ]);
   });
 });

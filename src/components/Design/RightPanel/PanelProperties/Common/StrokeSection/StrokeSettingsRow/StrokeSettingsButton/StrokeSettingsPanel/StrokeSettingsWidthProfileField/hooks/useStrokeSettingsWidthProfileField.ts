@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 import { StrokeProfile } from 'types/design/enums';
 
 // utils
-import { isStyledNode } from '../../../../../../AppearanceSection/utils/isStyledNode';
+import { isStrokeSettingsNode } from '../../../../../../AppearanceSection/utils/isStrokeSettingsNode';
 import { STROKE_PROFILE_DEFAULT } from 'constant/strokeProfile';
 
 export type TUseStrokeSettingsWidthProfileFieldResult = {
@@ -21,7 +21,7 @@ export type TUseStrokeSettingsWidthProfileFieldResult = {
 
 export const useStrokeSettingsWidthProfileField = (): TUseStrokeSettingsWidthProfileFieldResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStrokeSettingsNode);
   const profiles = nodes.map((node) => node.strokeProfile ?? STROKE_PROFILE_DEFAULT);
   const profile = profiles.every((nodeProfile) => nodeProfile === profiles[0]) ? (profiles[0] ?? STROKE_PROFILE_DEFAULT) : undefined;
   const flipped = nodes.length > 0 && nodes.every((node) => node.strokeProfileFlipped ?? false);

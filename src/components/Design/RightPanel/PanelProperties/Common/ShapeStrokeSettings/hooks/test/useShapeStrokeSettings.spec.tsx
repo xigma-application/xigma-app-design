@@ -12,7 +12,10 @@ import { store } from 'store';
 
 // types
 import { NodeType, StrokeAlign, StrokeMode } from 'types/design/enums';
-import { TEllipseNode } from 'types/design/types';
+import { TEllipseNode, TVectorNode } from 'types/design/types';
+
+// utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -136,5 +139,23 @@ describe('useShapeStrokeSettings', () => {
 
     // result
     expect(getEllipse('strokePolygon').strokeAlign).toBe(StrokeAlign.outside);
+  });
+
+  it('should read a vector without a stroke position as centered and set its weight', () => {
+    // mock
+    const vector = makeSquareVector({ id: 'strokeVector' });
+
+    store.dispatch(addNodes({ nodes: [vector], rootIds: [vector.id] }));
+    store.dispatch(setSelection([vector.id]));
+
+    // before
+    const { result } = renderHook(() => useShapeStrokeSettings(NodeType.vector), { wrapper });
+
+    // action
+    act(() => result.current.onWeightBlur(blurEvent('4')));
+
+    // result
+    expect(result.current).toMatchObject({ position: StrokeAlign.center, weight: 4 });
+    expect((selectActivePage(store.getState()).nodes[vector.id] as TVectorNode).strokeWidth).toBe(4);
   });
 });

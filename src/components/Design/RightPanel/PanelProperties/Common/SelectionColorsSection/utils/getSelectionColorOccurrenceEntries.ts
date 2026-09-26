@@ -1,22 +1,19 @@
 // types
-import { TAppearanceNode } from '../../AppearanceSection/types';
-import { TGradientPaint, TPaintProperty, TSolidPaint } from 'types/design/paint/types';
-import { TSelectionColorOccurrence } from '../types';
+import { TGradientPaint, TSolidPaint } from 'types/design/paint/types';
+import { TSelectionColorNode, TSelectionColorOccurrence } from '../types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getSelectionColorPaintSources } from './getSelectionColorPaintSources';
 import { isSelectionColorPaint } from './isSelectionColorPaint';
-
-const PAINT_PROPERTIES: TPaintProperty[] = ['fills', 'strokes'];
 
 export type TSelectionColorEntry = { occurrence: TSelectionColorOccurrence; paint: TSolidPaint | TGradientPaint };
 
-export const getSelectionColorOccurrenceEntries = (nodes: TAppearanceNode[]): TSelectionColorEntry[] =>
+export const getSelectionColorOccurrenceEntries = (nodes: TSelectionColorNode[]): TSelectionColorEntry[] =>
   nodes.flatMap((node) =>
-    PAINT_PROPERTIES.flatMap((property) =>
-      getNodePaints(node, property).reduce<TSelectionColorEntry[]>((entries, paint, index) => {
+    getSelectionColorPaintSources(node).flatMap(({ faceKey, paints, property }) =>
+      paints.reduce<TSelectionColorEntry[]>((entries, paint, index) => {
         if (isSelectionColorPaint(paint) && paint.visible !== false) {
-          entries.push({ occurrence: { index, nodeId: node.id, property }, paint });
+          entries.push({ occurrence: { faceKey, index, nodeId: node.id, property }, paint });
         }
 
         return entries;

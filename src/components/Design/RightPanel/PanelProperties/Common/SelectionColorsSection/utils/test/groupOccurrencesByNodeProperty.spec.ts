@@ -33,6 +33,20 @@ describe('groupOccurrencesByNodeProperty', () => {
     ]);
   });
 
+  it('should keep the areas of one vector as separate groups', () => {
+    // mock
+    const occurrences: TSelectionColorOccurrence[] = [
+      { faceKey: 'f1', index: 0, nodeId: 'v', property: 'fills' },
+      { faceKey: 'f2', index: 0, nodeId: 'v', property: 'fills' },
+    ];
+
+    // result
+    expect(groupOccurrencesByNodeProperty(occurrences)).toEqual([
+      { faceKey: 'f1', indices: new Set([0]), nodeId: 'v', property: 'fills' },
+      { faceKey: 'f2', indices: new Set([0]), nodeId: 'v', property: 'fills' },
+    ]);
+  });
+
   it('should merge several indices of the same node and property into one group', () => {
     // mock
     const occurrences: TSelectionColorOccurrence[] = [

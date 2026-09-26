@@ -12,13 +12,13 @@ import { STROKE_DYNAMIC_FIELDS } from '../../constants';
 import { TStrokeDynamicChanges, TUseStrokeSettingsDynamicTabResult } from '../../types';
 
 // utils
-import { isStyledNode } from '../../../../../../../AppearanceSection/utils/isStyledNode';
+import { isStrokeSettingsNode } from '../../../../../../../AppearanceSection/utils/isStrokeSettingsNode';
 import { getStrokeDynamicValues } from 'utils/design/stroke/getStrokeDynamicValues';
 import { handleStrokeDynamicBlur } from './utils/handleStrokeDynamicBlur';
 
 export const useStrokeSettingsDynamicTab = (): TUseStrokeSettingsDynamicTabResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStrokeSettingsNode);
   const valuesList = nodes.length > 0 ? nodes.map(getStrokeDynamicValues) : [getStrokeDynamicValues(undefined)];
   const values = Object.fromEntries(
     STROKE_DYNAMIC_FIELDS.map((field) => [

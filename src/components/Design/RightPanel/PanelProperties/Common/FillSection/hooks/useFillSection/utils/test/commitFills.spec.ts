@@ -34,6 +34,21 @@ describe('commitFills', () => {
     expect(dispatch).toHaveBeenCalledWith(updateNode({ changes: { defaultFill: fills, fillByKey: { a: fills } }, id: 'vector' }));
   });
 
+  it('should write vector strokes like any other node with the default stroke width and centered position', () => {
+    // mock
+    const dispatch = vi.fn();
+    const strokes = [{ color: '#000000', opacity: 100, type: 'solid' as const }];
+    const vector = makeSquareVector();
+
+    // before
+    commitFills(dispatch, [{ id: 'vector', strokeAlign: StrokeAlign.center, vector }], strokes, 'strokes');
+
+    // result
+    expect(dispatch).toHaveBeenCalledWith(
+      updateNode({ changes: { strokeAlign: StrokeAlign.center, strokeWidth: 1, strokes }, id: 'vector' }),
+    );
+  });
+
   it('should not dispatch when there are no targets', () => {
     // mock
     const dispatch = vi.fn();

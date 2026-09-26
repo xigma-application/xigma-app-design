@@ -6,6 +6,7 @@ import { setSelection } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TSelectionColorGroup } from '../../types';
 import { TOpenSelectionColorGroup, TUseSelectionColorsSectionResult } from './types';
 
@@ -23,7 +24,8 @@ export const useSelectionColorsSection = (): TUseSelectionColorsSectionResult =>
   const selectedNodes = useAppSelector(selectSelectedNodes);
   const nodesById = useAppSelector(selectNodes);
   const rootNodes = useMemo(() => selectedNodes.filter(isSelectionColorsRootNode), [selectedNodes]);
-  const hasChildren = rootNodes.length > 1 || rootNodes.some((rootNode) => rootNode.childIds.length > 0);
+  const hasChildren =
+    rootNodes.length > 1 || rootNodes.some((rootNode) => rootNode.type === NodeType.vector || rootNode.childIds.length > 0);
   const [openGroup, setOpenGroup] = useState<TOpenSelectionColorGroup | null>(null);
   const groups = useMemo(
     () => (rootNodes.length > 0 ? collectSelectionColorGroups(rootNodes, nodesById, openGroup?.occurrences ?? null) : NO_GROUPS),

@@ -1,14 +1,14 @@
 import { RefObject } from 'react';
 
 // types
-import { TStyledNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { TStrokeSettingsNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TApplyStrokeBrushChanges, TOriginalStrokeBrush } from '../types';
 import { TStrokeBrushValues } from 'utils/design/stroke/getStrokeBrushValues';
 
 export const handleStrokeBrushPreview = (
   nextBrush: string,
   originalBrushesRef: RefObject<TOriginalStrokeBrush[] | null>,
-  nodes: TStyledNode[],
+  nodes: TStrokeSettingsNode[],
   valuesList: TStrokeBrushValues[],
   update: TApplyStrokeBrushChanges,
 ): void => {
