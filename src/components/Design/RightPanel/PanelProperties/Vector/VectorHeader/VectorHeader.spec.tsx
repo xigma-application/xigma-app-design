@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // components
@@ -59,6 +59,7 @@ describe('VectorHeader behaviors', () => {
     expect(screen.getByLabelText('Create component')).toBeInTheDocument();
     expect(screen.getByLabelText('Use as mask')).toBeInTheDocument();
     expect(screen.getByLabelText('Boolean operations')).toBeInTheDocument();
+    expect(screen.getByLabelText('Edit object')).toBeInTheDocument();
   });
 
   it('should hide the create component button while several vectors are selected', () => {
@@ -70,5 +71,20 @@ describe('VectorHeader behaviors', () => {
 
     // result
     expect(screen.queryByLabelText('Create component')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Edit object')).not.toBeInTheDocument();
+  });
+
+  it('should offer Edit objects in the more actions menu while several vectors are selected', () => {
+    // mock
+    store.dispatch(setSelection(['header-vector-a', 'header-vector-b']));
+
+    // before
+    renderVectorHeader();
+
+    // action
+    fireEvent.click(screen.getByLabelText('More actions'));
+
+    // result
+    expect(screen.getByText('Edit objects')).toBeInTheDocument();
   });
 });

@@ -1060,8 +1060,8 @@ Stroke with `ShapeStrokeSettings type={NodeType.star}`, Effects and Export. `Cou
 layout, export, fill, appearance with corner radius, stroke, selection colors and effects are done). A vector has no stored box: its X/Y/W/H
 are its vertex bounds (`getNodeBounds` → `getVectorNodeBounds`).
 
-- `VectorHeader`: "Vector path" with matching layers, create component (single selection), mask and boolean;
-  the "…" menu comes later.
+- `VectorHeader`: "Vector path" with matching layers, create component (single selection), mask and boolean, then
+  Edit object for one vector or, for several, `PanelHeaderMoreActionsButton` with Edit objects (like the rectangle).
 - `Common/PositionSection` is shared: `Common/utils/isExistingTransformPanelNode` lets `useColumnPosition` and
   `useColumnRotation` take vectors next to box nodes. `getPositionEntry` reads the position from the bounds and
   never disables it for a vector (vectors do not take part in auto layout, so there is no ignore toggle either);

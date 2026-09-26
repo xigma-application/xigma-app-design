@@ -5,8 +5,10 @@ import { useTranslation } from 'react-i18next';
 import PanelHeader from '../../Common/PanelHeader/PanelHeader';
 import PanelHeaderBooleanButton from '../../Common/PanelHeader/PanelHeaderBooleanButton';
 import PanelHeaderComponentButton from '../../Common/PanelHeader/PanelHeaderComponentButton';
+import PanelHeaderEditObjectButton from '../../Common/PanelHeader/PanelHeaderEditObjectButton';
 import PanelHeaderMaskButton from '../../Common/PanelHeader/PanelHeaderMaskButton';
 import PanelHeaderMatchingLayersButton from '../../Common/PanelHeader/PanelHeaderMatchingLayersButton';
+import PanelHeaderMoreActionsButton from '../../Common/PanelHeader/PanelHeaderMoreActionsButton';
 
 // others
 import { translationNameSpace } from '../constants';
@@ -27,6 +29,7 @@ const VectorHeader: FC = () => {
           {!isMultiple && <PanelHeaderComponentButton />}
           <PanelHeaderMaskButton />
           <PanelHeaderBooleanButton />
+          {isMultiple ? <PanelHeaderMoreActionsButton /> : <PanelHeaderEditObjectButton />}
         </Fragment>
       }
       e2eValue="vector"

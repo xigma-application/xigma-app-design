@@ -413,3 +413,55 @@ test('the vector Corner radius rounds every sharp corner of the vector and keeps
   await expect.poll(async () => readPixelColor(page, 900, 400)).toEqual(filled);
   await expect.poll(async () => readPixelColor(page, 900, 305)).toEqual(filled);
 });
+
+test('with two vectors selected, Edit objects in the header menu opens both in vector edit mode', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-panel-edit-objects');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — two vectors, both selected
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { addNodes, setSelection } = await import('/src/store/design/slice.ts');
+    const square = (id: string, x: number): Record<string, unknown> => ({
+      defaultFill: null,
+      filledFaceKeys: [],
+      id,
+      name: id,
+      parentId: null,
+      rotation: 0,
+      segments: {
+        [`${id}-a`]: { endId: `${id}-2`, id: `${id}-a`, startId: `${id}-1`, tangentEnd: null, tangentStart: null },
+        [`${id}-b`]: { endId: `${id}-3`, id: `${id}-b`, startId: `${id}-2`, tangentEnd: null, tangentStart: null },
+      },
+      strokeWidth: 1,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: 'vector',
+      vertexHandleModes: {},
+      vertices: {
+        [`${id}-1`]: { id: `${id}-1`, x, y: 300 },
+        [`${id}-2`]: { id: `${id}-2`, x: x + 100, y: 300 },
+        [`${id}-3`]: { id: `${id}-3`, x: x + 100, y: 400 },
+      },
+    });
+
+    store.dispatch(addNodes({ nodes: [square('edit-a', 800), square('edit-b', 1000)] as never, rootIds: ['edit-a', 'edit-b'] }));
+    store.dispatch(setSelection(['edit-a', 'edit-b']));
+  });
+
+  // action
+  await page.locator('[data-test-component-header="vector"]').getByLabel('More actions').click();
+  await page.getByText('Edit objects', { exact: true }).click();
+
+  // result
+  await expect
+    .poll(async () =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+
+        return [...store.getState().design.vectorEditingNodeIds].sort();
+      }),
+    )
+    .toEqual(['edit-a', 'edit-b']);
+});
