@@ -12,6 +12,7 @@ import { TSmartSelectionLayout } from 'types/design/smartSelection/types';
 // utils
 import { getDragNodeOrigins } from './armDrag/getDragNodeOrigins';
 import { getSmartSelectionCascadeGroups } from '../../../../utils/getSmartSelectionCascadeGroups';
+import { getSubtreeNodeIds } from 'store/design/utils/nodeHierarchy/getSubtreeNodeIds';
 
 export const armSmartSelectionGapDrag = (
   canvas: HTMLCanvasElement,
@@ -23,7 +24,9 @@ export const armSmartSelectionGapDrag = (
   originalGapValue: number,
   pointerStart: TPoint,
 ): void => {
-  const { anchorPosition, anchorSize, cascadeGroups } = getSmartSelectionCascadeGroups(layout, axis);
+  const nodes = selectNodes(store.getState());
+  const { anchorPosition, anchorSize, cascadeGroups: layoutGroups } = getSmartSelectionCascadeGroups(layout, axis);
+  const cascadeGroups = layoutGroups.map((group) => ({ ...group, nodeIds: getSubtreeNodeIds(group.nodeIds, nodes) }));
   const movingIds = cascadeGroups.flatMap((group) => group.nodeIds);
 
   gapDragRef.current = {
@@ -36,7 +39,7 @@ export const armSmartSelectionGapDrag = (
     dispatchThrottle: { frameId: null, run: null },
     gapIndex,
     hasMoved: false,
-    nodeOrigins: getDragNodeOrigins(movingIds, selectNodes(store.getState())),
+    nodeOrigins: getDragNodeOrigins(movingIds, nodes),
     originalGapValue,
     pointerStart,
   };

@@ -5639,7 +5639,12 @@ to `fillRotation`, so the fill stays turned. Directly selected vectors keep thei
 Union got a wrong frame; it now reads the drawn shape (`getRenderedVectorNode`). `getRotatedGroupBounds` takes a
 vector's corners in the group's own turned frame (`getNodeLocalCorners`: the drawn shape turned back by the group's
 rotation), because the corners of its world axis-aligned box overshoot there; the overshoot moved the frame's x/y
-while the rotate pinned its width/height, so the frame slid off the Union. A turned boolean paints its fills
+while the rotate pinned its width/height, so the frame slid off the Union.
+Both `getRotatedNodeBounds` (store and `Canvas/utils`) give a vector the bounds of its drawn shape
+(`getRenderedVectorNode`), not its unturned points: a vector turned on its own keeps its turn in `rotation`, so the
+old "already baked" assumption made an unturned Union (`getNodesBoundingBox`), alignment, spacing, export and
+selection bounds use the wrong box. Smart Selection gap and swap drags expand each item to its subtree
+(`getSubtreeNodeIds`) like a normal drag, so a Union moves with its shapes. A turned boolean paints its fills
 and strokes over its own frame (`getBooleanPaintBox`: `x`, `y`, `width`, `height`, `rotation`) so an image, video
 or pattern turns with it; an unturned one keeps the shape bounds.
 

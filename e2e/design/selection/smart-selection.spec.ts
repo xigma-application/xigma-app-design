@@ -544,3 +544,34 @@ test('the Smart Selection gap guide never appears for children of a managed-layo
   await designPage.pointerMove(gapMidX, gapMidY);
   await expect(designPage.canvas).not.toHaveClass(/move-x/);
 });
+
+test('dragging a Smart Selection gap handle next to a Union moves the shapes inside the Union with it', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-smart-selection-gap-union');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a rectangle A, then a rectangle wrapped in a Union 50px to its right, both selected
+  await designPage.drawRectangle(700, 300, 750, 350);
+  await designPage.drawRectangle(800, 300, 850, 350);
+  await page.getByLabel('Boolean operations', { exact: true }).click();
+  await designPage.click(720, 320, { shift: true });
+
+  const readUnionChildX = async (): Promise<number> =>
+    page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const nodes = Object.values(pages[activePageId].nodes) as unknown as { parentId: string | null; type: string; x: number }[];
+      const union = nodes.find((node) => node.type === 'boolean') as unknown as { id: string };
+
+      return nodes.find((node) => node.parentId === union.id)!.x;
+    });
+
+  // action — grow the gap by dragging its handle 30px right
+  await designPage.pointerDown(775, 325);
+  await page.mouse.move(805, 325, { steps: 5 });
+  await designPage.pointerUp();
+
+  // result — the rectangle inside the Union moved with it, so the Union really moved
+  await expect.poll(readUnionChildX).toBe(860);
+});

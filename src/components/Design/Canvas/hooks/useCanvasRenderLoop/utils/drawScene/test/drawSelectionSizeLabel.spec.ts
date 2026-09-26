@@ -144,6 +144,7 @@ describe('drawSelectionSizeLabel', () => {
               hasMoved: true,
               nodeOrigins: {},
               pointerStart: { x: 0, y: 0 },
+              slotNodeIds: {},
               slots: [],
               targetIndex: 0,
             },

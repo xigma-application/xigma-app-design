@@ -24,6 +24,7 @@ const dragState = (fromIndex: number, targetIndex: number): TSmartSelectionSwapD
   hasMoved: true,
   nodeOrigins: {},
   pointerStart: { x: 0, y: 0 },
+  slotNodeIds: {},
   slots: [
     { bounds: { height: 40, width: 60, x: 0, y: 0 }, id: 'a' },
     { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: 'b' },

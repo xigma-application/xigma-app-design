@@ -678,6 +678,7 @@ export type TSmartSelectionSwapDragState = {
   hasMoved: boolean;
   nodeOrigins: Record<string, TNodeOrigin>;
   pointerStart: TPoint;
+  slotNodeIds: Record<string, string[]>;
   slots: { bounds: TDraftRect; id: string | null }[];
   targetIndex: number;
 };

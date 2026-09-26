@@ -1,5 +1,5 @@
 // store
-import { addNode } from 'store/design/slice';
+import { addNode, updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -69,5 +69,31 @@ describe('armSmartSelectionGapDrag', () => {
       pointerStart: { x: 75, y: 25 },
     });
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(3);
+  });
+
+  it('should move every node inside a Union with the Union when the gap changes', () => {
+    // mock
+    const anchor = addRect(0, 0);
+    const union = addRect(100, 0);
+    const child = addRect(100, 0);
+
+    store.dispatch(updateNode({ changes: { childIds: [child], type: NodeType.boolean } as never, id: union }));
+    store.dispatch(updateNode({ changes: { parentId: union }, id: child }));
+    const gapDragRef: { current: TSmartSelectionGapDragState | null } = { current: null };
+    const layout = {
+      gaps: [],
+      nodes: [
+        { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: anchor },
+        { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: union },
+      ],
+      type: 'row' as const,
+    };
+
+    // before
+    armSmartSelectionGapDrag(createCanvas(), pointerEvent(), gapDragRef, layout, 'x', 0, 50, { x: 75, y: 25 });
+
+    // result
+    expect(gapDragRef.current?.cascadeGroups[0].nodeIds).toEqual([union, child]);
+    expect(gapDragRef.current?.nodeOrigins).toEqual({ [child]: { x: 100, y: 0 }, [union]: { x: 100, y: 0 } });
   });
 });

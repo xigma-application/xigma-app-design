@@ -252,6 +252,7 @@ describe('drawSmartSelectionHandles', () => {
       hasMoved: true,
       nodeOrigins: {},
       pointerStart: { x: 0, y: 0 },
+      slotNodeIds: {},
       slots: [
         { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: 'a' },
         { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: 'b' },
@@ -282,6 +283,7 @@ describe('drawSmartSelectionHandles', () => {
             hasMoved: true,
             nodeOrigins: {},
             pointerStart: { x: 0, y: 0 },
+            slotNodeIds: {},
             slots: [
               { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: 'a' },
               { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: 'b' },
@@ -335,6 +337,7 @@ describe('drawSmartSelectionHandles', () => {
             hasMoved: false,
             nodeOrigins: {},
             pointerStart: { x: 0, y: 0 },
+            slotNodeIds: {},
             slots: [{ bounds: { height: 50, width: 50, x: 0, y: 0 }, id: 'a' }],
             targetIndex: 0,
           },

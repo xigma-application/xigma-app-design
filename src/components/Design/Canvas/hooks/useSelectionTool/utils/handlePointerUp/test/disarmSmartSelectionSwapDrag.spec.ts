@@ -74,6 +74,7 @@ describe('disarmSmartSelectionSwapDrag', () => {
       hasMoved: true,
       nodeOrigins: { [idA]: { x: 0, y: 0 }, [idB]: { x: 100, y: 0 }, [idC]: { x: 200, y: 0 } },
       pointerStart: { x: 25, y: 25 },
+      slotNodeIds: {},
       slots: [
         { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA },
         { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: idB },
@@ -105,6 +106,7 @@ describe('disarmSmartSelectionSwapDrag', () => {
       hasMoved: true,
       nodeOrigins: { [idA]: { x: 0, y: 0 } },
       pointerStart: { x: 25, y: 25 },
+      slotNodeIds: {},
       slots: [{ bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA }],
       targetIndex: 0,
     };
@@ -129,6 +131,7 @@ describe('disarmSmartSelectionSwapDrag', () => {
       hasMoved: false,
       nodeOrigins: { [idA]: { x: 0, y: 0 } },
       pointerStart: { x: 25, y: 25 },
+      slotNodeIds: {},
       slots: [{ bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA }],
       targetIndex: 0,
     };

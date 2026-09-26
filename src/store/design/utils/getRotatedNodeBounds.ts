@@ -6,24 +6,28 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { getNodeAxisAlignedBounds } from './getNodeAxisAlignedBounds';
 import { getRectCorners } from 'utils/canvas/getRectCorners';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
+import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 export const getRotatedNodeBounds = (node: TSceneNode): TDraftRect => {
   const bounds = getNodeAxisAlignedBounds(node);
-  let rotatedBounds = bounds;
+  const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+  const corners = getRectCorners(bounds).map((corner) => rotatePoint(corner, center, node.rotation));
+  const xs = corners.map((corner) => corner.x);
+  const ys = corners.map((corner) => corner.y);
 
-  if (node.type !== NodeType.vector && node.rotation !== 0) {
-    const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-    const corners = getRectCorners(bounds).map((corner) => rotatePoint(corner, center, node.rotation));
-    const xs = corners.map((corner) => corner.x);
-    const ys = corners.map((corner) => corner.y);
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs);
-    const maxY = Math.max(...ys);
-
-    rotatedBounds = { height: maxY - minY, width: maxX - minX, x: minX, y: minY };
+  switch (true) {
+    case node.type === NodeType.vector:
+      return getVectorNodeBounds(getRenderedVectorNode(node));
+    case node.rotation === 0:
+      return bounds;
+    default:
+      return {
+        height: Math.max(...ys) - Math.min(...ys),
+        width: Math.max(...xs) - Math.min(...xs),
+        x: Math.min(...xs),
+        y: Math.min(...ys),
+      };
   }
-
-  return rotatedBounds;
 };

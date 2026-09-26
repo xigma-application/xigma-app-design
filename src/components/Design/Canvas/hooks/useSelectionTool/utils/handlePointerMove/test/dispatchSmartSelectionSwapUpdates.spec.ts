@@ -50,6 +50,7 @@ describe('dispatchSmartSelectionSwapUpdates', () => {
       hasMoved: true,
       nodeOrigins: { [idA]: { x: 0, y: 0 }, [idB]: { x: 100, y: 0 }, [idC]: { x: 200, y: 0 } },
       pointerStart: { x: 25, y: 25 },
+      slotNodeIds: {},
       slots: [
         { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA },
         { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: idB },
@@ -80,6 +81,7 @@ describe('dispatchSmartSelectionSwapUpdates', () => {
       hasMoved: true,
       nodeOrigins: { [idA]: { x: 0, y: 0 }, [idB]: { x: 100, y: 0 }, [idC]: { x: 0, y: 100 }, [idD]: { x: 100, y: 100 } },
       pointerStart: { x: 25, y: 25 },
+      slotNodeIds: {},
       slots: [
         { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA },
         { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: idB },
@@ -111,6 +113,7 @@ describe('dispatchSmartSelectionSwapUpdates', () => {
       hasMoved: true,
       nodeOrigins: { [idA]: { x: 0, y: 0 }, [idB]: { x: 100, y: 0 }, [idC]: { x: 0, y: 100 } },
       pointerStart: { x: 25, y: 25 },
+      slotNodeIds: {},
       slots: [
         { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA },
         { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: idB },
@@ -140,6 +143,7 @@ describe('dispatchSmartSelectionSwapUpdates', () => {
       hasMoved: true,
       nodeOrigins: { [idA]: { x: 0, y: 0 }, [idB]: { x: 100, y: 0 } },
       pointerStart: { x: 25, y: 25 },
+      slotNodeIds: {},
       slots: [
         { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA },
         { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: idB },
@@ -165,6 +169,7 @@ describe('dispatchSmartSelectionSwapUpdates', () => {
       hasMoved: true,
       nodeOrigins: {},
       pointerStart: { x: 0, y: 0 },
+      slotNodeIds: {},
       slots: [{ bounds: { height: 50, width: 50, x: 0, y: 0 }, id: null }],
       targetIndex: 0,
     };
@@ -175,5 +180,29 @@ describe('dispatchSmartSelectionSwapUpdates', () => {
 
     // result
     expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should move the nodes listed for a slot by the delta of that slot', () => {
+    // mock
+    const idA = addRect(0, 0);
+    const idB = addRect(0, 0);
+    const dragState: TSmartSelectionSwapDragState = {
+      dispatchThrottle: { frameId: null, run: null },
+      fromIndex: 0,
+      hasMoved: true,
+      nodeOrigins: { [idA]: { x: 0, y: 0 }, [idB]: { x: 0, y: 0 } },
+      pointerStart: { x: 25, y: 25 },
+      slotNodeIds: { [idA]: [idA, idB] },
+      slots: [{ bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA }],
+      targetIndex: 0,
+    };
+
+    // action
+    dispatchSmartSelectionSwapUpdates(store.dispatch, dragState, 30, 10);
+    flushThrottledDispatch(dragState.dispatchThrottle);
+
+    // result
+    expect(nodes()[idA]).toMatchObject({ x: 30, y: 10 });
+    expect(nodes()[idB]).toMatchObject({ x: 30, y: 10 });
   });
 });

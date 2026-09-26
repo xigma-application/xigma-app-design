@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TLineNode, TRectangleNode } from 'types/design/types';
 
 // utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getRotatedNodeBounds } from '../getRotatedNodeBounds';
 
@@ -94,5 +95,14 @@ describe('getRotatedNodeBounds', () => {
       x: expect.closeTo(0),
       y: expect.closeTo(0),
     });
+  });
+
+  it('should give a rotated vector the bounds of its drawn shape', () => {
+    // mock — a 100x100 square turned 45° spans about 141 around its own center (50,50)
+    const bounds = getRotatedNodeBounds(makeSquareVector({ rotation: 45 }));
+
+    // result
+    expect(bounds.x).toBeCloseTo(50 - 50 * Math.SQRT2, 5);
+    expect(bounds.width).toBeCloseTo(100 * Math.SQRT2, 5);
   });
 });

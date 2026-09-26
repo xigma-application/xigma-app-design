@@ -1,8 +1,9 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TLineNode, TRectangleNode } from 'types/design/types';
 
 // utils
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getRotatedNodeBounds } from '../getRotatedNodeBounds';
 
@@ -73,24 +74,12 @@ describe('getRotatedNodeBounds', () => {
     });
   });
 
-  it('should ignore rotation for vector nodes, whose network is already baked into absolute vertex coordinates', () => {
-    // mock
-    const vector: TVectorNode = {
-      defaultFill: null,
-      filledFaceKeys: [],
-      id: 'v',
-      name: 'Vector',
-      parentId: null,
-      rotation: 45,
-      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
-      strokeWidth: 1,
-      strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
-      type: NodeType.vector,
-      vertexHandleModes: {},
-      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 12, y: 8 } },
-    };
+  it('should give a rotated vector the bounds of its drawn shape', () => {
+    // mock — a 100x100 square turned 45° spans about 141 around its own center (50,50)
+    const bounds = getRotatedNodeBounds(makeSquareVector({ rotation: 45 }));
 
     // result
-    expect(getRotatedNodeBounds(vector)).toEqual({ height: 8, width: 12, x: 0, y: 0 });
+    expect(bounds.x).toBeCloseTo(50 - 50 * Math.SQRT2, 5);
+    expect(bounds.width).toBeCloseTo(100 * Math.SQRT2, 5);
   });
 });

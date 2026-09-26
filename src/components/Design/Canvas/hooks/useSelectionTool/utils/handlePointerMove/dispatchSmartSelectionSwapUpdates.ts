@@ -29,7 +29,10 @@ const getSwapUpdates = (
       const deltaX = isDragged ? draggedDeltaX : (positions[id]?.x ?? bounds.x) - bounds.x;
       const deltaY = isDragged ? draggedDeltaY : (positions[id]?.y ?? bounds.y) - bounds.y;
 
-      return [{ changes: getGeometryDeltaChanges(dragState.nodeOrigins[id], deltaX, deltaY), id }];
+      return (dragState.slotNodeIds[id] ?? [id]).map((nodeId) => ({
+        changes: getGeometryDeltaChanges(dragState.nodeOrigins[nodeId], deltaX, deltaY),
+        id: nodeId,
+      }));
     }
 
     return [];

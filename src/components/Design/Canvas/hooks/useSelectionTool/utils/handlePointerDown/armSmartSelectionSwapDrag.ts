@@ -12,6 +12,7 @@ import { TSmartSelectionSwapDragState } from 'types/design/canvas/types';
 // utils
 import { getDragNodeOrigins } from './armDrag/getDragNodeOrigins';
 import { getSmartSelectionSwapSlots } from '../../../../utils/getSmartSelectionSwapSlots';
+import { getSubtreeNodeIds } from 'store/design/utils/nodeHierarchy/getSubtreeNodeIds';
 
 export const armSmartSelectionSwapDrag = (
   canvas: HTMLCanvasElement,
@@ -21,17 +22,17 @@ export const armSmartSelectionSwapDrag = (
   fromIndex: number,
   pointerStart: TPoint,
 ): void => {
+  const nodes = selectNodes(store.getState());
   const slots = getSmartSelectionSwapSlots(layout).map((slot) => ({ bounds: slot.bounds, id: slot.id }));
+  const slotNodeIds = Object.fromEntries(slots.flatMap(({ id }) => (id === null ? [] : [[id, getSubtreeNodeIds([id], nodes)]])));
 
   swapDragRef.current = {
     dispatchThrottle: { frameId: null, run: null },
     fromIndex,
     hasMoved: false,
-    nodeOrigins: getDragNodeOrigins(
-      slots.map((slot) => slot.id).filter((id): id is string => id !== null),
-      selectNodes(store.getState()),
-    ),
+    nodeOrigins: getDragNodeOrigins(Object.values(slotNodeIds).flat(), nodes),
     pointerStart,
+    slotNodeIds,
     slots,
     targetIndex: fromIndex,
   };

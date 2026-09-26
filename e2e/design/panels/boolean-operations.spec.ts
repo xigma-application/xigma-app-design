@@ -727,3 +727,74 @@ test('a Union of a rectangle and a vector turns as one: the vector bakes the tur
   // result
   await expect.poll(readUnion).toEqual({ ...before, vectorRotation: 0 });
 });
+
+test('a Union holding a vector turned on its own is framed around the drawn vector', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-rotated-vector-frame');
+  await expect(designPage.canvas).toBeVisible();
+
+  // before — a 200x200 square vector turned 45° on its own, joined in a Union with a rectangle to its right
+  const frame = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { addNodes, booleanNodes, setSelection } = await import('/src/store/design/slice.ts');
+    const corners = [
+      [800, 300],
+      [1000, 300],
+      [1000, 500],
+      [800, 500],
+    ];
+
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            defaultFill: null,
+            filledFaceKeys: [],
+            id: 'turned-square',
+            name: 'Vector',
+            parentId: null,
+            rotation: 45,
+            segments: Object.fromEntries(
+              [0, 1, 2, 3].map((index) => [
+                `s${index}`,
+                { endId: `v${(index + 1) % 4}`, id: `s${index}`, startId: `v${index}`, tangentEnd: null, tangentStart: null },
+              ]),
+            ),
+            strokeWidth: 2,
+            strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+            type: 'vector',
+            vertexHandleModes: {},
+            vertices: Object.fromEntries(corners.map(([x, y], index) => [`v${index}`, { id: `v${index}`, x, y }])),
+          },
+          {
+            fills: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
+            height: 100,
+            id: 'side-rectangle',
+            name: 'Rectangle',
+            parentId: null,
+            rotation: 0,
+            type: 'rectangle',
+            width: 100,
+            x: 1200,
+            y: 350,
+          },
+        ] as never,
+        rootIds: ['turned-square', 'side-rectangle'],
+      }),
+    );
+    store.dispatch(setSelection(['turned-square', 'side-rectangle']));
+    store.dispatch(booleanNodes('union' as never));
+
+    const { activePageId, pages } = store.getState().design;
+    const union = Object.values(pages[activePageId].nodes).find((node) => node.type === 'boolean') as unknown as {
+      height: number;
+      y: number;
+    };
+
+    return { height: Math.round(union.height), y: Math.round(union.y) };
+  });
+
+  // result — the turned square spans 200·√2 ≈ 283 tall around its centre y = 400
+  expect(frame).toEqual({ height: 283, y: 259 });
+});
